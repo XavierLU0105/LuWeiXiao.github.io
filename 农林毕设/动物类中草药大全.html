@@ -149,10 +149,12 @@
 			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     		transition: box-shadow 0.3s ease-in-out;
         }
+		
         #back-to-top:hover {
             background-color: #789262;
 			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
+		
 		.search-container {
 			text-align: center;
 			margin-top: 40px;
@@ -251,12 +253,14 @@
 </head>
 <body>
 <header>
+	
         <h1>动物类中草药大全</h1>
 		<!-- 添加搜索框 -->
 		<div id="searchForm">
             <input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
             <button type="submit">搜索</button>
         </div>
+	
     </header>
       <div class="herb-container">
         <!-- 卡片式草药信息 -->
@@ -566,6 +570,7 @@
 			window.open(searchUrl, '_blank');
 		}
 	</script>
+	
 	<div class="search-container">
     <input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
     <button id="searchButton" onclick="searchOnBaidu()">百度一下</button>

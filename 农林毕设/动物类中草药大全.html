@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+	<link rel="icon" href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E4%B8%AD%E8%8D%89%E8%8D%AF%E7%BD%91%E9%A1%B5%E6%A0%87%E7%AD%BElogo.ico" type="image/x-icon">
+    <title>动物类中草药大全</title>
+    <style>
+		
+		body, html {
+			margin: 0;
+			padding: 0;
+			font-family: 'Arial', sans-serif;
+			background-image: url('https://sfile.chatglm.cn/testpath/66ad5732-95e8-58c5-bf63-00b969b9e2de_0.png');
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-attachment: fixed; /* 背景图片固定，不随滚动条滚动 */
+			color: #333333;
+			padding: 20px; /* 添加内边距 */
+		}
+
+		header {
+			color: #ffffff;
+			padding: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between; /* 使用space-between让两侧对齐 */
+			margin-bottom: 40px;
+			background-color: transparent;
+		}
+
+		header h1 {
+			margin: 0; /* 确保没有默认的margin影响居中 */
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		#searchForm {
+			display: flex;
+			align-items: center;
+			margin-left: auto; /* 搜索框靠右 */
+		}
+		
+		/* 应用动画到搜索按钮 */
+		#searchForm button {
+		  transition: background-color 0.3s ease, transform 0.3s ease;
+		}
+
+		#searchForm button:hover {
+		  animation: pulse-button 0.5s infinite; /* 鼠标悬停时播放动画 */
+		  background-color: #3498db; /* 鼠标悬停时改变背景颜色 */
+		}
+
+		#searchBox {
+			flex-grow: 1;
+			padding: 5px;
+			margin-right: 5px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			transition: border-color 0.3s ease, transform 0.3s ease;
+		}
+		
+		#searchBox:hover {
+		  border-color: #3498db; /* 鼠标悬停时改变边框颜色 */
+		  transform: scale(1.05); /* 鼠标悬停时放大到105% */
+		}
+		
+		@keyframes pulse-button {
+		  0% {
+			transform: scale(1);
+		  }
+		  50% {
+			transform: scale(1.1);
+		  }
+		  100% {
+			transform: scale(1);
+		  }
+		}
+
+		#searchBox:focus {
+		  animation: pulse 1s infinite; /* 输入框获得焦点时播放动画 */
+		}
+
+		.herb-container {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			padding: 20px;
+			gap: 20px; /* 添加卡片之间的间隔 */
+		}
+
+		.herb-card {
+		  border: 1px solid #c8e6c9;
+		  border-radius: 10px;
+		  margin: 10px;
+		  padding: 20px;
+		  width: calc(50% - 40px);
+		  background-color: #fafafa;
+		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		  text-align: center;
+		  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+					  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		  will-change: transform, box-shadow;
+		}
+
+		.herb-card:hover {
+		  transform: scale(1.03);
+		  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+		}
+
+		.herb-card h2 {
+			color: #33691e;
+			margin: 10px 0;
+			font-size: 1.5em; /* 增大标题字体大小 */
+		}
+
+		.herb-card img {
+			max-width: 100%;
+			height: auto;
+			border-radius: 8px; /* 图片圆角 */
+			margin-bottom: 10px;
+		}
+
+		.herb-card p {
+			color: #666666;
+			line-height: 1.6;
+			font-size: 1em; /* 调整段落字体大小 */
+		}
+
+		.highlight {
+		  background-color: rgba(255, 255, 0, 0.5); /* 使用半透明的黄色背景 */
+		  color: #333333; /* 确保文本颜色与背景对比度高 */
+		  /* 或者使用文本阴影而不是背景色 */
+		  text-shadow: 0px 0px 5px #000000; /* 黑色文本阴影 */
+		}
+		
+		#back-to-top {
+            display: block;
+            position: fixed;
+            bottom: 10px;
+            right: 25px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: #AFDD22;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    		transition: box-shadow 0.3s ease-in-out;
+        }
+        #back-to-top:hover {
+            background-color: #789262;
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+		.search-container {
+			text-align: center;
+			margin-top: 40px;
+		}
+
+		#searchInput {
+			padding: 5px;
+			margin-right: 5px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			width: 300px; /* 根据需要调整宽度 */
+		}
+
+		#searchButton {
+			padding: 5px 10px;
+			border: none;
+			border-radius: 5px;
+			background-color: #3498db;
+			color: white;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		#searchButton:hover {
+			background-color: #2980b9;
+		}
+		
+		/* 搜索框获得焦点时的动画 */
+		#searchInput:focus {
+		  border-color: #3498db; /* 边框颜色变化 */
+		  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); /* 添加阴影 */
+		}
+
+		/* 搜索按钮点击动画 */
+		#searchButton:active {
+		  transform: scale(0.95); /* 点击时缩小 */
+		  transition: transform 0.2s; /* 动画持续时间 */
+		}
+
+		/* 输入时的动态效果 */
+		#searchInput + .loading-animation {
+		  display: none; /* 默认不显示 */
+		  margin-left: 5px; /* 与输入框间隔 */
+		}
+
+		#searchInput:focus + .loading-animation {
+		  display: inline-block; /* 输入框获得焦点时显示 */
+		  animation: spin 1s linear infinite; /* 旋转动画 */
+		}
+
+		/* 搜索结果动态显示 */
+		.search-result {
+		  opacity: 0;
+		  transition: opacity 0.5s ease-in;
+		}
+
+		.search-result.visible {
+		  opacity: 1;
+		}
+		
+		@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(-20px); }
+		to { opacity: 1; transform: translateY(0); }
+		}
+
+		h1 {
+		  animation: fadeIn 2s ease forwards;
+		  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+		}
+		
+		h1:hover {
+		  color: #9ACF9F;
+		  transform: scale(1.1);
+		  transition: color 0.3s ease, transform 0.3s ease;
+		}
+		
+		@keyframes fadeInColor {
+		  from {
+			color: #9ED900; /* 初始颜色，与原来的颜色相同 */
+		  }
+		  to {
+			color: #0C8918; /* 结束颜色，选择一个不同的颜色以增加动画效果 */
+		  }
+		}
+
+		.comfort-animation {
+		  animation: fadeInColor 2s ease-in-out infinite alternate; /* 无限交替渐变动画 */
+		  transition: transform 0.3s ease; /* 平滑过渡效果 */
+		}
+
+		.comfort-animation:hover {
+		  transform: scale(1.05); /* 鼠标悬浮时文本放大 */
+		}
+		
+    </style>
+</head>
+<body>
+<header>
+        <h1>动物类中草药大全</h1>
+		<!-- 添加搜索框 -->
+		<div id="searchForm">
+            <input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
+            <button type="submit">搜索</button>
+        </div>
+    </header>
+      <div class="herb-container">
+        <!-- 卡片式草药信息 -->
+        <div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9A%82%E8%9A%81/20195109" target="_blank">蚂蚁（蚍蜉）</a></h2>
+			<p class="comfort-animation">用于治疗风湿、类风湿性关节炎、肝炎等疾病。</p>
+            <img src="https://selfpage-gips.cdn.bcebos.com/d38142b9dc05ffba8c7157b0a3ce771d.jpg?x-bce-process=image/auto-orient,o_1/resize,w_1242,limit_1/quality,Q_86/format,f_auto" alt="蚂蚁（蚍蜉）图片">
+        </div>
+		  
+        <div class="herb-card">
+            <h2><a href="https://m.baidu.com/bh/m/detail/ar_4547478433512824576" target="_blank">蜜蜂</a></h2>
+			<p class="comfort-animation">蜜蜂的幼虫、蛹和蜂房都可以入药，用于治疗高血脂、高血压等疾病。</p>
+            <img src="https://sfile.chatglm.cn/testpath/8aaf52d3-ddf8-535c-89fe-379d0fd43d66_0.png" alt="蜜蜂图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=Mzg5ODA3MzczNg==&mid=2247524543&idx=4&sn=a9773684de581ab767397203e3ca94b2" target="_blank">土鳖虫</a></h2>
+			<p class="comfort-animation">用于破血逐瘀，治疗血瘀经闭、产后瘀阻腹痛等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/ywXaBWw7octxJrIUtzhz2fqdNBGMWNAzDWUeWHLZnEXjZl2mQA9hov0VZEElhdo19DibhdIFvRCA3DDYFbLvguQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="土鳖虫图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="http://www.dazhongyi.cc/zhongyaocai/yaocai_h/haima.html" target="_blank">海马</a></h2>
+			<p class="comfort-animation">用于补肾壮阳，治疗肾虚阳痿、腰膝酸软等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/3M1qGbQw9tHH8yoh3CsVBL7tcZBvZUshhzxWv0XibPibpIVVgAoxtUzibOD5Z3NBibphEP4dSzyianbcH3oCZlBsYlQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="海马图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9C%88%E8%9A%A3/16555343" target="_blank">蜈蚣</a></h2>
+			<p class="comfort-animation">用于祛风镇痉，治疗痉挛抽搐、中风半身不遂等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/Ze3dyG3GhxYjnfJic6FzWRjQxfHSwkLwVxnfsZicDnYkZhaHJ1HeYkSiamhmrcme0gAZjN76Ef6ia0nYOhXmA8wpYQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蜈蚣图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%89%9B%E9%BB%84/22506078" target="_blank">牛黄</a></h2>
+			<p class="comfort-animation">即牛的胆结石，用于清热解毒，治疗热病神昏、咽喉肿痛等。</p>
+            <img src="https://bkimg.cdn.bcebos.com/pic/4bed2e738bd4b31c2570c6f88ed6277f9e2ff821?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080" alt="牛黄图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B9%BF%E8%8C%B8/22505990" target="_blank">鹿茸</a></h2>
+			<p class="comfort-animation">用于壮肾阳，治疗阳痿早泄、宫冷不孕等。</p>
+            <img src="https://bkimg.cdn.bcebos.com/pic/bd3eb13533fa828b3afaa3a0f41f4134960a5a93?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080" alt="鹿茸图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%99%BD%E8%8A%8D/769213" target="_blank">白芍</a></h2>
+			<p class="comfort-animation">养血调经，用于血虚引起的月经不调、腹痛等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_png/niaonLCVQ9CRK8xySPtGibpSTK1nKj7L4oOejBZrb3pEWXSX4YQynEEWoQt8wnDR5CziaSqCqYImAlAWJAEeUR62A/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="白芍图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%87%95%E7%AA%9D/19918028" target="_blank">燕窝</a></h2>
+			<p class="comfort-animation">用于滋阴润肺，治疗肺燥咳嗽、痰中带血等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/sCp0ta7k6675LR2EXrhlzK2WxUMicOPiaEvUU6g3WWakXKU5OC4Jnt7ELdvb2evDDq8JyEicCt3FgEYW76j2icn64w/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="燕窝图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247505139&idx=6&sn=f32993ba6e4952393c27501944c28868" target="_blank">熊胆</a></h2>
+			<p class="comfort-animation">用于清热解毒，治疗热病惊风、目赤肿痛等。</p>
+            <img src="https://bkimg.cdn.bcebos.com/pic/d043ad4bd11373f071b3a100a40f4bfbfaed04a5?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080" alt="熊胆图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%86%AC%E8%99%AB%E5%A4%8F%E8%8D%89/14542348?fromtitle=%E8%99%AB%E8%8D%89&fromid=324384" target="_blank">虫草</a></h2>
+			<p class="comfort-animation">即冬虫夏草，用于补肺益肾，治疗久咳虚喘、劳嗽痰血等。</p>
+            <img src="https://img1.baidu.com/it/u=1645614060,316671400&fm=253&fmt=auto&app=138&f=PNG?w=621&h=500" alt="虫草图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%BA%9D%E9%A6%99/22506178" target="_blank">麝香</a></h2>
+			<p class="comfort-animation">来自麝鹿的分泌物，用于开窍醒脑、活血化瘀，但由于麝鹿是濒危物种，麝香的使用已经受到严格限制。</p>
+            <img src="https://pic.rmb.bdstatic.com/bjh/news/5bd5e6a5aaf7eb4969700b8b78ef3868.jpeg" alt="麝香图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzI5NzQyNzI0OA==&mid=2247492522&idx=1&sn=71c1f26d2a25bac11a931bc185be9c9d" target="_blank">犀牛角</a></h2>
+			<p class="comfort-animation">传统上被认为有清热解毒、凉血的功效，但由于犀牛是濒危物种，国际贸易和药用均已被禁止。</p>
+            <img src="https://bkimg.cdn.bcebos.com/pic/2cf5e0fe9925bc315c87a60956df8db1ca13704c?x-bce-process=image/format,f_auto/watermark,image_d2F0ZXIvYmFpa2UyNzI,g_7,xp_5,yp_5,P_20/resize,m_lfit,limit_1,h_1080" alt="犀牛角图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%99%8E%E9%AA%A8/5046225" target="_blank">虎骨</a></h2>
+			<p class="comfort-animation">传统上用于治疗风湿、强壮筋骨，但由于老虎是濒危物种，虎骨的使用已经严格禁止。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/g9iacr5ZRBSticRl1yOXvkOicjWGbDLASm2nibEn0ibdUsytV09kBZgciaIXvgQvnfeAmgKMMCakLMNrYh18picjVKbag/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="虎骨图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzU1NzA4NjExNQ==&mid=2247488066&idx=1&sn=8f5e0b2f28f086974416a5e18865455f" target="_blank">穿山甲鳞片</a></h2>
+			<p class="comfort-animation">传统上用于活血化瘀、消肿排脓，但由于穿山甲是濒危物种，其鳞片的使用已经受到国际禁止。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/YUB8icibotZ2mnTiatXzNNtzVWnK77PovMQycrQ8weebuqywwUovAdusxuwicRRJOI0DLHfrdN0G38tyI9icW6ADjqw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="穿山甲鳞片图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9F%BE%E9%85%A5/2204054" target="_blank">蟾酥</a></h2>
+			<p class="comfort-animation">来自蟾蜍的皮肤分泌物，用于解毒、止痛，但由于蟾蜍可能受到农药污染，其使用应谨慎。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/niaonLCVQ9CTTVCp7pqp80yjJAUr9wiaibCleCCOIp2fcZ11yaJyh0v3ytsy1au0NP0e6QVmFwp0ZUKfOAPTNXlPg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蟾酥图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9A%95%E7%A0%82/22512497" target="_blank">蚕砂</a></h2>
+			<p class="comfort-animation">即蚕宝宝的粪便，用于清热解毒、镇惊安神。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/OXItP96ia9kz3TuXce3ibJj9bDYHbMGh1Odhib9VtRrYEicxYaFNiaJB4dMZ6zic7uyCSfaEncXVRdRrGhlM9XW2JvQw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蚕砂图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%8F%8D%E7%8F%A0/22506373" target="_blank">珍珠</a></h2>
+			<p class="comfort-animation">用于安神定惊、明目消翳，常用于眼科疾病。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/g9iacr5ZRBSu5QHgYC9W2Y3jcA0T6WdicibIib1aGd6CtXl8RSNmvMetlYN4xibnmiaT0rAKCUeIJUyGH055eZspDkfA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1&tp=webp" alt="珍珠图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://wapask-mip.39.net/bdsshz/question/103082809.html" target="_blank">牡蛎壳</a></h2>
+			<p class="comfort-animation">用于平肝潜阳、软坚散结，常用于治疗肝阳上亢、瘰疬痰核等。</p>
+            <img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.alicdn.com%2Fi1%2F2207377820245%2FO1CN01CZDGCK1DgFhdPdXrm_%21%212207377820245.jpg&refer=http%3A%2F%2Fimg.alicdn.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1721451625&t=1ad69c4639073a216ca5a1d7d06a0aba" alt="牡蛎壳图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B8%A1%E5%86%85%E9%87%91/405117" target="_blank">鸡内金</a></h2>
+			<p class="comfort-animation">即鸡的砂囊内壁，用于消食健胃、涩精止遗。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/Ze3dyG3GhxaD0kB5kWaHr2yuYD7k3q9pmCD5n3ibyr5x4YDAibKNzMz0Utz8uzuiaA2vPFUQ60vgxwR683Goz6TAw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鸡内金图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B9%BF%E8%A7%92%E9%9C%9C?fromModule=lemma_search-box" target="_blank">鹿角霜</a></h2>
+			<p class="comfort-animation">即鹿角的粉末，用于补肾阳、强筋骨。</p>
+            <img src="https://pimg.39.net/yaopin/zycimg/11xr1cd1ezggz2019.jpg" alt="鹿角霜图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=Mzk0OTIxOTM1NA==&mid=2247516195&idx=3&sn=4bee74d543c1250b175245fac89d97e9" target="_blank">蝎子</a></h2>
+			<p class="comfort-animation">用于治疗痉挛、风湿痛、癫痫等疾病。</p>
+            <img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.alicdn.com%2Fi1%2F4029442048%2FO1CN01NYAxcE1R01lRpDYAL_%21%214029442048.png&refer=http%3A%2F%2Fimg.alicdn.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1721451877&t=9df5a21ad7a13bb65242f85ed6b4a13a" alt="蝎子图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9B%87%E8%83%86/22506404" target="_blank">蛇胆</a></h2>
+			<p class="comfort-animation">用于清热解毒、祛风止痉，治疗黄疸、风湿等。</p>
+            <img src="https://mmbiz.qpic.cn/sz_mmbiz_jpg/fDEicic25uMicXQ4tWHA62oW9rfd1Vcm1A4JmtnWXPjAYzQa1OP8ZaL2TVT5Nm8icaD1jXiahb7WYmXwQyklvLv4X2Q/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蛇胆图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://m.bohe.cn/article/mip/rr085pcpkgb4mtg.html" target="_blank">蝙蝠粪便</a></h2>
+			<p class="comfort-animation">在传统医学中有时用于眼科疾病，但由于可能携带疾病，其使用应非常谨慎。</p>
+            <img src="https://file.bohe.cn/fhfile1/M00/74/3C/oYYBAF0tLVmAPDzIAADf1GF48Bo73.jpeg" alt="蝙蝠粪便图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%B5%B7%E9%BE%99/22505877" target="_blank">海龙</a></h2>
+			<p class="comfort-animation">用于补肾壮阳，治疗阳痿早泄等。</p>
+            <img src="https://mmbiz.qpic.cn/sz_mmbiz_jpg/BQyN7l2nicJbCAiadhDicicmUZjnco9KqENXlFxLprXRRBNiaft1jcsyXxic1jrRWTN2NQH8fCArU21fp2xhfuK1byvQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="海龙图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%88%BA%E7%8C%AC%E7%9A%AE?fromModule=lemma_search-box" target="_blank">刺猬皮</a></h2>
+			<p class="comfort-animation">用于治疗痔疮、皮肤瘙痒等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/g9iacr5ZRBStibLIiawLicld2JBOlwrxnfcxmiaNDTn8t0pJfsUIDKHN2P2ibibfOaCk4mXO8EKSKNFTZWdFibRT3rW3AQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="刺猬皮图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9C%82%E6%88%BF/8966987" target="_blank">蜂房</a></h2>
+			<p class="comfort-animation">用于治疗鼻炎、哮喘等呼吸系统疾病。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/MGuFRQIXparIczQM9wTJQU00FC3CM2eM9cFZrh95ZbgZVmcVCbicVJe4zIkFcWfVqxKic9qg6PrwAH7ISCRsK7vA/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蜂房图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9D%89%E8%9C%95/1757467" target="_blank">蝉蜕</a></h2>
+			<p class="comfort-animation">即蝉的外壳，用于治疗感冒、发热、皮肤病等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/niaonLCVQ9CQbL7Ql3D0kYqZEze7h2WPcgw6hkYICgice7G24TOZX6PG6r4OjujtPicQ1J6FsSjR39xzicicFXSW7OQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蝉蜕图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%96%91%E8%9D%A5/2205048" target="_blank">斑蝥</a></h2>
+			<p class="comfort-animation">用于治疗风湿、癫痫等疾病，但由于其毒性较大，使用需谨慎。</p>
+            <img src="斑蝥.jpg" alt="斑蝥图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://www.baidu.com/bh/dict/ydyp_16000151301683654590?contentid=ydyp_16000151301683654590&query=%E4%B9%8C%E8%B4%BC%E9%AA%A8%E4%B8%AD%E8%8D%89%E8%8D%AF&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">乌贼骨</a></h2>
+			<p class="comfort-animation">用于治疗胃痛、呕吐、遗精等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/YUB8icibotZ2l8L2LdGtpSLVV7hg1AjLxXiaYfOnKhENGZ5JtN3R74np90iciawu0LYt8bgCJXNruAVn1OGrmb6iahjQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="乌贼骨图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B1%BC%E9%B3%94/19946042" target="_blank">鱼鳔</a></h2>
+			<p class="comfort-animation">用于治疗肾虚、腰膝酸软等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/X43Yw6kABicT9o3rGNLkgo8KWRicMJ7iaiciaClWkWT2IsLlhu21maS7iaB3CqGic76Hf7NAOVRmwPokIMfWWD4sWljhw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鱼鳔图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%BE%9F%E7%89%88/2325812" target="_blank">龟板</a></h2>
+			<p class="comfort-animation">用于滋阴补肾，治疗肾阴虚引起的腰膝酸软、头晕耳鸣等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/Ze3dyG3Ghxaq2LbcLbCcCP6XtnjgeXACtAMnpa6nAhnyIbS3pIdjiaZZhEhBTz5q8kY6fpPyTQB6ypBcx7ib7mXg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="龟板图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%98%BF%E8%83%B6/22505444" target="_blank">阿胶</a></h2>
+			<p class="comfort-animation">由驴皮制成，用于补血止血，治疗血虚眩晕、心悸失眠等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/JCUlmYbr585qVLy0Ftl2V4VYydWibav8ahkg9z127ynaeOI0qH93icdicujSic4IVXg9vHUnVH6wc3qndrJzNfZg8A/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="阿胶图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B9%BF%E7%AD%8B/19915791" target="_blank">鹿筋</a></h2>
+			<p class="comfort-animation">用于强筋骨，治疗风湿痹痛、筋骨酸软等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/OXItP96ia9kz9MKcsP0uncrYgpDibcYd3RKoGVGqKMJq4FktvRoIcDXQJFMicIb6JYpMiaSnx2qAUNHQR41zRiaiaESQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鹿筋图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzA3MDA4MDg3Ng==&mid=2650304762&idx=3&sn=98f2aba272785373d0e31dc424e352d3" target="_blank">鹿鞭</a></h2>
+			<p class="comfort-animation">用于补肾壮阳，治疗阳痿早泄、腰膝酸软等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_png/tSqUOqKuFeZbvvOybarIjkTaLWYN3sYXCZYH1OIbYRgiabwgOAYic1bNpXiazRmSJ597IM2xXTb51Ex4MNvnNVpwQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鹿鞭图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%86%8A%E6%8E%8C/22506246" target="_blank">熊掌</a></h2>
+			<p class="comfort-animation">传统上认为具有滋补作用，但由于熊是濒危物种，熊掌的使用已经严格禁止。</p>
+            <img src="https://mmbiz.qpic.cn/sz_mmbiz_png/3M1qGbQw9tExK5HsUIpSQQUphrfxxCuk1ZaIq9VjUqlGVxNpNHqoPf0SJ1Zib16xkYYLqphOSgiamLYCHDibfZwlQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="熊掌图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://www.baidu.com/bh/dict/ydyp_12390201439374835338?contentid=ydyp_12390201439374835338&query=%E9%B9%BF%E8%A7%92%E8%83%B6%E4%B8%AD%E8%8D%89%E8%8D%AF&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">鹿角胶</a></h2>
+			<p class="comfort-animation">用于补血止血，治疗血虚眩晕、心悸失眠等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/g9iacr5ZRBSvtTwq4Hv0Ih0xf7AdVYZfdaO8CeXqoH0TYAHqqicmZnKLrHsAJCpoYB9KFbicteibicnPHq30MWjcgDg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鹿角胶图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%9A%95%E8%8C%A7/22506090" target="_blank">蚕茧</a></h2>
+			<p class="comfort-animation">用于治疗咳嗽、失音、癫痫等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_png/rdiaBJvibD9rLBz850slotFpAll4UOOw8zuVKiaINOsdj1xBjmg0Cb4fTDacAPibxMkiaWOyfmCDwPsqN8u5ZCWJXkg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="蚕茧图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B9%BF%E5%B0%BE/22506237" target="_blank">鹿尾巴</a></h2>
+			<p class="comfort-animation">用于补肾壮阳，治疗阳痿早泄、腰膝酸软等。</p>
+            <img src="https://mmbiz.qpic.cn/sz_mmbiz_jpg/3M1qGbQw9tGm0pX9kaw4EsibhX3YI3ibozqSzFYJTD9jSzwNNIW3riaqZvmViaYN6JE7fknsicFAg0g94sorKr4wepw/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="鹿尾巴图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%9C%B0%E9%BE%99/15945149" target="_blank">地龙</a></h2>
+			<p class="comfort-animation">即蚯蚓，用于清热平肝，治疗高血压、头痛等。</p>
+            <img src="https://mmbiz.qpic.cn/mmbiz_jpg/niaonLCVQ9CQ7YXicLk4pAmzUw72I01pRAicFpL6Y0R7ohYgYAMmN3sszNRpc1lfOZiaFPKxoP5uUp1iaCj1P0OH9gg/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="地龙图片">
+        </div>  
+		  
+    </div>
+	<button id="back-to-top">回到顶部</button>
+	<script>
+		window.addEventListener("scroll", function() {
+			var backToTopButton = document.getElementById("back-to-top");
+			if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+				backToTopButton.style.display = "block";
+			} else {
+				backToTopButton.style.display = "none";
+			}
+		});
+		document.getElementById("back-to-top").addEventListener("click", function() {
+			document.body.scrollTop = 0;
+			document.documentElement.scrollTop = 0;
+		});
+		document.addEventListener('scroll', function() {
+			var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+			var header = document.querySelector('header');
+
+			// 改变导航栏的透明度
+			header.style.opacity = 1 - scrollTop / 100; // 每滚动100px，透明度减少
+		});
+		
+		// 获取所有卡片元素
+		const cards = document.querySelectorAll('.herb-card');
+		
+		function highlightSearch() {
+		  var input = document.getElementById('searchBox');
+		  var filter = input.value.toUpperCase();
+		  var cards = document.getElementsByClassName('herb-card');
+
+		  for (var i = 0; i < cards.length; i++) {
+			var card = cards[i];
+			var cardTitle = card.getElementsByTagName('h2')[0];
+
+			if (cardTitle.innerText.toUpperCase().indexOf(filter) > -1) {
+			  card.style.display = "";
+			  // 创建mark元素来包裹搜索词
+			  var filterSpan = document.createElement('mark');
+			  filterSpan.textContent = filter;
+			  var existingText = cardTitle.firstChild;
+			  // 替换文本中的搜索词为mark元素
+			  cardTitle.innerHTML = cardTitle.innerHTML.replace(filter, filterSpan.outerHTML);
+			} else {
+			  card.style.display = "none";
+			}
+		  }
+		}
+		
+		function searchOnBaidu() {
+			var searchQuery = document.getElementById('searchInput').value;
+				// 检查搜索词是否为空
+				if (searchQuery.trim() === '') {
+					// 可以在这里添加提示信息，例如：
+					alert('请输入搜索内容！');
+					return; // 阻止函数继续执行
+				}
+		// 编码搜索词，确保URL的合法性
+			var encodedQuery = encodeURIComponent(searchQuery);
+			// 构造百度搜索的URL
+			var searchUrl = `https://www.baidu.com/s?wd=${encodedQuery}`;
+
+			// 打开新标签页或窗口并进行搜索
+			window.open(searchUrl, '_blank');
+		}
+	</script>
+	<div class="search-container">
+    <input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
+    <button id="searchButton" onclick="searchOnBaidu()">百度一下</button>
+	</div>
+	
+	<footer style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
+		&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+	</footer>
+	
+</body>
+</html>

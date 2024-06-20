@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!-- 声明文档类型，指明文档遵循HTML5规范。
+     HTML5是目前最广泛使用的网页标准，它支持更多的功能和新特性，让网页制作更加灵活和强大。 -->
+
+<html lang="zh-CN">
+<!-- lang属性设置文档的语言为中文简体，这对于搜索引擎优化和辅助技术如屏幕阅读器来说很重要。 -->
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定网页的字符编码为UTF-8，这是一种支持多语言的编码方式。
+         UTF-8编码可以显示任何语言的字符，包括中文，这对于国际化和多语言支持是必要的。 -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 定义网页的视口，使得页面在不同设备上都有良好的显示效果。
+         width=device-width表示网页宽度等于设备宽度；
+         initial-scale=1.0表示初始缩放比例为1，即不缩放。 -->
+
+    <link rel="icon" href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E4%B8%AD%E8%8D%89%E8%8D%AF%E7%BD%91%E9%A1%B5%E6%A0%87%E7%AD%BElogo.ico" type="image/x-icon">
+    <!-- 设置网页的图标，这个图标会在浏览器的标签页上显示。
+         href属性指定图标的路径，type属性指明图标的类型。 -->
+
+    <title>中草药网站设计与实现</title>
+    <!-- 定义网页的标题，这个标题会显示在浏览器的标签页上。
+         网页标题对于搜索引擎优化（SEO）和用户识别网页内容都非常重要。 -->
+	
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+        /* 引入Google Fonts上的Ma Shan Zheng字体，这是一个具有中国特色的书法字体。
+           使用这个字体可以让网站看起来更有文化气息和特色。 */
+		@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+        /* 引入Google Fonts上的Roboto字体，这是一个简洁现代的字体，适合显示醒目的文本 */
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Ma Shan Zheng', cursive;
+            background-image: url('https://sfile.chatglm.cn/testpath/3bc914dd-7464-5b3c-ba05-8c1a211bdae7_0.png');
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        /* 设置网页的整体样式，包括字体、背景等。
+           height: 100% 表示让html和body元素的高度占满整个视口；
+           margin: 0 表示去除默认的外边距；
+           font-family 设置网页的字体为之前引入的Ma Shan Zheng字体；
+           background-image 设置网页的背景图片，center表示图片居中，no-repeat表示图片不重复。 */
+
+        @media (max-width: 768px) {
+            body {
+                background-size: auto 100%;
+            }
+        }
+        /* 根据屏幕宽度调整背景图片大小。
+           当屏幕宽度小于768px时，背景图片的宽度会自动调整，高度保持100%。 */
+
+        @media (min-width: 769px) {
+            body {
+                background-size: cover;
+            }
+        }
+        /* 根据屏幕宽度调整背景图片大小。
+           当屏幕宽度大于等于769px时，背景图片会覆盖整个背景区域。 */
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        /* 设置网页的布局和颜色。
+           display: flex 表示使用flex布局；
+           justify-content: center 表示水平居中；
+           align-items: center 表示垂直居中；
+           color: #333 设置文字颜色为深灰色。 */
+
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 3s ease-in-out;
+        }
+        /* 设置欢迎信息容器的样式。
+           display: flex 表示容器内使用flex布局；
+           flex-direction: column 表示子元素垂直排列；
+           align-items: center 表示子元素水平居中；
+           opacity: 0 表示初始不显示；
+           transition 设置透明度的变化为3秒渐变，实现渐入效果。 */
+
+        .welcome-message {
+            font-size: 10em;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-weight: bold;
+            color: #2ADD9C;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+        }
+        /* 设置欢迎信息的样式。
+           font-size: 3em 表示字体大小为基准字体大小的3倍；
+           margin-bottom: 20px 表示每条欢迎信息底部有20px的间距；
+           line-height: 1.5 表示行高为字体大小的1.5倍，使得文字排版更舒适；
+           font-weight: bold 表示字体加粗；
+           color: #2ADD9C 设置文字颜色为一种绿色，与中草药主题相呼应；
+           text-shadow 设置文字阴影，增加立体感。 */
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #008000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        /* 设置按钮的样式。
+           display: inline-block 表示按钮呈现为行内块元素；
+           padding: 10px 20px 表示按钮内边距上下为10px，左右为20px；
+           background-color: #008000 设置按钮背景颜色为绿色；
+           color: white 设置按钮文字颜色为白色；
+           text-decoration: none 表示去除按钮文字的下划线；
+           border-radius: 5px 表示按钮边框圆角为5px，使按钮看起来更圆润；
+           transition 设置按钮背景颜色、位置和阴影的变化为0.3秒渐变，实现动态效果；
+           font-size: 2em 表示按钮文字大小为基准字体大小的2倍；
+           font-weight: bold 表示按钮文字加粗；
+           box-shadow 设置按钮阴影，增加立体感。 */
+
+        .button:hover {
+            background-color: #006600;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        /* 设置按钮鼠标悬停时的样式。
+           background-color: #006600 表示鼠标悬停时按钮背景颜色变深；
+           transform: translateY(-5px) 表示鼠标悬停时按钮向上移动5px，产生浮起效果；
+           box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3) 增加按钮阴影，加强立体感。 */
+
+		.button:active {
+			transform: scale(0.95); /* 点击时按钮稍微缩小 */
+			transition: transform 0.1s; /* 动画持续时间 */
+		}
+		
+        .copyright-notice {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            padding: 10px;
+            color: #E9E7EF;
+            font-size: 1em;
+            text-align: center;
+            line-height: 1.5;
+            z-index: 1000;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+			font-family: 'Roboto', sans-serif;
+        }
+        /* 设置版权提示的样式。
+			position: fixed 表示版权提示始终固定在屏幕的某个位置；
+			bottom: 0 和 right: 0 表示版权提示位于屏幕右下角；
+			padding: 10px 表示版权提示内边距为10px；
+			color: #E9E7EF 设置文字颜色为银白色；
+			font-size: 1em 表示字体大小为基准字体大小；
+			text-align: center 表示文字居中；
+			line-height: 1.5 表示行高为字体大小的1.5倍；
+			z-index: 1000 表示版权提示在层叠上下文中的位置最高，不会被其他元素覆盖；
+			border-top-left-radius 和 border-top-right-radius 表示版权提示顶部边框圆角，使其看起来像一个提示标签。
+			font-family: 'Roboto', sans-serif; 使用Roboto字体，如果没有找到则使用默认的无衬线字体 */
+		
+		@keyframes breathing {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .welcome-message {
+			font-size: 3em;
+			margin-bottom: 20px;
+			line-height: 1.5;
+			font-weight: bold;
+			color: transparent; /* 设置文字颜色为透明，以便显示背景渐变 */
+			-webkit-background-clip: text; /* 用于兼容Webkit内核的浏览器 */
+			background-clip: text; /* 背景裁剪为文字形状 */
+			background-image: linear-gradient(45deg, #4CAF50, #8BC34A); /* 设置文字的渐变背景，从较深的绿色到较浅的绿色 */
+			text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* 设置文字阴影 */
+			animation: breathing 3s ease-in-out infinite; /* 应用呼吸动画 */
+		}
+    </style>
+</head>
+<body>
+    <div class="welcome-container" id="welcomeContainer">
+        <div class="welcome-message">欢迎来到中草药的世界</div>
+        <div class="welcome-message">你可以在这了解到关于中草药的一切</div>
+        <a href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E4%B8%AD%E8%8D%89%E8%8D%AF%E7%9A%84%E5%88%86%E7%B1%BB.html" class="button">开始探索</a>
+    </div>
+
+    <div class="copyright-notice">
+        &copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+    </div>
+    <script>
+        // 当页面加载完成后，设置文字的透明度为1，以触发渐入效果
+        document.addEventListener('DOMContentLoaded', function() {
+            var welcomeContainer = document.getElementById('welcomeContainer');
+            welcomeContainer.style.opacity = 1;
+        });
+		
+		document.querySelector('.button').addEventListener('click', function(event) {
+			event.preventDefault(); // 阻止链接默认的跳转行为
+			var button = this;
+			button.style.backgroundColor = '#006600'; // 改变按钮背景色
+			button.style.transform = 'translateY(-5px)'; // 按钮上移
+
+			// 模拟网络请求或动画持续时间
+			setTimeout(function() {
+				window.location.href = button.href; // 使用button的href属性进行跳转
+				button.style.backgroundColor = '#008000'; // 恢复按钮背景色
+				button.style.transform = 'none'; // 恢复按钮位置
+			}, 300); // 300毫秒后跳转
+		});
+    </script>
+</body>
+</html>

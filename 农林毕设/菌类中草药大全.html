@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+	<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
+    <title>菌类中草药大全</title>
+    <style>
+		
+		body, html {
+			margin: 0;
+			padding: 0;
+			font-family: 'Arial', sans-serif;
+			background-image: url('https://sfile.chatglm.cn/testpath/66ad5732-95e8-58c5-bf63-00b969b9e2de_0.png');
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center center;
+			background-attachment: fixed; /* 背景图片固定，不随滚动条滚动 */
+			color: #333333;
+			padding: 20px; /* 添加内边距 */
+		}
+
+		header {
+			color: #ffffff;
+			padding: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between; /* 使用space-between让两侧对齐 */
+			margin-bottom: 40px;
+			background-color: transparent;
+		}
+
+		header h1 {
+			margin: 0; /* 确保没有默认的margin影响居中 */
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+		}
+
+		#searchForm {
+			display: flex;
+			align-items: center;
+			margin-left: auto; /* 搜索框靠右 */
+		}
+		
+		/* 应用动画到搜索按钮 */
+		#searchForm button {
+		  transition: background-color 0.3s ease, transform 0.3s ease;
+		}
+
+		#searchForm button:hover {
+		  animation: pulse-button 0.5s infinite; /* 鼠标悬停时播放动画 */
+		  background-color: #3498db; /* 鼠标悬停时改变背景颜色 */
+		}
+
+		#searchBox {
+			flex-grow: 1;
+			padding: 5px;
+			margin-right: 5px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			transition: border-color 0.3s ease, transform 0.3s ease;
+		}
+		
+		#searchBox:hover {
+		  border-color: #3498db; /* 鼠标悬停时改变边框颜色 */
+		  transform: scale(1.05); /* 鼠标悬停时放大到105% */
+		}
+		
+		@keyframes pulse-button {
+		  0% {
+			transform: scale(1);
+		  }
+		  50% {
+			transform: scale(1.1);
+		  }
+		  100% {
+			transform: scale(1);
+		  }
+		}
+
+		#searchBox:focus {
+		  animation: pulse 1s infinite; /* 输入框获得焦点时播放动画 */
+		}
+
+		.herb-container {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			padding: 20px;
+			gap: 20px; /* 添加卡片之间的间隔 */
+		}
+
+		.herb-card {
+		  border: 1px solid #c8e6c9;
+		  border-radius: 10px;
+		  margin: 10px;
+		  padding: 20px;
+		  width: calc(50% - 40px);
+		  background-color: rgba(250, 250, 250, 0.6);
+		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		  text-align: center;
+		  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+					  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		  will-change: transform, box-shadow;
+		}
+
+		.herb-card:hover {
+		  transform: scale(1.03);
+		  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+		}
+
+		.herb-card h2 {
+			color: #33691e;
+			margin: 10px 0;
+			font-size: 1.5em; /* 增大标题字体大小 */
+		}
+
+		.herb-card img {
+			max-width: 100%;
+			height: auto;
+			border-radius: 8px; /* 图片圆角 */
+			margin-bottom: 10px;
+		}
+
+		.herb-card p {
+			color: #666666;
+			line-height: 1.6;
+			font-size: 1em; /* 调整段落字体大小 */
+		}
+
+		.highlight {
+		  background-color: rgba(255, 255, 0, 0.5); /* 使用半透明的黄色背景 */
+		  color: #333333; /* 确保文本颜色与背景对比度高 */
+		  /* 或者使用文本阴影而不是背景色 */
+		  text-shadow: 0px 0px 5px #000000; /* 黑色文本阴影 */
+		}
+		
+		#back-to-top {
+            display: block;
+            position: fixed;
+            bottom: 10px;
+            right: 25px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: #AFDD22;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    		transition: box-shadow 0.3s ease-in-out;
+        }
+		
+        #back-to-top:hover {
+            background-color: #789262;
+			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+		
+		.search-container {
+			text-align: center;
+			margin-top: 40px;
+		}
+
+		#searchInput {
+			padding: 5px;
+			margin-right: 5px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			width: 300px; /* 根据需要调整宽度 */
+		}
+
+		#searchButton {
+			padding: 5px 10px;
+			border: none;
+			border-radius: 5px;
+			background-color: #3498db;
+			color: white;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		#searchButton:hover {
+			background-color: #2980b9;
+		}
+		
+		/* 搜索框获得焦点时的动画 */
+		#searchInput:focus {
+		  border-color: #3498db; /* 边框颜色变化 */
+		  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); /* 添加阴影 */
+		}
+
+		/* 搜索按钮点击动画 */
+		#searchButton:active {
+		  transform: scale(0.95); /* 点击时缩小 */
+		  transition: transform 0.2s; /* 动画持续时间 */
+		}
+
+		/* 输入时的动态效果 */
+		#searchInput + .loading-animation {
+		  display: none; /* 默认不显示 */
+		  margin-left: 5px; /* 与输入框间隔 */
+		}
+
+		#searchInput:focus + .loading-animation {
+		  display: inline-block; /* 输入框获得焦点时显示 */
+		  animation: spin 1s linear infinite; /* 旋转动画 */
+		}
+
+		/* 搜索结果动态显示 */
+		.search-result {
+		  opacity: 0;
+		  transition: opacity 0.5s ease-in;
+		}
+
+		.search-result.visible {
+		  opacity: 1;
+		}
+		
+		@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(-20px); }
+		to { opacity: 1; transform: translateY(0); }
+		}
+
+		h1 {
+		  animation: fadeIn 2s ease forwards;
+		  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+		}
+		
+		h1:hover {
+		  color: #9ACF9F;
+		  transform: scale(1.1);
+		  transition: color 0.3s ease, transform 0.3s ease;
+		}
+		
+		@keyframes fadeInColor {
+		  from {
+			color: #9ED900; /* 初始颜色，与原来的颜色相同 */
+		  }
+		  to {
+			color: #0C8918; /* 结束颜色，选择一个不同的颜色以增加动画效果 */
+		  }
+		}
+
+		.comfort-animation {
+		  animation: fadeInColor 2s ease-in-out infinite alternate; /* 无限交替渐变动画 */
+		  transition: transform 0.3s ease; /* 平滑过渡效果 */
+		}
+
+		.comfort-animation:hover {
+		  transform: scale(1.05); /* 鼠标悬浮时文本放大 */
+		}
+		
+    </style>
+</head>
+<body>
+<header>
+	
+        <h1>菌类中草药大全</h1>
+		<!-- 添加搜索框 -->
+		<div id="searchForm">
+            <input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
+            <button type="submit">搜索</button>
+        </div>
+	
+    </header>
+      <div class="herb-container">
+        <!-- 卡片式草药信息 -->
+        <div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%86%AC%E8%99%AB%E5%A4%8F%E8%8D%89/100431" target="_blank">冬虫夏草</a></h2>
+			<p class="comfort-animation">珍贵的滋补药材，具有补肾益肺、强身抗疲劳的功效。</p>
+            <img src="图片/冬虫夏草.jpg" alt="冬虫夏草图片">
+        </div>
+		  
+        <div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%81%B5%E8%8A%9D/202136" target="_blank">灵芝</a></h2>
+			<p class="comfort-animation">传统滋补强身药材，被认为能延年益寿、增强免疫力。</p>
+            <img src="图片/灵芝.jpg" alt="灵芝图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%93%B6%E8%80%B3/418220" target="_blank">银耳</a></h2>
+			<p class="comfort-animation">滋阴润肺，常用于治疗肺燥咳嗽。</p>
+            <img src="图片/银耳.jpeg" alt="银耳图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%8C%B4%E5%A4%B4%E8%8F%87/418495?fr=ge_ala" target="_blank">猴头菇</a></h2>
+			<p class="comfort-animation">具有健脾养胃、安神的功效。</p>
+            <img src="图片/猴头菇.webp" alt="猴头菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%87%91%E9%92%88%E8%8F%87/418021" target="_blank">金针菇</a></h2>
+			<p class="comfort-animation">营养丰富，有助于增强机体抵抗力。</p>
+            <img src="图片/金针菇.jpeg" alt="金针菇图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%A6%99%E8%8F%87/20169405" target="_blank">香菇</a></h2>
+			<p class="comfort-animation">具有抗癌、增强免疫力的作用。</p>
+            <img src="图片/香菇.jpeg" alt="香菇图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%BB%91%E6%9C%A8%E8%80%B3/280805" target="_blank">黑木耳</a></h2>
+			<p class="comfort-animation">活血化瘀，常用于预防心血管疾病。</p>
+            <img src="图片/黑木耳.jpeg" alt="黑木耳图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%AB%B9%E8%8D%AA/19974224" target="_blank">竹荪</a></h2>
+			<p class="comfort-animation">清热解暑，具有调节胃肠功能的作用。</p>
+            <img src="图片/竹荪.jpeg" alt="竹荪图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%9D%BE%E5%8F%A3%E8%98%91/418059" target="_blank">松口蘑</a></h2>
+			<p class="comfort-animation">味道鲜美，具有一定的药用价值。</p>
+            <img src="图片/松口蘑.jpeg" alt="松口蘑图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%8C%AF%E8%8B%93/302589" target="_blank">茯苓</a></h2>
+			<p class="comfort-animation">利水渗湿，健脾安神。</p>
+            <img src="图片/茯苓.jpg" alt="茯苓图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%8C%AA%E8%8B%93%E5%A4%9A%E5%AD%94%E8%8F%8C/58218214?fromtitle=%E7%8C%AA%E8%8B%93&fromid=1243683&fr=aladdin" target="_blank">猪苓</a></h2>
+			<p class="comfort-animation">利尿消肿，用于治疗水肿和小便不利。</p>
+            <img src="图片/猪苓.jpg" alt="猪苓图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%A9%AC%E5%8B%83/16177768" target="_blank">马勃</a></h2>
+			<p class="comfort-animation">止血消炎，外用可治疗创伤出血。</p>
+            <img src="图片/马勃.jpg" alt="马勃图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%9B%B7%E4%B8%B8/4559394" target="_blank">雷丸</a></h2>
+			<p class="comfort-animation">具有驱虫作用，但需在专业指导下使用。</p>
+            <img src="图片/雷丸.jpg" alt="雷丸图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%BA%A6%E8%A7%92%E8%8F%8C/5192350" target="_blank">麦角菌</a></h2>
+			<p class="comfort-animation">含有生物活性成分，但需注意其潜在的副作用。</p>
+            <img src="图片/麦角菌.jpeg" alt="麦角菌图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%BA%A2%E6%9B%B2/757677" target="_blank">红曲</a></h2>
+			<p class="comfort-animation">具有降血脂作用，但需注意剂量和使用方法。</p>
+            <img src="图片/红曲.jpg" alt="红曲图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%96%84%E6%A0%91%E8%8A%9D/972074" target="_blank">薄树芝</a></h2>
+			<p class="comfort-animation">具有抗炎和免疫调节作用。</p>
+            <img src="图片/薄树芝.jpeg" alt="薄树芝图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E7%81%B5%E8%8A%9D/1002935?fromtitle=%E7%B4%AB%E8%8A%9D&fromid=1147692&fr=aladdin" target="_blank">紫芝</a></h2>
+			<p class="comfort-animation">与灵芝类似，具有滋补强壮的效果。</p>
+            <img src="图片/紫芝.jpeg" alt="紫芝图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E4%BA%91%E8%8A%9D/17030510" target="_blank">云芝</a></h2>
+			<p class="comfort-animation">具有抗癌和免疫调节作用。</p>
+            <img src="图片/云芝.jpg" alt="云芝图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%A0%91%E8%88%8C/2421624" target="_blank">树舌</a></h2>
+			<p class="comfort-animation">具有抗肿瘤潜力，但需进一步研究。</p>
+            <img src="图片/树舌.jpg" alt="树舌图片">
+        </div>
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%9D%BE%E4%B9%B3%E8%8F%87/973928" target="_blank">松乳菇</a></h2>
+			<p class="comfort-animation">具有滋补作用，但需注意其药用特性。</p>
+            <img src="图片/松乳菇.jpeg" alt="松乳菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%BE%8A%E8%82%9A%E8%8F%8C/19918125" target="_blank">羊肚菌</a></h2>
+			<p class="comfort-animation">味道鲜美，具有一定的药用价值。</p>
+            <img src="图片/羊肚菌.jpeg" alt="羊肚菌图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%8D%89%E8%8F%87/22511532" target="_blank">草菇</a></h2>
+			<p class="comfort-animation">具有清热解暑、增强免疫力的作用。</p>
+            <img src="图片/草菇.jpeg" alt="草菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%B9%B3%E8%8F%87/2098911" target="_blank">平菇</a></h2>
+			<p class="comfort-animation">营养丰富，有助于提高机体抵抗力。</p>
+            <img src="图片/平菇.jpeg" alt="平菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%9D%8F%E9%B2%8D%E8%8F%87/418424" target="_blank">杏鲍菇</a></h2>
+			<p class="comfort-animation">具有增强免疫力和抗氧化的作用。</p>
+            <img src="图片/杏鲍菇.jpeg" alt="杏鲍菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%B8%A1%E8%85%BF%E8%8F%87/4168332" target="_blank">鸡腿菇</a></h2>
+			<p class="comfort-animation">具有健脾养胃、增强免疫力的功效。</p>
+            <img src="图片/鸡腿菇.jpeg" alt="鸡腿菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%B7%B4%E8%A5%BF%E8%98%91%E8%8F%87?fromtitle=%E5%A7%AC%E6%9D%BE%E8%8C%B8&fromid=5537493&fromModule=lemma_search-box" target="_blank">姬松茸</a></h2>
+			<p class="comfort-animation">具有抗疲劳和增强免疫力的作用。</p>
+            <img src="图片/姬松茸.png" alt="姬松茸图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%9A%B1%E7%8E%AF%E7%90%83%E7%9B%96%E8%8F%87/973688" target="_blank">大球盖菇</a></h2>
+			<p class="comfort-animation">具有滋补强壮和增强免疫力的作用。</p>
+            <img src="图片/大球盖菇.jpeg" alt="大球盖菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%8D%89%E7%8F%8A%E7%91%9A/6042059" target="_blank">草珊瑚</a></h2>
+			<p class="comfort-animation">具有清热解毒、消炎止痛的功效。</p>
+            <img src="图片/草珊瑚.webp" alt="草珊瑚图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%8C%B6%E6%A0%91%E8%8F%87/418003" target="_blank">茶树菇</a></h2>
+			<p class="comfort-animation">具有健脾养胃、增强免疫力的作用。</p>
+            <img src="图片/茶树菇.jpeg" alt="茶树菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%96%91%E7%8E%89%E8%95%88/9956141?fromtitle=%E7%9C%9F%E5%A7%AC%E8%8F%87&fromid=4170948&fr=aladdin" target="_blank">真姬菇</a></h2>
+			<p class="comfort-animation">具有滋补强壮和抗氧化的作用。</p>
+            <img src="图片/真姬菇.jpeg" alt="真姬菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%95%BF%E6%A0%B9%E8%8F%87/2099564" target="_blank">长根菇</a></h2>
+			<p class="comfort-animation">具有抗肿瘤潜力，但需进一步研究。</p>
+            <img src="图片/长根菇.webp" alt="长根菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E8%99%8E%E7%9A%AE%E9%A6%99%E8%8F%87/7215541" target="_blank">虎皮香菇</a></h2>
+			<p class="comfort-animation">具有滋补作用，但需注意其药用特性。</p>
+            <img src="图片/虎皮香菇.jpg" alt="虎皮香菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%96%91%E7%8E%89%E8%95%88/9956141?fromtitle=%E8%9F%B9%E5%91%B3%E8%8F%87&fromid=3225041&fr=aladdin" target="_blank">蟹味菇</a></h2>
+			<p class="comfort-animation">具有增强免疫力和抗氧化的作用。</p>
+            <img src="图片/蟹味菇.jpeg" alt="蟹味菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%A6%99%E8%98%91/2420893" target="_blank">花脸菇</a></h2>
+			<p class="comfort-animation">具有滋补作用，但需注意其药用特性。</p>
+            <img src="图片/花脸菇.jpeg" alt="花脸菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%87%91%E9%A1%B6%E4%BE%A7%E8%80%B3/972689" target="_blank">金顶侧耳</a></h2>
+			<p class="comfort-animation">具有抗氧化作用，但需注意其药用特性。</p>
+            <img src="图片/金顶侧耳.jpeg" alt="金顶侧耳图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E9%87%91%E9%A1%B6%E4%BE%A7%E8%80%B3/972689?fromtitle=%E6%A6%86%E9%BB%84%E8%98%91&fromid=3296248&fr=aladdin" target="_blank">榆黄蘑</a></h2>
+			<p class="comfort-animation">具有滋补作用，但需注意其药用特性。</p>
+            <img src="图片/榆黄蘑.jpeg" alt="榆黄蘑图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E5%85%89%E5%B8%BD%E9%B3%9E%E4%BC%9E/55349598?fromtitle=%E7%8F%8D%E7%8F%A0%E8%8F%87&fromid=10306125&fr=aladdin" target="_blank">珍珠菇</a></h2>
+			<p class="comfort-animation">具有滋补强壮和抗氧化的作用。</p>
+            <img src="图片/珍珠菇.jpeg" alt="珍珠菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E7%8C%AA%E8%82%9A%E8%8F%87/2594959" target="_blank">猪肚菇</a></h2>
+			<p class="comfort-animation">具有健脾养胃、增强免疫力的功效。</p>
+            <img src="图片/猪肚菇.jpeg" alt="猪肚菇图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%9D%8F%E4%BB%81%E6%B0%B4/980988" target="_blank">杏仁水</a></h2>
+			<p class="comfort-animation">虽非菌类，但具有润肺止咳的功效。</p>
+            <img src="图片/杏仁水.jpeg" alt="杏仁水图片">
+        </div>  
+		  
+		<div class="herb-card">
+            <h2><a href="https://baike.baidu.com/item/%E6%A6%9B%E8%98%91/22512293" target="_blank">榛蘑</a></h2>
+			<p class="comfort-animation">具有滋补作用，但需注意其药用特性。</p>
+            <img src="图片/榛蘑.jpeg" alt="榛蘑图片">
+        </div>  
+		  
+    </div>
+	<button id="back-to-top">回到顶部</button>
+	<script>
+		window.addEventListener("scroll", function() {
+			var backToTopButton = document.getElementById("back-to-top");
+			if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+				backToTopButton.style.display = "block";
+			} else {
+				backToTopButton.style.display = "none";
+			}
+		});
+		document.getElementById("back-to-top").addEventListener("click", function() {
+			document.body.scrollTop = 0;
+			document.documentElement.scrollTop = 0;
+		});
+		document.addEventListener('scroll', function() {
+			var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+			var header = document.querySelector('header');
+
+			// 改变导航栏的透明度
+			header.style.opacity = 1 - scrollTop / 100; // 每滚动100px，透明度减少
+		});
+		
+		// 获取所有卡片元素
+		const cards = document.querySelectorAll('.herb-card');
+		
+		function highlightSearch() {
+		  var input = document.getElementById('searchBox');
+		  var filter = input.value.toUpperCase();
+		  var cards = document.getElementsByClassName('herb-card');
+
+		  for (var i = 0; i < cards.length; i++) {
+			var card = cards[i];
+			var cardTitle = card.getElementsByTagName('h2')[0];
+
+			if (cardTitle.innerText.toUpperCase().indexOf(filter) > -1) {
+			  card.style.display = "";
+			  // 创建mark元素来包裹搜索词
+			  var filterSpan = document.createElement('mark');
+			  filterSpan.textContent = filter;
+			  var existingText = cardTitle.firstChild;
+			  // 替换文本中的搜索词为mark元素
+			  cardTitle.innerHTML = cardTitle.innerHTML.replace(filter, filterSpan.outerHTML);
+			} else {
+			  card.style.display = "none";
+			}
+		  }
+		}
+		
+		function searchOnBaidu() {
+			var searchQuery = document.getElementById('searchInput').value;
+				// 检查搜索词是否为空
+				if (searchQuery.trim() === '') {
+					// 可以在这里添加提示信息，例如：
+					alert('请输入搜索内容！');
+					return; // 阻止函数继续执行
+				}
+		// 编码搜索词，确保URL的合法性
+			var encodedQuery = encodeURIComponent(searchQuery);
+			// 构造百度搜索的URL
+			var searchUrl = `https://www.baidu.com/s?wd=${encodedQuery}`;
+
+			// 打开新标签页或窗口并进行搜索
+			window.open(searchUrl, '_blank');
+		}
+	</script>
+	
+	<div class="search-container">
+    <input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
+    <button id="searchButton" onclick="searchOnBaidu()">百度一下</button>
+	</div>
+	
+	<footer style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
+		&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+	</footer>
+	
+</body>
+</html>

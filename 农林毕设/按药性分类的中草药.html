@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
+		<title>按药性分类的中草药</title>
+		<style>
+			body,
+			html {
+				margin: 0;
+				padding: 0;
+				font-family: 'Arial', sans-serif;
+				background-image: url("图片/按药性分类的中草药背景图片.png");
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center center;
+				background-attachment: fixed;
+				/* 背景图片固定，不随滚动条滚动 */
+				color: #333333;
+				padding: 20px;
+				/* 添加内边距 */
+			}
+
+			header {
+				color: #ffffff;
+				padding: 20px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				/* 使用space-between让两侧对齐 */
+				margin-bottom: 40px;
+				background-color: transparent;
+			}
+
+			header h1 {
+				margin: 0;
+				/* 确保没有默认的margin影响居中 */
+				text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+			}
+
+			#searchForm {
+				display: flex;
+				align-items: center;
+				margin-left: auto;
+				/* 搜索框靠右 */
+			}
+
+			/* 应用动画到搜索按钮 */
+			#searchForm button {
+				transition: background-color 0.3s ease, transform 0.3s ease;
+			}
+
+			#searchForm button:hover {
+				animation: pulse-button 0.5s infinite;
+				/* 鼠标悬停时播放动画 */
+				background-color: #3498db;
+				/* 鼠标悬停时改变背景颜色 */
+			}
+
+			#searchBox {
+				flex-grow: 1;
+				padding: 5px;
+				margin-right: 5px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				transition: border-color 0.3s ease, transform 0.3s ease;
+			}
+
+			#searchBox:hover {
+				border-color: #3498db;
+				/* 鼠标悬停时改变边框颜色 */
+				transform: scale(1.05);
+				/* 鼠标悬停时放大到105% */
+			}
+
+			@keyframes pulse-button {
+				0% {
+					transform: scale(1);
+				}
+
+				50% {
+					transform: scale(1.1);
+				}
+
+				100% {
+					transform: scale(1);
+				}
+			}
+
+			#searchBox:focus {
+				animation: pulse 1s infinite;
+				/* 输入框获得焦点时播放动画 */
+			}
+
+			.herb-container {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				padding: 20px;
+				gap: 20px;
+				/* 添加卡片之间的间隔 */
+			}
+
+			.herb-card {
+				border: 1px solid #c8e6c9;
+				border-radius: 10px;
+				margin: 10px;
+				padding: 20px;
+				width: calc(50% - 40px);
+				background-color: rgba(250, 250, 250, 0.6);
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+				text-align: center;
+				transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+					box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				will-change: transform, box-shadow;
+			}
+
+			.herb-card:hover {
+				transform: scale(1.03);
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+			}
+
+			.herb-card h2 {
+				color: #33691e;
+				margin: 10px 0;
+				font-size: 1.5em;
+				/* 增大标题字体大小 */
+			}
+
+			.herb-card img {
+				max-width: 100%;
+				height: auto;
+				border-radius: 8px;
+				/* 图片圆角 */
+				margin-bottom: 10px;
+			}
+
+			.herb-card p {
+				color: #666666;
+				line-height: 1.6;
+				font-size: 1em;
+				/* 调整段落字体大小 */
+			}
+
+			.highlight {
+				background-color: rgba(255, 255, 0, 0.5);
+				/* 使用半透明的黄色背景 */
+				color: #333333;
+				/* 确保文本颜色与背景对比度高 */
+				/* 或者使用文本阴影而不是背景色 */
+				text-shadow: 0px 0px 5px #000000;
+				/* 黑色文本阴影 */
+			}
+
+			#back-to-top {
+				display: block;
+				position: fixed;
+				bottom: 10px;
+				right: 25px;
+				z-index: 99;
+				border: none;
+				outline: none;
+				background-color: #AFDD22;
+				color: white;
+				cursor: pointer;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+				transition: box-shadow 0.3s ease-in-out;
+			}
+
+			#back-to-top:hover {
+				background-color: #789262;
+				box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+			}
+
+			.search-container {
+				text-align: center;
+				margin-top: 40px;
+			}
+
+			#searchInput {
+				padding: 5px;
+				margin-right: 5px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				width: 300px;
+				/* 根据需要调整宽度 */
+			}
+
+			#searchButton {
+				padding: 5px 10px;
+				border: none;
+				border-radius: 5px;
+				background-color: #3498db;
+				color: white;
+				cursor: pointer;
+				transition: background-color 0.3s ease;
+			}
+
+			#searchButton:hover {
+				background-color: #2980b9;
+			}
+
+			/* 搜索框获得焦点时的动画 */
+			#searchInput:focus {
+				border-color: #3498db;
+				/* 边框颜色变化 */
+				box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+				/* 添加阴影 */
+			}
+
+			/* 搜索按钮点击动画 */
+			#searchButton:active {
+				transform: scale(0.95);
+				/* 点击时缩小 */
+				transition: transform 0.2s;
+				/* 动画持续时间 */
+			}
+
+			/* 输入时的动态效果 */
+			#searchInput+.loading-animation {
+				display: none;
+				/* 默认不显示 */
+				margin-left: 5px;
+				/* 与输入框间隔 */
+			}
+
+			#searchInput:focus+.loading-animation {
+				display: inline-block;
+				/* 输入框获得焦点时显示 */
+				animation: spin 1s linear infinite;
+				/* 旋转动画 */
+			}
+
+			/* 搜索结果动态显示 */
+			.search-result {
+				opacity: 0;
+				transition: opacity 0.5s ease-in;
+			}
+
+			.search-result.visible {
+				opacity: 1;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(-20px);
+				}
+
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			h1 {
+				animation: fadeIn 2s ease forwards;
+				text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+			}
+
+			h1:hover {
+				color: #9ACF9F;
+				transform: scale(1.1);
+				transition: color 0.3s ease, transform 0.3s ease;
+			}
+
+			@keyframes fadeInColor {
+				from {
+					color: #9ED900;
+					/* 初始颜色，与原来的颜色相同 */
+				}
+
+				to {
+					color: #0C8918;
+					/* 结束颜色，选择一个不同的颜色以增加动画效果 */
+				}
+			}
+
+			.comfort-animation {
+				animation: fadeInColor 2s ease-in-out infinite alternate;
+				/* 无限交替渐变动画 */
+				transition: transform 0.3s ease;
+				/* 平滑过渡效果 */
+			}
+
+			.comfort-animation:hover {
+				transform: scale(1.05);
+				/* 鼠标悬浮时文本放大 */
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+
+			<h1>按药性分类的中草药</h1>
+			<!-- 添加搜索框 -->
+			<div id="searchForm">
+				<input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
+				<button type="submit">搜索</button>
+			</div>
+
+		</header>
+		<div class="herb-container">
+			<!-- 卡片式草药信息 -->
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%BB%84%E8%BF%9E/16177743"
+						target="_blank">黄连</a></h2>
+				<p class="comfort-animation">清热燥湿、泻火解毒，但苦寒伤胃，脾胃虚寒者慎用。</p>
+				<img src="图片/黄连.jpg" alt="黄连图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%BB%84%E8%8A%A9/16177741" target="_blank">黄芩</a></h2>
+				<p class="comfort-animation">清热燥湿、泻火解毒，适用于肺热咳嗽、湿热黄疸。</p>
+				<img src="图片/黄芩.jpg" alt="黄芩图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%BB%84%E6%9F%8F/13209903" target="_blank">黄柏</a></h2>
+				<p class="comfort-animation">清热燥湿、泻火解毒，常用于治疗湿热带下、湿疹等。</p>
+				<img src="图片/黄柏.jpg" alt="黄柏图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%87%91%E9%93%B6%E8%8A%B1/20143150"
+						target="_blank">金银花</a></h2>
+				<p class="comfort-animation">清热解毒、散风热，适用于外感风热、咽喉肿痛。</p>
+				<img src="图片/金银花.jpg" alt="金银花图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15629755551180068798?contentid=ydyp_15629755551180068798&query=%E8%BF%9E%E7%BF%98&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">连翘</a>
+				</h2>
+				<p class="comfort-animation">清热解毒、消肿散结，用于治疗疮疡肿毒、风热感冒。</p>
+				<img src="图片/连翘.png" alt="连翘图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%9F%A5%E6%AF%8D/519720" target="_blank">知母</a></h2>
+				<p class="comfort-animation">清热生津、滋阴降火，适用于阴虚内热、肺热咳嗽。</p>
+				<img src="图片/知母.jpg" alt="知母图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%B4%AF%E4%BC%97/1784247" target="_blank">贯众</a>
+				</h2>
+				<p class="comfort-animation">清热解毒、凉血止血，用于治疗热毒血痢、吐衄。</p>
+				<img src="图片/贯众.jpg" alt="贯众图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%92%B2%E5%85%AC%E8%8B%B1/16177765" target="_blank">蒲公英</a></h2>
+				<p class="comfort-animation">清热解毒、消肿散结，适用于乳腺炎、急性扁桃体炎。</p>
+				<img src="图片/蒲公英.png" alt="蒲公英图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%8E%84%E5%8F%82/16174763" target="_blank">玄参</a>
+				</h2>
+				<p class="comfort-animation">清热凉血、滋阴降火，用于治疗阴虚火旺、咽喉肿痛。</p>
+				<img src="图片/玄参.jpg" alt="玄参图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E8%8D%89/14230616" target="_blank">紫草</a></h2>
+				<p class="comfort-animation">清热解毒、凉血止血，用于治疗疮疡肿毒、血热吐衄。</p>
+				<img src="图片/紫草.jpg" alt="紫草图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%B5%A4%E8%8A%8D/5131929"
+						target="_blank">赤芍</a></h2>
+				<p class="comfort-animation">清热凉血、散瘀止痛，适用于热病后期、瘀血疼痛。</p>
+				<img src="图片/赤芍.jpg" alt="赤芍图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%89%A1%E4%B8%B9%E7%9A%AE/395830" target="_blank">牡丹皮</a></h2>
+				<p class="comfort-animation">清热凉血、活血散瘀，用于治疗阴虚发热、月经不调。</p>
+				<img src="图片/牡丹皮.jpg" alt="牡丹皮图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%9D%92%E8%92%BF/15978890" target="_blank">青蒿</a></h2>
+				<p class="comfort-animation">清热解暑、截疟，适用于夏季感冒、疟疾。</p>
+				<img src="图片/青蒿.jpg" alt="青蒿图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247505612&idx=5&sn=cd78dd82dbe217821f421fd0a89bc993" target="_blank">白薇</a>
+				</h2>
+				<p class="comfort-animation">清热凉血、解毒散瘀，用于治疗阴虚发热、疮疡肿毒。</p>
+				<img src="图片/白薇.jpeg" alt="白薇图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15660063584883906776?contentid=ydyp_15660063584883906776&query=%E5%9C%B0%E9%AA%A8%E7%9A%AE&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">地骨皮</a></h2>
+				<p class="comfort-animation">清热凉血、退虚热，适用于阴虚潮热、盗汗。</p>
+				<img src="图片/地骨皮.png" alt="地骨皮图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%BD%97%E5%B8%83%E9%BA%BB/20192691" target="_blank">罗布麻</a>
+				</h2>
+				<p class="comfort-animation">清热解毒、利尿消肿，用于治疗热淋、水肿。</p>
+				<img src="图片/罗布麻.jpeg" alt="罗布麻图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E5%B1%B1%E8%8D%AF/22506831"
+						target="_blank">山药</a></h2>
+				<p class="comfort-animation">补脾益肺、固肾涩精，适用于脾虚泄泻、肾虚遗精。</p>
+				<img src="图片/山药.jpeg" alt="山药图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E5%A4%A9%E9%BA%BB/274538" target="_blank">天麻</a></h2>
+				<p class="comfort-animation">平肝息风、祛风胜湿，用于治疗眩晕、中风后遗症。</p>
+				<img src="图片/天麻.jpg" alt="天麻图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15699839015039998129?contentid=ydyp_15699839015039998129&query=%E7%99%BD%E6%9C%AF&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">白术</a></h2>
+				<p class="comfort-animation">健脾燥湿、安胎，适用于脾虚食少、胎动不安。</p>
+				<img src="图片/白术.jpeg" alt="白术图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%8C%AF%E8%8B%93/302589" target="_blank">茯苓</a>
+				</h2>
+				<p class="comfort-animation">利水渗湿、健脾宁心，适用于水肿、脾虚泄泻。</p>
+				<img src="图片/茯苓.jpg" alt="茯苓图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15423449782113670616?contentid=ydyp_15423449782113670616&query=%E7%94%98%E8%8D%89&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">甘草</a>
+				</h2>
+				<p class="comfort-animation">补脾益气、清热解毒，用于调和药性、缓解药物毒性。</p>
+				<img src="图片/甘草.png" alt="甘草图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E4%B8%B9%E5%8F%82/53612" target="_blank">丹参</a></h2>
+				<p class="comfort-animation">活血化瘀、清心除烦，适用于心绞痛、月经不调。</p>
+				<img src="图片/丹参.jpg" alt="丹参图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15845096295049712856?contentid=ydyp_15845096295049712856&query=%E5%B7%9D%E8%8A%8E&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">川芎</a></h2>
+				<p class="comfort-animation">活血行气、祛风止痛，用于治疗头痛、胸痹。</p>
+				<img src="图片/川芎.webp" alt="川芎图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E5%BD%93%E5%BD%92/17196912" target="_blank">当归</a>
+				</h2>
+				<p class="comfort-animation">补血调经、活血止痛，适用于血虚萎黄、月经不调。</p>
+				<img src="图片/当归.jpg" alt="当归图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%BA%A2%E8%8A%B1/16556131" target="_blank">红花</a>
+				</h2>
+				<p class="comfort-animation">活血化瘀、通经止痛，用于治疗瘀血疼痛、月经不调。</p>
+				<img src="图片/红花.jpg" alt="红花图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E6%A1%82%E6%9E%9D/16048672"
+						target="_blank">桂枝</a></h2>
+				<p class="comfort-animation">发汗解肌、温经止痛，适用于风寒感冒、关节疼痛。</p>
+				<img src="图片/桂枝.jpg" alt="桂枝图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15804047475798660208?contentid=ydyp_15804047475798660208&query=%E5%B9%B2%E5%A7%9C&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1"
+						target="_blank">干姜</a></h2>
+				<p class="comfort-animation">温中散寒、回阳救逆，用于治疗脾胃虚寒、寒邪内侵。</p>
+				<img src="图片/干姜.png" alt="干姜图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%82%89%E6%A1%82/16099406" target="_blank">肉桂</a>
+				</h2>
+				<p class="comfort-animation">温经散寒、助阳化气，适用于肾阳不足、寒湿痹痛。</p>
+				<img src="图片/肉桂.jpg" alt="肉桂图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%99%88%E7%9A%AE/746229" target="_blank">陈皮</a>
+				</h2>
+				<p class="comfort-animation">理气调中、燥湿化痰，用于治疗胸腹胀满、咳嗽痰多。</p>
+				<img src="图片/陈皮.jpg" alt="陈皮图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%A6%99%E9%99%84/2660165"  target="_blank">香附</a></h2>
+				<p class="comfort-animation">疏肝理气、调经止痛，适用于肝郁气滞、月经不调。</p>
+				<img src="图片/香附.jpg" alt="香附图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%BB%86%E8%BE%9B/16177747" target="_blank">细辛</a>
+				</h2>
+				<p class="comfort-animation">祛风散寒、通鼻利窍，用于治疗风寒感冒、鼻塞不通。</p>
+				<img src="图片/细辛.jpg" alt="细辛图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%94%9F%E5%A7%9C/16171219" target="_blank">生姜</a></h2>
+				<p class="comfort-animation">发汗解表、温中止呕，适用于风寒感冒、胃寒呕吐。</p>
+				<img src="图片/生姜.jpeg" alt="生姜图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%8A%B1%E6%A4%92/16165010" target="_blank">花椒</a></h2>
+				<p class="comfort-animation">温中散寒、杀虫止痛，用于治疗胃寒呕吐、蛔虫腹痛。</p>
+				<img src="图片/花椒.jpeg" alt="花椒图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%BE%A3%E6%A4%92/16261999" target="_blank">辣椒</a></h2>
+				<p class="comfort-animation">温中散寒、促进食欲，但过量食用可能刺激胃肠道。</p>
+				<img src="图片/辣椒.jpeg" alt="辣椒图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%82%89%E8%8B%81%E8%93%89/22506704" target="_blank">肉苁蓉</a></h2>
+				<p class="comfort-animation">补肾助阳、润肠通便，适用于肾阳不足、肠燥便秘。</p>
+				<img src="图片/肉苁蓉.jpg" alt="肉苁蓉图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E5%B7%B4%E6%88%9F%E5%A4%A9/16211056" target="_blank">巴戟天</a></h2>
+				<p class="comfort-animation">补肾助阳、强筋骨，用于治疗阳痿、腰膝酸软。</p>
+				<img src="图片/巴戟天.jpg" alt="巴戟天图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15239435142405835749?contentid=ydyp_15239435142405835749&query=%E4%BB%99%E8%8C%85&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1"
+						target="_blank">仙茅</a></h2>
+				<p class="comfort-animation">温肾助阳、祛寒湿，适用于肾阳不足、寒湿带下。</p>
+				<img src="图片/仙茅.jpeg" alt="仙茅图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A0%82%E4%BB%81/16102319" target="_blank">砂仁</a></h2>
+				<p class="comfort-animation">理气和胃、安胎，适用于脾胃气滞、胎动不安。</p>
+				<img src="图片/砂仁.jpg" alt="砂仁图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E4%B8%81%E9%A6%99/17019440" target="_blank">丁香</a></h2>
+				<p class="comfort-animation">温中散寒、止痛，用于治疗胃寒呕吐、腹痛。</p>
+				<img src="图片/丁香.jpg" alt="丁香图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E6%A1%91%E5%AF%84%E7%94%9F/16100679" target="_blank">桑寄生</a></h2>
+				<p class="comfort-animation">祛风湿、强筋骨，适用于风湿痹痛、筋骨无力。</p>
+				<img src="图片/桑寄生.jpg" alt="桑寄生图片">
+			</div>
+
+		</div>
+		<button id="back-to-top">回到顶部</button>
+		<script>
+			window.addEventListener("scroll", function() {
+				var backToTopButton = document.getElementById("back-to-top");
+				if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+					backToTopButton.style.display = "block";
+				} else {
+					backToTopButton.style.display = "none";
+				}
+			});
+			document.getElementById("back-to-top").addEventListener("click", function() {
+				document.body.scrollTop = 0;
+				document.documentElement.scrollTop = 0;
+			});
+			document.addEventListener('scroll', function() {
+				var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+				var header = document.querySelector('header');
+
+				// 改变导航栏的透明度
+				header.style.opacity = 1 - scrollTop / 100; // 每滚动100px，透明度减少
+			});
+
+			// 获取所有卡片元素
+			const cards = document.querySelectorAll('.herb-card');
+
+			function highlightSearch() {
+				var input = document.getElementById('searchBox');
+				var filter = input.value.toUpperCase();
+				var cards = document.getElementsByClassName('herb-card');
+
+				for (var i = 0; i < cards.length; i++) {
+					var card = cards[i];
+					var cardTitle = card.getElementsByTagName('h2')[0];
+
+					if (cardTitle.innerText.toUpperCase().indexOf(filter) > -1) {
+						card.style.display = "";
+						// 创建mark元素来包裹搜索词
+						var filterSpan = document.createElement('mark');
+						filterSpan.textContent = filter;
+						var existingText = cardTitle.firstChild;
+						// 替换文本中的搜索词为mark元素
+						cardTitle.innerHTML = cardTitle.innerHTML.replace(filter, filterSpan.outerHTML);
+					} else {
+						card.style.display = "none";
+					}
+				}
+			}
+
+			function searchOnBaidu() {
+				var searchQuery = document.getElementById('searchInput').value;
+				// 检查搜索词是否为空
+				if (searchQuery.trim() === '') {
+					// 可以在这里添加提示信息，例如：
+					alert('请输入搜索内容！');
+					return; // 阻止函数继续执行
+				}
+				// 编码搜索词，确保URL的合法性
+				var encodedQuery = encodeURIComponent(searchQuery);
+				// 构造百度搜索的URL
+				var searchUrl = `https://www.baidu.com/s?wd=${encodedQuery}`;
+
+				// 打开新标签页或窗口并进行搜索
+				window.open(searchUrl, '_blank');
+			}
+		</script>
+
+		<div class="search-container">
+			<input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
+			<button id="searchButton" onclick="searchOnBaidu()">百度一下</button>
+		</div>
+
+		<footer
+			style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
+			&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+		</footer>
+
+	</body>
+</html>

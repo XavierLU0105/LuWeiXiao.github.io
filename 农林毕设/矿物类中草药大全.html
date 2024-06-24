@@ -1,584 +1,646 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head>
-    <meta charset="UTF-8">
-	<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
-    <title>矿物类中草药大全</title>
-    <style>
-		
-		body, html {
-			margin: 0;
-			padding: 0;
-			font-family: 'Arial', sans-serif;
-			background-image: url('https://sfile.chatglm.cn/testpath/2384f526-a0f2-5fba-befd-7dd369f7fca3_0.png');
-			background-size: cover;
-			background-repeat: no-repeat;
-			background-position: center center;
-			background-attachment: fixed; /* 背景图片固定，不随滚动条滚动 */
-			color: #333333;
-			padding: 20px; /* 添加内边距 */
-		}
-
-		header {
-			color: #ffffff;
-			padding: 20px;
-			display: flex;
-			align-items: center;
-			justify-content: space-between; /* 使用space-between让两侧对齐 */
-			margin-bottom: 40px;
-			background-color: transparent;
-		}
-
-		header h1 {
-			margin: 0; /* 确保没有默认的margin影响居中 */
-			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-		}
-
-		#searchForm {
-			display: flex;
-			align-items: center;
-			margin-left: auto; /* 搜索框靠右 */
-		}
-		
-		/* 应用动画到搜索按钮 */
-		#searchForm button {
-		  transition: background-color 0.3s ease, transform 0.3s ease;
-		}
-
-		#searchForm button:hover {
-		  animation: pulse-button 0.5s infinite; /* 鼠标悬停时播放动画 */
-		  background-color: #3498db; /* 鼠标悬停时改变背景颜色 */
-		}
-
-		#searchBox {
-			flex-grow: 1;
-			padding: 5px;
-			margin-right: 5px;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			transition: border-color 0.3s ease, transform 0.3s ease;
-		}
-		
-		#searchBox:hover {
-		  border-color: #3498db; /* 鼠标悬停时改变边框颜色 */
-		  transform: scale(1.05); /* 鼠标悬停时放大到105% */
-		}
-		
-		@keyframes pulse-button {
-		  0% {
-			transform: scale(1);
-		  }
-		  50% {
-			transform: scale(1.1);
-		  }
-		  100% {
-			transform: scale(1);
-		  }
-		}
-
-		#searchBox:focus {
-		  animation: pulse 1s infinite; /* 输入框获得焦点时播放动画 */
-		}
-
-		.herb-container {
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: center;
-			padding: 20px;
-			gap: 20px; /* 添加卡片之间的间隔 */
-		}
-
-		.herb-card {
-		  border: 1px solid #c8e6c9;
-		  border-radius: 10px;
-		  margin: 10px;
-		  padding: 20px;
-		  width: calc(50% - 40px);
-		  background-color: rgba(250, 250, 250, 0.6);
-		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		  text-align: center;
-		  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-					  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		  will-change: transform, box-shadow;
-		}
-
-		.herb-card:hover {
-		  transform: scale(1.03);
-		  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-		}
-
-		.herb-card h2 {
-			color: #33691e;
-			margin: 10px 0;
-			font-size: 1.5em; /* 增大标题字体大小 */
-		}
-
-		.herb-card img {
-			max-width: 100%;
-			height: auto;
-			border-radius: 8px; /* 图片圆角 */
-			margin-bottom: 10px;
-		}
-
-		.herb-card p {
-			color: #666666;
-			line-height: 1.6;
-			font-size: 1em; /* 调整段落字体大小 */
-		}
-
-		.highlight {
-		  background-color: rgba(255, 255, 0, 0.5); /* 使用半透明的黄色背景 */
-		  color: #333333; /* 确保文本颜色与背景对比度高 */
-		  /* 或者使用文本阴影而不是背景色 */
-		  text-shadow: 0px 0px 5px #000000; /* 黑色文本阴影 */
-		}
-		
-		#back-to-top {
-            display: block;
-            position: fixed;
-            bottom: 10px;
-            right: 25px;
-            z-index: 99;
-            border: none;
-            outline: none;
-            background-color: #AFDD22;
-            color: white;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 5px;
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    		transition: box-shadow 0.3s ease-in-out;
-        }
-		
-        #back-to-top:hover {
-            background-color: #789262;
-			box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-		
-		.search-container {
-			text-align: center;
-			margin-top: 40px;
-		}
-
-		#searchInput {
-			padding: 5px;
-			margin-right: 5px;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			width: 300px; /* 根据需要调整宽度 */
-		}
-
-		#searchButton {
-			padding: 5px 10px;
-			border: none;
-			border-radius: 5px;
-			background-color: #3498db;
-			color: white;
-			cursor: pointer;
-			transition: background-color 0.3s ease;
-		}
-
-		#searchButton:hover {
-			background-color: #2980b9;
-		}
-		
-		/* 搜索框获得焦点时的动画 */
-		#searchInput:focus {
-		  border-color: #3498db; /* 边框颜色变化 */
-		  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); /* 添加阴影 */
-		}
-
-		/* 搜索按钮点击动画 */
-		#searchButton:active {
-		  transform: scale(0.95); /* 点击时缩小 */
-		  transition: transform 0.2s; /* 动画持续时间 */
-		}
-
-		/* 输入时的动态效果 */
-		#searchInput + .loading-animation {
-		  display: none; /* 默认不显示 */
-		  margin-left: 5px; /* 与输入框间隔 */
-		}
-
-		#searchInput:focus + .loading-animation {
-		  display: inline-block; /* 输入框获得焦点时显示 */
-		  animation: spin 1s linear infinite; /* 旋转动画 */
-		}
-
-		/* 搜索结果动态显示 */
-		.search-result {
-		  opacity: 0;
-		  transition: opacity 0.5s ease-in;
-		}
-
-		.search-result.visible {
-		  opacity: 1;
-		}
-		
-		@keyframes fadeIn {
-		from { opacity: 0; transform: translateY(-20px); }
-		to { opacity: 1; transform: translateY(0); }
-		}
-
-		h1 {
-		  animation: fadeIn 2s ease forwards;
-		  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-		}
-		
-		h1:hover {
-		  color: #9ACF9F;
-		  transform: scale(1.1);
-		  transition: color 0.3s ease, transform 0.3s ease;
-		}
-		
-		@keyframes fadeInColor {
-		  from {
-			color: #9ED900; /* 初始颜色，与原来的颜色相同 */
-		  }
-		  to {
-			color: #0C8918; /* 结束颜色，选择一个不同的颜色以增加动画效果 */
-		  }
-		}
-
-		.comfort-animation {
-		  animation: fadeInColor 2s ease-in-out infinite alternate; /* 无限交替渐变动画 */
-		  transition: transform 0.3s ease; /* 平滑过渡效果 */
-		}
-
-		.comfort-animation:hover {
-		  transform: scale(1.05); /* 鼠标悬浮时文本放大 */
-		}
-		
-    </style>
-</head>
-<body>
-<header>
-	
-        <h1>矿物类中草药大全</h1>
-		<!-- 添加搜索框 -->
-		<div id="searchForm">
-            <input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
-            <button type="submit">搜索</button>
-        </div>
-	
-    </header>
-      <div class="herb-container">
-        <!-- 卡片式草药信息 -->
-        <div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%9B%84%E9%BB%84/16555574" target="_blank">雄黄</a></h2>
-			<p class="comfort-animation">又称石黄，主要用于清热解毒、杀虫等。</p>
-            <img src="图片/雄黄.jpg" alt="雄黄图片">
-        </div>
-		  
-        <div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%9B%8C%E9%BB%84/907555" target="_blank">雌黄</a></h2>
-			<p class="comfort-animation">具有解毒、杀虫、燥湿止痒的功效。</p>
-            <img src="图片/雌黄.jpeg" alt="雌黄图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E6%9C%B1%E7%A0%82/16565416" target="_blank">朱砂</a></h2>
-			<p class="comfort-animation">又称丹砂，用于安神镇惊、清热解毒。</p>
-            <img src="图片/朱砂.jpg" alt="朱砂图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%A3%81%E7%9F%B3/905962" target="_blank">磁石</a></h2>
-			<p class="comfort-animation">具有平肝息风、镇静安神的作用。</p>
-            <img src="图片/磁石.jpg" alt="磁石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E8%87%AA%E7%84%B6%E9%93%9C/906881" target="_blank">自然铜</a></h2>
-			<p class="comfort-animation">用于跌打损伤、瘀血肿痛。</p>
-            <img src="图片/自然铜.webp" alt="自然铜图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%85%E4%B8%B9/20261260" target="_blank">铅丹</a></h2>
-			<p class="comfort-animation">有清热解毒、收敛止血的功效。</p>
-            <img src="图片/铅丹.jpeg" alt="铅丹图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E5%AF%86%E9%99%80%E5%83%A7/20584886" target="_blank">密陀僧</a></h2>
-			<p class="comfort-animation">用于清热解毒、燥湿止痒。</p>
-            <img src="图片/密陀僧.webp" alt="密陀僧图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%82%89%E7%94%98%E7%9F%B3/16629588" target="_blank">炉甘石</a></h2>
-			<p class="comfort-animation">具有清热解毒、明目退翳的功效。</p>
-            <img src="图片/炉甘石.webp" alt="炉甘石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247498792&idx=4&sn=2a1a0a2ca16134bbf8c029fe673a5b3e" target="_blank">硫磺</a></h2>
-			<p class="comfort-animation">用于外用消毒、杀虫。</p>
-            <img src="图片/硫磺.jpg" alt="硫磺图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://www.baidu.com/bh/dict/ydyp_15585017428052616421?contentid=ydyp_15585017428052616421&query=%E8%B5%AD%E7%9F%B3&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">赭石</a></h2>
-			<p class="comfort-animation">有平肝息风、清热解毒的作用。</p>
-            <img src="图片/赭石.jpg" alt="赭石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%BE%99%E9%AA%A8/20193558" target="_blank">龙骨</a></h2>
-			<p class="comfort-animation">用于安神定惊、收敛止血。</p>
-            <img src="图片/龙骨.jpg" alt="龙骨图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%BE%99%E9%BD%BF/22506242" target="_blank">龙齿</a></h2>
-			<p class="comfort-animation">具有安神镇惊、清热解毒的功效。</p>
-            <img src="图片/龙齿.jpeg" alt="龙齿图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%90%A5%E7%8F%80/22507563" target="_blank">琥珀</a></h2>
-			<p class="comfort-animation">用于安神、活血化瘀。</p>
-            <img src="图片/琥珀.jpeg" alt="琥珀图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%87%91%E7%B2%BE%E7%9F%B3/4864427" target="_blank">金精石</a></h2>
-			<p class="comfort-animation">有清热解毒、平肝息风的作用。</p>
-            <img src="图片/金精石.png" alt="金精石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%B6%E7%B2%BE%E7%9F%B3/1905668" target="_blank">银精石</a></h2>
-			<p class="comfort-animation">用于清热解毒、平肝息风。</p>
-            <img src="图片/银精石.jpg" alt="银精石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%9C%E7%BB%BF/765695" target="_blank">铜绿</a></h2>
-			<p class="comfort-animation">具有清热解毒、燥湿止痒的功效。</p>
-            <img src="图片/铜绿.webp" alt="铜绿图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E7%9F%B3%E8%8B%B1/24232910" target="_blank">紫石英</a></h2>
-			<p class="comfort-animation">用于镇惊安神、平肝息风。</p>
-            <img src="图片/紫石英.jpeg" alt="紫石英图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://www.med66.com/new/53a269aa2009/20091127zhangx144034.shtml" target="_blank">白石英</a></h2>
-			<p class="comfort-animation">有清热、安神、平肝的作用。</p>
-            <img src="图片/白石英.jpg" alt="白石英图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E8%8A%B1%E8%95%8A%E7%9F%B3/405872" target="_blank">花蕊石</a></h2>
-			<p class="comfort-animation">用于清热解毒、止血。</p>
-            <img src="图片/花蕊石.jpg" alt="花蕊石图片">
-        </div>
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%9D%92%E7%A4%9E%E7%9F%B3/907623" target="_blank">青礞石</a></h2>
-			<p class="comfort-animation">有清热解毒、平肝息风的功效。</p>
-            <img src="图片/青礞石.webp" alt="青礞石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%98%B3%E8%B5%B7%E7%9F%B3/907416" target="_blank">阳起石</a></h2>
-			<p class="comfort-animation">用于温阳助火、温中散寒。</p>
-            <img src="图片/阳起石.webp" alt="阳起石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E4%BA%91%E6%AF%8D/4754386" target="_blank">云母</a></h2>
-			<p class="comfort-animation">具有清热解毒、平肝息风的作用。</p>
-            <img src="图片/云母.jpeg" alt="云母图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%9F%B3%E8%86%8F/16169261" target="_blank">石膏</a></h2>
-			<p class="comfort-animation">用于清热泻火、生津止渴。</p>
-            <img src="图片/石膏.jpg" alt="石膏图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E6%BB%91%E7%9F%B3/465268" target="_blank">滑石</a></h2>
-			<p class="comfort-animation">有清热利湿、通淋的作用。</p>
-            <img src="图片/滑石.webp" alt="滑石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%A1%BC%E7%A0%82/687227" target="_blank">硼砂</a></h2>
-			<p class="comfort-animation">用于清热解毒、燥湿止痒（注意：硼砂有毒，使用需谨慎）。</p>
-            <img src="图片/硼砂.jpg" alt="硼砂图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E8%8A%92%E7%A1%9D/393791" target="_blank">芒硝</a></h2>
-			<p class="comfort-animation">具有清热泻火、软坚散结的作用。</p>
-            <img src="图片/芒硝.jpg" alt="芒硝图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%A1%87%E7%A0%82/2484019" target="_blank">硇砂</a></h2>
-			<p class="comfort-animation">用于消积化瘀、软坚散结。</p>
-            <img src="图片/硇砂.jpg" alt="硇砂图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%A1%BC%E9%85%B8/1132205" target="_blank">硼酸</a></h2>
-			<p class="comfort-animation">有消毒、防腐的作用。</p>
-            <img src="图片/硼酸.jpeg" alt="硼酸图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%81%E8%90%BD/4562105" target="_blank">铁落</a></h2>
-			<p class="comfort-animation">用于清热解毒、止血。</p>
-            <img src="图片/铁落.jpg" alt="铁落图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E6%B5%B7%E6%B5%AE%E7%9F%B3/22506293" target="_blank">海浮石</a></h2>
-			<p class="comfort-animation">具有清热解毒、软坚散结的功效。</p>
-            <img src="图片/海浮石.jpeg" alt="海浮石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E4%BB%A3%E8%B5%AD%E7%9F%B3/903870" target="_blank">代赭石</a></h2>
-			<p class="comfort-animation">一种铁矿石，用于清热解毒。</p>
-            <img src="图片/代赭石.jpg" alt="代赭石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%A1%AB%E9%85%B8%E9%93%9D%E9%92%BE/10816997" target="_blank">硫酸铝钾</a></h2>
-			<p class="comfort-animation">用于收敛止血、止泻。</p>
-            <img src="图片/硫酸铝钾.jpeg" alt="硫酸铝钾图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://www.baidu.com/bh/dict/ydyp_16221749366221312637?contentid=ydyp_16221749366221312637&query=%E9%92%9F%E4%B9%B3%E7%9F%B3&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1" target="_blank">钟乳石</a></h2>
-			<p class="comfort-animation">用于治疗阳痿、遗精、虚劳咳嗽等。</p>
-            <img src="图片/钟乳石.jpg" alt="钟乳石图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E8%A1%80%E4%BD%99%E7%82%AD/668901?fr=ge_ala" target="_blank">血余炭</a></h2>
-			<p class="comfort-animation">具有止血、散瘀的功效。</p>
-            <img src="图片/血余炭.png" alt="血余炭图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247506122&idx=7&sn=43083e686d9274460d0d46d48800fbaa" target="_blank">砒霜</a></h2>
-			<p class="comfort-animation">具有剧毒，传统上用于杀虫，但现代已极少使用。</p>
-            <img src="图片/砒霜.jpeg" alt="砒霜图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%85%E9%9C%9C/4532659?fr=ge_ala" target="_blank">铅霜</a></h2>
-			<p class="comfort-animation">具有清热解毒、收敛止血的功效。</p>
-            <img src="图片/铅霜.png" alt="铅霜图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E8%B5%A4%E7%9F%B3%E8%84%82/907043" target="_blank">赤石脂</a></h2>
-			<p class="comfort-animation">这是一种含有铁、铝、硅等矿物质的赤色粘土，传统上用于止血、收敛、生肌，常用于治疗外伤出血、溃疡不敛等。</p>
-            <img src="图片/赤石脂.jpg" alt="赤石脂图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E9%93%81%E7%B2%89/875130" target="_blank">铁粉</a></h2>
-			<p class="comfort-animation">通常由铁制成，用于中药材，具有消炎、止痛的作用。</p>
-            <img src="图片/铁粉.jpeg" alt="铁粉图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E8%8D%89%E8%8C%B8/2545534" target="_blank">紫草茸</a></h2>
-			<p class="comfort-animation">有清热解毒、活血化瘀的作用。</p>
-            <img src="图片/紫草茸.jpeg" alt="紫草茸图片">
-        </div>  
-		  
-		<div class="herb-card">
-            <h2><a href="https://baike.baidu.com/item/%E7%8E%9B%E7%91%99/20177267" target="_blank">玛瑙</a></h2>
-			<p class="comfort-animation">用于安神、活血化瘀。</p>
-            <img src="图片/玛瑙.png" alt="玛瑙图片">
-        </div>  
-		  
-    </div>
-	<button id="back-to-top">回到顶部</button>
-	<script>
-		window.addEventListener("scroll", function() {
-			var backToTopButton = document.getElementById("back-to-top");
-			if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-				backToTopButton.style.display = "block";
-			} else {
-				backToTopButton.style.display = "none";
+	<head>
+		<meta charset="UTF-8">
+		<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
+		<title>矿物类中草药大全</title>
+		<style>
+			body,
+			html {
+				margin: 0;
+				padding: 0;
+				font-family: 'Arial', sans-serif;
+				background-image: url('https://sfile.chatglm.cn/testpath/2384f526-a0f2-5fba-befd-7dd369f7fca3_0.png');
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center center;
+				background-attachment: fixed;
+				/* 背景图片固定，不随滚动条滚动 */
+				color: #333333;
+				padding: 20px;
+				/* 添加内边距 */
 			}
-		});
-		document.getElementById("back-to-top").addEventListener("click", function() {
-			document.body.scrollTop = 0;
-			document.documentElement.scrollTop = 0;
-		});
-		document.addEventListener('scroll', function() {
-			var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-			var header = document.querySelector('header');
 
-			// 改变导航栏的透明度
-			header.style.opacity = 1 - scrollTop / 100; // 每滚动100px，透明度减少
-		});
-		
-		// 获取所有卡片元素
-		const cards = document.querySelectorAll('.herb-card');
-		
-		function highlightSearch() {
-		  var input = document.getElementById('searchBox');
-		  var filter = input.value.toUpperCase();
-		  var cards = document.getElementsByClassName('herb-card');
-
-		  for (var i = 0; i < cards.length; i++) {
-			var card = cards[i];
-			var cardTitle = card.getElementsByTagName('h2')[0];
-
-			if (cardTitle.innerText.toUpperCase().indexOf(filter) > -1) {
-			  card.style.display = "";
-			  // 创建mark元素来包裹搜索词
-			  var filterSpan = document.createElement('mark');
-			  filterSpan.textContent = filter;
-			  var existingText = cardTitle.firstChild;
-			  // 替换文本中的搜索词为mark元素
-			  cardTitle.innerHTML = cardTitle.innerHTML.replace(filter, filterSpan.outerHTML);
-			} else {
-			  card.style.display = "none";
+			header {
+				color: #ffffff;
+				padding: 20px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				/* 使用space-between让两侧对齐 */
+				margin-bottom: 40px;
+				background-color: transparent;
 			}
-		  }
-		}
-		
-		function searchOnBaidu() {
-			var searchQuery = document.getElementById('searchInput').value;
+
+			header h1 {
+				margin: 0;
+				/* 确保没有默认的margin影响居中 */
+				text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+			}
+
+			#searchForm {
+				display: flex;
+				align-items: center;
+				margin-left: auto;
+				/* 搜索框靠右 */
+			}
+
+			/* 应用动画到搜索按钮 */
+			#searchForm button {
+				transition: background-color 0.3s ease, transform 0.3s ease;
+			}
+
+			#searchForm button:hover {
+				animation: pulse-button 0.5s infinite;
+				/* 鼠标悬停时播放动画 */
+				background-color: #3498db;
+				/* 鼠标悬停时改变背景颜色 */
+			}
+
+			#searchBox {
+				flex-grow: 1;
+				padding: 5px;
+				margin-right: 5px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				transition: border-color 0.3s ease, transform 0.3s ease;
+			}
+
+			#searchBox:hover {
+				border-color: #3498db;
+				/* 鼠标悬停时改变边框颜色 */
+				transform: scale(1.05);
+				/* 鼠标悬停时放大到105% */
+			}
+
+			@keyframes pulse-button {
+				0% {
+					transform: scale(1);
+				}
+
+				50% {
+					transform: scale(1.1);
+				}
+
+				100% {
+					transform: scale(1);
+				}
+			}
+
+			#searchBox:focus {
+				animation: pulse 1s infinite;
+				/* 输入框获得焦点时播放动画 */
+			}
+
+			.herb-container {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				padding: 20px;
+				gap: 20px;
+				/* 添加卡片之间的间隔 */
+			}
+
+			.herb-card {
+				border: 1px solid #c8e6c9;
+				border-radius: 10px;
+				margin: 10px;
+				padding: 20px;
+				width: calc(50% - 40px);
+				background-color: rgba(250, 250, 250, 0.6);
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+				text-align: center;
+				transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+					box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				will-change: transform, box-shadow;
+			}
+
+			.herb-card:hover {
+				transform: scale(1.03);
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+			}
+
+			.herb-card h2 {
+				color: #33691e;
+				margin: 10px 0;
+				font-size: 1.5em;
+				/* 增大标题字体大小 */
+			}
+
+			.herb-card img {
+				max-width: 100%;
+				height: auto;
+				border-radius: 8px;
+				/* 图片圆角 */
+				margin-bottom: 10px;
+			}
+
+			.herb-card p {
+				color: #666666;
+				line-height: 1.6;
+				font-size: 1em;
+				/* 调整段落字体大小 */
+			}
+
+			.highlight {
+				background-color: rgba(255, 255, 0, 0.5);
+				/* 使用半透明的黄色背景 */
+				color: #333333;
+				/* 确保文本颜色与背景对比度高 */
+				/* 或者使用文本阴影而不是背景色 */
+				text-shadow: 0px 0px 5px #000000;
+				/* 黑色文本阴影 */
+			}
+
+			#back-to-top {
+				display: block;
+				position: fixed;
+				bottom: 10px;
+				right: 25px;
+				z-index: 99;
+				border: none;
+				outline: none;
+				background-color: #AFDD22;
+				color: white;
+				cursor: pointer;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+				transition: box-shadow 0.3s ease-in-out;
+			}
+
+			#back-to-top:hover {
+				background-color: #789262;
+				box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+			}
+
+			.search-container {
+				text-align: center;
+				margin-top: 40px;
+			}
+
+			#searchInput {
+				padding: 5px;
+				margin-right: 5px;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+				width: 300px;
+				/* 根据需要调整宽度 */
+			}
+
+			#searchButton {
+				padding: 5px 10px;
+				border: none;
+				border-radius: 5px;
+				background-color: #3498db;
+				color: white;
+				cursor: pointer;
+				transition: background-color 0.3s ease;
+			}
+
+			#searchButton:hover {
+				background-color: #2980b9;
+			}
+
+			/* 搜索框获得焦点时的动画 */
+			#searchInput:focus {
+				border-color: #3498db;
+				/* 边框颜色变化 */
+				box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+				/* 添加阴影 */
+			}
+
+			/* 搜索按钮点击动画 */
+			#searchButton:active {
+				transform: scale(0.95);
+				/* 点击时缩小 */
+				transition: transform 0.2s;
+				/* 动画持续时间 */
+			}
+
+			/* 输入时的动态效果 */
+			#searchInput+.loading-animation {
+				display: none;
+				/* 默认不显示 */
+				margin-left: 5px;
+				/* 与输入框间隔 */
+			}
+
+			#searchInput:focus+.loading-animation {
+				display: inline-block;
+				/* 输入框获得焦点时显示 */
+				animation: spin 1s linear infinite;
+				/* 旋转动画 */
+			}
+
+			/* 搜索结果动态显示 */
+			.search-result {
+				opacity: 0;
+				transition: opacity 0.5s ease-in;
+			}
+
+			.search-result.visible {
+				opacity: 1;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(-20px);
+				}
+
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			h1 {
+				animation: fadeIn 2s ease forwards;
+				text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+			}
+
+			h1:hover {
+				color: #9ACF9F;
+				transform: scale(1.1);
+				transition: color 0.3s ease, transform 0.3s ease;
+			}
+
+			@keyframes fadeInColor {
+				from {
+					color: #9ED900;
+					/* 初始颜色，与原来的颜色相同 */
+				}
+
+				to {
+					color: #0C8918;
+					/* 结束颜色，选择一个不同的颜色以增加动画效果 */
+				}
+			}
+
+			.comfort-animation {
+				animation: fadeInColor 2s ease-in-out infinite alternate;
+				/* 无限交替渐变动画 */
+				transition: transform 0.3s ease;
+				/* 平滑过渡效果 */
+			}
+
+			.comfort-animation:hover {
+				transform: scale(1.05);
+				/* 鼠标悬浮时文本放大 */
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+
+			<h1>矿物类中草药大全</h1>
+			<!-- 添加搜索框 -->
+			<div id="searchForm">
+				<input type="search" id="searchBox" name="q" placeholder="搜索此网页的草药" oninput="highlightSearch()">
+				<button type="submit">搜索</button>
+			</div>
+
+		</header>
+		<div class="herb-container">
+			<!-- 卡片式草药信息 -->
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%9B%84%E9%BB%84/16555574" target="_blank">雄黄</a></h2>
+				<p class="comfort-animation">又称石黄，主要用于清热解毒、杀虫等。</p>
+				<img src="图片/雄黄.jpg" alt="雄黄图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%9B%8C%E9%BB%84/907555" target="_blank">雌黄</a></h2>
+				<p class="comfort-animation">具有解毒、杀虫、燥湿止痒的功效。</p>
+				<img src="图片/雌黄.jpeg" alt="雌黄图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E6%9C%B1%E7%A0%82/16565416" target="_blank">朱砂</a></h2>
+				<p class="comfort-animation">又称丹砂，用于安神镇惊、清热解毒。</p>
+				<img src="图片/朱砂.jpg" alt="朱砂图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A3%81%E7%9F%B3/905962" target="_blank">磁石</a></h2>
+				<p class="comfort-animation">具有平肝息风、镇静安神的作用。</p>
+				<img src="图片/磁石.jpg" alt="磁石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%87%AA%E7%84%B6%E9%93%9C/906881" target="_blank">自然铜</a>
+				</h2>
+				<p class="comfort-animation">用于跌打损伤、瘀血肿痛。</p>
+				<img src="图片/自然铜.webp" alt="自然铜图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%85%E4%B8%B9/20261260" target="_blank">铅丹</a></h2>
+				<p class="comfort-animation">有清热解毒、收敛止血的功效。</p>
+				<img src="图片/铅丹.jpeg" alt="铅丹图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E5%AF%86%E9%99%80%E5%83%A7/20584886" target="_blank">密陀僧</a>
+				</h2>
+				<p class="comfort-animation">用于清热解毒、燥湿止痒。</p>
+				<img src="图片/密陀僧.webp" alt="密陀僧图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%82%89%E7%94%98%E7%9F%B3/16629588" target="_blank">炉甘石</a>
+				</h2>
+				<p class="comfort-animation">具有清热解毒、明目退翳的功效。</p>
+				<img src="图片/炉甘石.webp" alt="炉甘石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247498792&idx=4&sn=2a1a0a2ca16134bbf8c029fe673a5b3e"
+						target="_blank">硫磺</a></h2>
+				<p class="comfort-animation">用于外用消毒、杀虫。</p>
+				<img src="图片/硫磺.jpg" alt="硫磺图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_15585017428052616421?contentid=ydyp_15585017428052616421&query=%E8%B5%AD%E7%9F%B3&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1"
+						target="_blank">赭石</a></h2>
+				<p class="comfort-animation">有平肝息风、清热解毒的作用。</p>
+				<img src="图片/赭石.jpg" alt="赭石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%BE%99%E9%AA%A8/20193558" target="_blank">龙骨</a></h2>
+				<p class="comfort-animation">用于安神定惊、收敛止血。</p>
+				<img src="图片/龙骨.jpg" alt="龙骨图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%BE%99%E9%BD%BF/22506242" target="_blank">龙齿</a></h2>
+				<p class="comfort-animation">具有安神镇惊、清热解毒的功效。</p>
+				<img src="图片/龙齿.jpeg" alt="龙齿图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%90%A5%E7%8F%80/22507563" target="_blank">琥珀</a></h2>
+				<p class="comfort-animation">用于安神、活血化瘀。</p>
+				<img src="图片/琥珀.jpeg" alt="琥珀图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%87%91%E7%B2%BE%E7%9F%B3/4864427" target="_blank">金精石</a>
+				</h2>
+				<p class="comfort-animation">有清热解毒、平肝息风的作用。</p>
+				<img src="图片/金精石.png" alt="金精石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%B6%E7%B2%BE%E7%9F%B3/1905668" target="_blank">银精石</a>
+				</h2>
+				<p class="comfort-animation">用于清热解毒、平肝息风。</p>
+				<img src="图片/银精石.jpg" alt="银精石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%9C%E7%BB%BF/765695" target="_blank">铜绿</a></h2>
+				<p class="comfort-animation">具有清热解毒、燥湿止痒的功效。</p>
+				<img src="图片/铜绿.webp" alt="铜绿图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E7%9F%B3%E8%8B%B1/24232910" target="_blank">紫石英</a>
+				</h2>
+				<p class="comfort-animation">用于镇惊安神、平肝息风。</p>
+				<img src="图片/紫石英.jpeg" alt="紫石英图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.med66.com/new/53a269aa2009/20091127zhangx144034.shtml" target="_blank">白石英</a>
+				</h2>
+				<p class="comfort-animation">有清热、安神、平肝的作用。</p>
+				<img src="图片/白石英.jpg" alt="白石英图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%8A%B1%E8%95%8A%E7%9F%B3/405872" target="_blank">花蕊石</a>
+				</h2>
+				<p class="comfort-animation">用于清热解毒、止血。</p>
+				<img src="图片/花蕊石.jpg" alt="花蕊石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%9D%92%E7%A4%9E%E7%9F%B3/907623" target="_blank">青礞石</a>
+				</h2>
+				<p class="comfort-animation">有清热解毒、平肝息风的功效。</p>
+				<img src="图片/青礞石.webp" alt="青礞石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%98%B3%E8%B5%B7%E7%9F%B3/907416" target="_blank">阳起石</a>
+				</h2>
+				<p class="comfort-animation">用于温阳助火、温中散寒。</p>
+				<img src="图片/阳起石.webp" alt="阳起石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E4%BA%91%E6%AF%8D/4754386" target="_blank">云母</a></h2>
+				<p class="comfort-animation">具有清热解毒、平肝息风的作用。</p>
+				<img src="图片/云母.jpeg" alt="云母图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%9F%B3%E8%86%8F/16169261" target="_blank">石膏</a></h2>
+				<p class="comfort-animation">用于清热泻火、生津止渴。</p>
+				<img src="图片/石膏.jpg" alt="石膏图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E6%BB%91%E7%9F%B3/465268" target="_blank">滑石</a></h2>
+				<p class="comfort-animation">有清热利湿、通淋的作用。</p>
+				<img src="图片/滑石.webp" alt="滑石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A1%BC%E7%A0%82/687227" target="_blank">硼砂</a></h2>
+				<p class="comfort-animation">用于清热解毒、燥湿止痒（注意：硼砂有毒，使用需谨慎）。</p>
+				<img src="图片/硼砂.jpg" alt="硼砂图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%8A%92%E7%A1%9D/393791" target="_blank">芒硝</a></h2>
+				<p class="comfort-animation">具有清热泻火、软坚散结的作用。</p>
+				<img src="图片/芒硝.jpg" alt="芒硝图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A1%87%E7%A0%82/2484019" target="_blank">硇砂</a></h2>
+				<p class="comfort-animation">用于消积化瘀、软坚散结。</p>
+				<img src="图片/硇砂.jpg" alt="硇砂图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A1%BC%E9%85%B8/1132205" target="_blank">硼酸</a></h2>
+				<p class="comfort-animation">有消毒、防腐的作用。</p>
+				<img src="图片/硼酸.jpeg" alt="硼酸图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%81%E8%90%BD/4562105" target="_blank">铁落</a></h2>
+				<p class="comfort-animation">用于清热解毒、止血。</p>
+				<img src="图片/铁落.jpg" alt="铁落图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E6%B5%B7%E6%B5%AE%E7%9F%B3/22506293" target="_blank">海浮石</a>
+				</h2>
+				<p class="comfort-animation">具有清热解毒、软坚散结的功效。</p>
+				<img src="图片/海浮石.jpeg" alt="海浮石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E4%BB%A3%E8%B5%AD%E7%9F%B3/903870" target="_blank">代赭石</a>
+				</h2>
+				<p class="comfort-animation">一种铁矿石，用于清热解毒。</p>
+				<img src="图片/代赭石.jpg" alt="代赭石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%A1%AB%E9%85%B8%E9%93%9D%E9%92%BE/10816997"
+						target="_blank">硫酸铝钾</a></h2>
+				<p class="comfort-animation">用于收敛止血、止泻。</p>
+				<img src="图片/硫酸铝钾.jpeg" alt="硫酸铝钾图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://www.baidu.com/bh/dict/ydyp_16221749366221312637?contentid=ydyp_16221749366221312637&query=%E9%92%9F%E4%B9%B3%E7%9F%B3&sf_ch=ch_search_5713&sf_ref=search&subTab=%E7%94%A8%E8%8D%AF%E8%AF%B4%E6%98%8E&from=dicta&isPageHome=1"
+						target="_blank">钟乳石</a></h2>
+				<p class="comfort-animation">用于治疗阳痿、遗精、虚劳咳嗽等。</p>
+				<img src="图片/钟乳石.jpg" alt="钟乳石图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%A1%80%E4%BD%99%E7%82%AD/668901?fr=ge_ala"
+						target="_blank">血余炭</a></h2>
+				<p class="comfort-animation">具有止血、散瘀的功效。</p>
+				<img src="图片/血余炭.png" alt="血余炭图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://mp.weixin.qq.com/s?__biz=MzU0Mjg5MTQyMA==&mid=2247506122&idx=7&sn=43083e686d9274460d0d46d48800fbaa"
+						target="_blank">砒霜</a></h2>
+				<p class="comfort-animation">具有剧毒，传统上用于杀虫，但现代已极少使用。</p>
+				<img src="图片/砒霜.jpeg" alt="砒霜图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%85%E9%9C%9C/4532659?fr=ge_ala" target="_blank">铅霜</a>
+				</h2>
+				<p class="comfort-animation">具有清热解毒、收敛止血的功效。</p>
+				<img src="图片/铅霜.png" alt="铅霜图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E8%B5%A4%E7%9F%B3%E8%84%82/907043" target="_blank">赤石脂</a>
+				</h2>
+				<p class="comfort-animation">这是一种含有铁、铝、硅等矿物质的赤色粘土，传统上用于止血、收敛、生肌，常用于治疗外伤出血、溃疡不敛等。</p>
+				<img src="图片/赤石脂.jpg" alt="赤石脂图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E9%93%81%E7%B2%89/875130" target="_blank">铁粉</a></h2>
+				<p class="comfort-animation">通常由铁制成，用于中药材，具有消炎、止痛的作用。</p>
+				<img src="图片/铁粉.jpeg" alt="铁粉图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%B4%AB%E8%8D%89%E8%8C%B8/2545534" target="_blank">紫草茸</a>
+				</h2>
+				<p class="comfort-animation">有清热解毒、活血化瘀的作用。</p>
+				<img src="图片/紫草茸.jpeg" alt="紫草茸图片">
+			</div>
+
+			<div class="herb-card">
+				<h2><a href="https://baike.baidu.com/item/%E7%8E%9B%E7%91%99/20177267" target="_blank">玛瑙</a></h2>
+				<p class="comfort-animation">用于安神、活血化瘀。</p>
+				<img src="图片/玛瑙.png" alt="玛瑙图片">
+			</div>
+
+		</div>
+		<button id="back-to-top">回到顶部</button>
+		<script>
+			window.addEventListener("scroll", function() {
+				var backToTopButton = document.getElementById("back-to-top");
+				if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+					backToTopButton.style.display = "block";
+				} else {
+					backToTopButton.style.display = "none";
+				}
+			});
+			document.getElementById("back-to-top").addEventListener("click", function() {
+				document.body.scrollTop = 0;
+				document.documentElement.scrollTop = 0;
+			});
+			document.addEventListener('scroll', function() {
+				var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+				var header = document.querySelector('header');
+
+				// 改变导航栏的透明度
+				header.style.opacity = 1 - scrollTop / 100; // 每滚动100px，透明度减少
+			});
+
+			// 获取所有卡片元素
+			const cards = document.querySelectorAll('.herb-card');
+
+			function highlightSearch() {
+				var input = document.getElementById('searchBox');
+				var filter = input.value.toUpperCase();
+				var cards = document.getElementsByClassName('herb-card');
+
+				for (var i = 0; i < cards.length; i++) {
+					var card = cards[i];
+					var cardTitle = card.getElementsByTagName('h2')[0];
+
+					if (cardTitle.innerText.toUpperCase().indexOf(filter) > -1) {
+						card.style.display = "";
+						// 创建mark元素来包裹搜索词
+						var filterSpan = document.createElement('mark');
+						filterSpan.textContent = filter;
+						var existingText = cardTitle.firstChild;
+						// 替换文本中的搜索词为mark元素
+						cardTitle.innerHTML = cardTitle.innerHTML.replace(filter, filterSpan.outerHTML);
+					} else {
+						card.style.display = "none";
+					}
+				}
+			}
+
+			function searchOnBaidu() {
+				var searchQuery = document.getElementById('searchInput').value;
 				// 检查搜索词是否为空
 				if (searchQuery.trim() === '') {
 					// 可以在这里添加提示信息，例如：
 					alert('请输入搜索内容！');
 					return; // 阻止函数继续执行
 				}
-		// 编码搜索词，确保URL的合法性
-			var encodedQuery = encodeURIComponent(searchQuery);
-			// 构造百度搜索的URL
-			var searchUrl = `https://www.baidu.com/s?wd=${encodedQuery}`;
+				// 编码搜索词，确保URL的合法性
+				var encodedQuery = encodeURIComponent(searchQuery);
+				// 构造百度搜索的URL
+				var searchUrl = `https://www.baidu.com/s?wd=${encodedQuery}`;
 
-			// 打开新标签页或窗口并进行搜索
-			window.open(searchUrl, '_blank');
-		}
-	</script>
-	
-	<div class="search-container">
-    <input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
-    <button id="searchButton" onclick="searchOnBaidu()">百度一下</button>
-	</div>
-	
-	<footer style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
-		&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
-	</footer>
-	
-</body>
+				// 打开新标签页或窗口并进行搜索
+				window.open(searchUrl, '_blank');
+			}
+		</script>
+
+		<div class="search-container">
+			<input type="text" id="searchInput" placeholder="在这查找此网页没有的中草药" />
+			<button id="searchButton" onclick="searchOnBaidu()">百度一下</button>
+		</div>
+
+		<footer
+			style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
+			&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+		</footer>
+
+	</body>
 </html>

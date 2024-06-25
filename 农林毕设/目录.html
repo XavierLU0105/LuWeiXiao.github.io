@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
+		<title>目录</title>
+		<style>
+			.home-button {
+				position: fixed;
+				/* 固定定位 */
+				top: 20px;
+				/* 距离顶部20像素 */
+				left: 20px;
+				/* 距离左侧20像素 */
+				background-color: #5cb85c;
+				/* 按钮背景颜色 */
+				color: white;
+				/* 文字颜色 */
+				padding: 10px 20px;
+				/* 内边距 */
+				text-decoration: none;
+				/* 去除下划线 */
+				border-radius: 5px;
+				/* 边框圆角 */
+				transition: background-color 0.3s;
+				/* 背景颜色变化的过渡效果 */
+			}
+
+			.home-button:hover {
+				background-color: #4cae4c;
+				/* 鼠标悬停时的背景颜色 */
+			}
+
+			body,
+			html {
+				height: 100%;
+				margin: 0;
+				font-family: 'Arial', sans-serif;
+				scroll-behavior: smooth;
+				/* 启用平滑滚动 */
+			}
+
+			body {
+				background: linear-gradient(45deg, #F07860, #A8B878, #A0C8A0, #38E0E0, #00D0D0);
+				background-size: 400% 400%;
+				animation: gradientBackground 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.container {
+				padding: 40px;
+				border-radius: 10px;
+				box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+				width: 100%;
+				max-width: 600px;
+				background-color: rgba(255, 255, 255, 0.3);
+			}
+
+			h1 {
+				color: #333;
+				text-align: center;
+				margin-bottom: 30px;
+				background-color: rgba(255, 255, 255, 0);
+			}
+
+			ul {
+				list-style-type: none;
+				padding: 0;
+			}
+
+			ul li {
+				padding: 15px;
+				margin-bottom: 10px;
+				background-color: rgba(255, 255, 255, 0.1);
+				border-radius: 5px;
+				transition: background-color 0.3s ease, color 0.3s ease;
+			}
+
+			ul li:hover {
+				background-color: #e9e9e9;
+				color: #5cb85c;
+			}
+
+			ul li a {
+				text-decoration: none;
+				color: #333;
+				font-size: 24px;
+				font-weight: bold;
+				transition: color 0.3s ease;
+			}
+
+			ul li a:hover {
+				color: #5cb85c;
+			}
+
+			@keyframes gradientBackground {
+				0% {
+					background-position: 0% 0%;
+				}
+
+				25% {
+					background-position: 25% 0%;
+				}
+
+				50% {
+					background-position: 25% 25%;
+				}
+
+				75% {
+					background-position: 75% 25%;
+				}
+
+				100% {
+					background-position: 75% 0%;
+				}
+			}
+
+			/* 列表项的缩放动画 */
+			@keyframes scaleUp {
+				from {
+					transform: scale(0.9);
+				}
+
+				to {
+					transform: scale(1);
+				}
+			}
+
+			ul li:hover {
+				transform: scale(1.05);
+				/* 轻微放大 */
+				transition: transform 0.3s ease;
+			}
+
+			/* 链接的边框变化 */
+			ul li a {
+				border-bottom: 2px solid transparent;
+				/* 默认无边框 */
+			}
+
+			ul li a:hover {
+				border-bottom: 2px solid #5cb85c;
+				/* 鼠标悬停时出现下边框 */
+			}
+		</style>
+	</head>
+	<body>
+		<a href="中草药网站设计与实现.html" class="home-button">首页</a>
+		<div class="container">
+			<h1>目录</h1>
+			<ul>
+				<li><a href="中草药的分类.html">中草药分类</a></li>
+				<li><a href="中草药药性相克表.html">中草药药性相克表</a></li>
+			</ul>
+		</div>
+
+		<footer
+			style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; text-align: center; padding: 10px; color: #ffffff;">
+			&copy; 2024 陆蔚孝。保留所有权利。版权所有，未经版权所有者明确书面许可，禁止复制或分发本作品。
+		</footer>
+
+	</body>
+</html>

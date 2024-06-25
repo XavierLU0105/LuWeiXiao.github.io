@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="中草药网页标签logo.ico" type="image/x-icon">
+		<title>中草药药性相克表</title>
+		<style>
+			@keyframes hoverColorChange {
+				from {
+					background-color: #4CAF50;
+				}
+
+				to {
+					background-color: #45a049;
+				}
+			}
+
+			@keyframes clickEffect {
+				50% {
+					transform: translateY(2px);
+				}
+			}
+
+			.back-button {
+				display: block;
+				width: 80px;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				background-color: #4CAF50;
+				color: white;
+				text-decoration: none;
+				border-radius: 5px;
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				z-index: 1000;
+				transition: background-color 0.3s ease;
+				animation: hoverColorChange 0.3s ease alternate infinite;
+			}
+
+			.back-button:active {
+				animation: clickEffect 0.1s ease;
+			}
+
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: #f4f4f4;
+			}
+
+			.container {
+				width: 80%;
+				margin: 0 auto;
+				background-color: #fff;
+				padding: 20px;
+				border-radius: 5px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h1 {
+				text-align: center;
+				color: #333;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			th,
+			td {
+				border: 1px solid #ddd;
+				padding: 8px;
+				text-align: left;
+			}
+
+			th {
+				background-color: #f0f0f0;
+			}
+
+			.warning {
+				color: red;
+			}
+
+			.section-title {
+				font-weight: bold;
+				margin-top: 20px;
+			}
+
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: #f4f4f4;
+			}
+
+			.container {
+				width: 80%;
+				margin: 0 auto;
+				background-color: #fff;
+				padding: 20px;
+				border-radius: 5px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h1 {
+				text-align: center;
+				color: #333;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			th,
+			td {
+				border: 1px solid #ddd;
+				padding: 8px;
+				text-align: left;
+			}
+
+			th {
+				background-color: #f0f0f0;
+			}
+
+			.warning {
+				color: red;
+			}
+
+			.section-title {
+				font-weight: bold;
+				margin-top: 20px;
+			}
+		</style>
+	</head>
+	<body>
+
+		<a href="#" class="back-button" onclick="goBack()">返回</a>
+
+		<div class="container">
+			<h1>中草药药性相克表</h1>
+
+			<div class="section-title">十八反</div>
+			<table>
+				<tr>
+					<th>中草药A</th>
+					<th>相克中草药B</th>
+				</tr>
+				<tr>
+					<td>甘草</td>
+					<td>大戟、芫花、甘遂、海藻</td>
+				</tr>
+				<tr>
+					<td>藜芦</td>
+					<td>人参、丹参、沙参、玄参、细辛、芍药</td>
+				</tr>
+				<tr>
+					<td>乌头</td>
+					<td>半夏、瓜蒌、贝母、白及、白蔹</td>
+				</tr>
+				<!-- 添加更多十八反信息 -->
+			</table>
+
+			<div class="section-title">十九畏</div>
+			<table>
+				<tr>
+					<th>中草药A</th>
+					<th>相克中草药B</th>
+				</tr>
+				<tr>
+					<td>硫磺</td>
+					<td>朴硝（芒硝）</td>
+				</tr>
+				<tr>
+					<td>水银</td>
+					<td>砒霜</td>
+				</tr>
+				<tr>
+					<td>狼毒</td>
+					<td>密陀僧</td>
+				</tr>
+				<tr>
+					<td>巴豆</td>
+					<td>牵牛（丑牛）</td>
+				</tr>
+				<tr>
+					<td>丁香</td>
+					<td>郁金</td>
+				</tr>
+				<tr>
+					<td>牙硝</td>
+					<td>三棱</td>
+				</tr>
+				<tr>
+					<td>川乌、草乌</td>
+					<td>犀角</td>
+				</tr>
+				<tr>
+					<td>人参</td>
+					<td>五脂</td>
+				</tr>
+				<tr>
+					<td>官桂</td>
+					<td>石脂</td>
+				</tr>
+				<!-- 添加更多十九畏信息 -->
+			</table>
+
+			<div class="section-title">其他相克</div>
+			<table>
+				<tr>
+					<th>中草药A</th>
+					<th>相克中草药B</th>
+					<th>相克原因</th>
+				</tr>
+				<tr>
+					<td>黄芪</td>
+					<td>萝卜</td>
+					<td>萝卜的“下气”作用可能会阻碍黄芪的补气效果</td>
+				</tr>
+				<tr>
+					<td>黄芪</td>
+					<td>玄参</td>
+					<td>功能相克</td>
+				</tr>
+				<tr>
+					<td>黄芪</td>
+					<td>杏仁</td>
+					<td>可能导致身体不适</td>
+				</tr>
+				<tr>
+					<td>人参</td>
+					<td>萝卜、大蒜</td>
+					<td>这些食物会化解人参的药力</td>
+				</tr>
+				<tr>
+					<td>双黄连</td>
+					<td>大蒜</td>
+					<td>大蒜性热，而双黄连性凉，同食会降低药效</td>
+				</tr>
+				<tr>
+					<td>板蓝根</td>
+					<td>冷饮</td>
+					<td>板蓝根性凉，同食冷饮会导致肠胃不适</td>
+				</tr>
+				<tr>
+					<td>发汗药</td>
+					<td>醋和生冷食物</td>
+					<td>这些食物有收敛作用，会与药效相抵</td>
+				</tr>
+				<tr>
+					<td>皮肤疾患服药</td>
+					<td>鱼虾、鹅肉等</td>
+					<td>这些食物可能引起过敏</td>
+				</tr>
+				<tr>
+					<td>朱砂安神丸</td>
+					<td>碘化钾</td>
+					<td>朱砂含硫化汞，与碘化物反应可能产生有毒的碘化汞</td>
+				</tr>
+				<tr>
+					<td>西柚汁</td>
+					<td>降压药</td>
+					<td>西柚汁可能增加血液中药物的浓度，增加副作用</td>
+				</tr>
+				<tr>
+					<td>含钙、磷、镁的食物</td>
+					<td>某些药物</td>
+					<td>它们可能与药物结合，影响药效</td>
+				</tr>
+				<tr>
+					<td>海味（螺、蚌、蟹、甲鱼等）</td>
+					<td>某些药物</td>
+					<td>可能引起不良反应</td>
+				</tr>
+				<tr>
+					<td>头孢类药物、安眠药、降压药</td>
+					<td>酒精</td>
+					<td>酒精可能增加药物的毒性反应</td>
+				</tr>
+				<tr>
+					<td>人参</td>
+					<td>五脂</td>
+					<td>人参不宜与五脂（可能指五种油脂或脂肪类物质）同服，可能会影响人参的补气效果</td>
+				</tr>
+				<tr>
+					<td>官桂</td>
+					<td>石脂</td>
+					<td>官桂（一种肉桂）不宜与石脂（可能指某些矿物质或石类药材）同服</td>
+				</tr>
+				<tr>
+					<td>茯苓</td>
+					<td>醋</td>
+					<td>茯苓与醋同食可能会影响药效或产生不良反应</td>
+				</tr>
+				<tr>
+					<td>鳖甲</td>
+					<td>苋菜</td>
+					<td>服用含有鳖甲的中药时，应避免与苋菜同食</td>
+				</tr>
+				<tr>
+					<td>泻下剂</td>
+					<td>油腻及不易消化的食物</td>
+					<td>服用泻下剂时不宜食用油腻及不易消化的食物，如大承气汤、麻仁丸等</td>
+				</tr>
+				<tr>
+					<td>驱虫类中药</td>
+					<td>油腻食物</td>
+					<td>驱虫类中药应避免油腻食物，并以空腹服药为宜</td>
+				</tr>
+				<tr>
+					<td>患病服药期间</td>
+					<td>生冷、黏腻等不易消化的食物或刺激性食物如辣椒等</td>
+					<td>患病服药期间应避免生冷、黏腻等不易消化的食物或刺激性食物如辣椒等</td>
+				</tr>
+				<tr>
+					<td>甘草、黄连、桔梗、乌梅</td>
+					<td>猪肉</td>
+					<td>甘草、黄连、桔梗、乌梅忌猪肉</td>
+				</tr>
+				<tr>
+					<td>鸡肉</td>
+					<td>黄鳝</td>
+					<td>鸡肉忌黄鳝</td>
+				</tr>
+				<tr>
+					<td>蜂蜜</td>
+					<td>生葱</td>
+					<td>蜂蜜忌生葱</td>
+				</tr>
+				<tr>
+					<td>天门冬</td>
+					<td>鲤鱼</td>
+					<td>天门冬忌鲤鱼</td>
+				</tr>
+				<tr>
+					<td>荆芥</td>
+					<td>鱼、蟹、河豚、驴肉</td>
+					<td>荆芥忌鱼、蟹、河豚、驴肉</td>
+				</tr>
+				<tr>
+					<td>白术</td>
+					<td>大蒜、桃、李</td>
+					<td>白术忌大蒜、桃、李</td>
+				</tr>
+				<tr>
+					<td>牛肝</td>
+					<td>富含维生素C的食物</td>
+					<td>牛肝与富含维生素C的食物相克，因为牛肝中的铜、铁能使维生素C氧化而失去功能</td>
+				</tr>
+				<tr>
+					<td>牛肝</td>
+					<td>鲇鱼、鳗</td>
+					<td>牛肝与鲇鱼、鳗相克，可能产生不良的生化反应</td>
+				</tr>
+				<tr>
+					<td>头孢菌素类药物</td>
+					<td>海产品</td>
+					<td>服用头孢菌素类药物期间或用药结束后两星期内，应忌食海产品，以免引起过敏反应</td>
+				</tr>
+			</table>
+
+			<p class="warning">注意：在使用中草药时，请务必咨询专业医生或中医师，以确保安全有效。</p>
+		</div>
+		<script>
+			// JavaScript函数用于返回上一个页面
+			function goBack() {
+				window.history.back();
+			}
+		</script>
+	</body>
+</html>

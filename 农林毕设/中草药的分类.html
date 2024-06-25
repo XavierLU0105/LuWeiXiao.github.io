@@ -12,6 +12,28 @@
 		<title>中草药分类</title>
 		<!-- 定义网页的标题，这个标题会显示在浏览器的标签页上。 -->
 		<style>
+			.back-button {
+				position: fixed;
+				top: 10px;
+				/* 距离顶部的距离 */
+				left: 10px;
+				/* 距离左侧的距离 */
+				background-color: #333;
+				/* 按钮背景颜色 */
+				color: white;
+				/* 文字颜色 */
+				padding: 8px 16px;
+				/* 内边距 */
+				text-decoration: none;
+				/* 去除下划线 */
+				border-radius: 4px;
+				/* 边框圆角 */
+				cursor: pointer;
+				/* 鼠标悬停时显示手形图标 */
+				z-index: 1000;
+				/* 确保按钮在页面其他元素之上 */
+			}
+
 			body,
 			html {
 				margin: 0;
@@ -60,6 +82,21 @@
 				background-size: auto;
 				background-position: center center;
 				z-index: -1;
+				/* 确保背景图片在footer之下 */
+			}
+
+			.site-footer {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				text-align: center;
+				padding: 10px 0;
+				font-size: 1em;
+				color: #44CEF6;
+				/* 修改颜色以提高对比度 */
+				z-index: 10;
+				/* 确保footer在背景之上 */
 			}
 
 			.content {
@@ -268,24 +305,10 @@
 					background-position: 0% 50%;
 				}
 			}
-
-			.site-footer {
-				position: absolute;
-				/* 绝对定位，相对于页面底部 */
-				left: 0;
-				bottom: 0;
-				width: 100%;
-				text-align: center;
-				padding: 10px 0;
-				font-size: 0.8em;
-				color: #F47983;
-				/* 文字颜色，根据背景图片颜色调整以确保可读性 */
-				z-index: 10;
-				/* 确保在背景层之上 */
-			}
 		</style>
 	</head>
 	<body>
+		<a href="目录.html" class="back-button">返回</a>
 		<div class="sidebar">
 			<h1 class="unique-style">中草药分类</h1>
 		</div>

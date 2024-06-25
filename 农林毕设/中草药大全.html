@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>中草药大全</title>
+		<style>
+			#backButton {
+				position: fixed;
+				/* 固定定位，不随页面滚动而移动 */
+				top: 20px;
+				/* 距离顶部的距离 */
+				left: 20px;
+				/* 距离左侧的距离 */
+				background-color: #f7f7f7;
+				/* 背景颜色 */
+				color: #333;
+				/* 文字颜色 */
+				padding: 10px 20px;
+				/* 内边距 */
+				border-radius: 5px;
+				/* 边框圆角 */
+				text-decoration: none;
+				/* 去除下划线 */
+				font-size: 16px;
+				/* 字体大小 */
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				/* 轻微的阴影效果 */
+				z-index: 1000;
+				/* 确保按钮始终在页面内容的上方 */
+			}
+
+			body {
+				font-family: 'Microsoft YaHei', Arial, sans-serif;
+				line-height: 1.6;
+				margin: 0;
+				padding: 0;
+				background-color: #f7f7f7;
+			}
+
+			.container {
+				max-width: 1000px;
+				margin: 0 auto;
+				padding: 40px;
+				background-color: #fff;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h1 {
+				color: #333;
+				text-align: center;
+				font-size: 36px;
+				margin-bottom: 20px;
+			}
+
+			h2 {
+				color: #555;
+				font-size: 28px;
+				margin-top: 30px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #ddd;
+			}
+
+			p {
+				color: #666;
+				font-size: 18px;
+				margin-top: 15px;
+				text-align: justify;
+			}
+
+			ul {
+				list-style-type: none;
+				padding: 0;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 15px;
+			}
+
+			li {
+				background-color: #f7f7f7;
+				padding: 10px 20px;
+				border-radius: 5px;
+				transition: background-color 0.3s ease;
+			}
+
+			li:hover {
+				background-color: #e7e7e7;
+			}
+
+			a {
+				color: #0066cc;
+				text-decoration: none;
+				font-size: 20px;
+			}
+
+			a:hover {
+				text-decoration: underline;
+			}
+
+			@media (max-width: 600px) {
+				ul {
+					flex-direction: column;
+				}
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+
+				to {
+					opacity: 1;
+				}
+			}
+
+			@keyframes slideIn {
+				from {
+					transform: translateY(20px);
+					opacity: 0;
+				}
+
+				to {
+					transform: translateY(0);
+					opacity: 1;
+				}
+			}
+
+			.animated {
+				animation-duration: 1s;
+				animation-fill-mode: both;
+			}
+
+			.fade-in {
+				animation-name: fadeIn;
+			}
+
+			.slide-in {
+				animation-name: slideIn;
+			}
+
+			/* 应用动画 */
+			.container {
+				animation: fadeIn 1.5s;
+			}
+
+			h1 {
+				animation: slideIn 1s;
+			}
+
+			ul li {
+				animation: fadeIn 0.5s ease-in-out;
+				animation-delay: calc(var(--delay) * 0.1s);
+			}
+		</style>
+	</head>
+	<body>
+		<a id="backButton" href="目录.html">返回</a>
+		<div class="container animated fade-in">
+			<h1 class="animated slide-in">中草药大全</h1>
+			<h2>中草药列表</h2>
+			<ul>
+				<li style="--delay: 1;">人参（Panax ginseng）</li>
+				<li style="--delay: 2;">当归（Angelica sinensis）</li>
+				<li style="--delay: 3;">黄芪（Astragalus membranaceus）</li>
+				<li style="--delay: 4;">甘草（Glycyrrhiza uralensis）</li>
+				<li style="--delay: 5;">茯苓（Poria cocos）</li>
+				<li style="--delay: 6;">薄荷（Mentha haplocalyx）</li>
+				<li style="--delay: 7;">桑叶（Morus alba）</li>
+				<li style="--delay: 8;">菊花（Chrysanthemum morifolium）</li>
+				<li style="--delay: 9;">金银花（Lonicera japonica）</li>
+				<li style="--delay: 10;">丹参（Salvia miltiorrhiza）</li>
+				<li style="--delay: 11;">银杏叶（Ginkgo biloba）</li>
+				<li style="--delay: 12;">罗汉果（Siraitia grosvenorii）</li>
+				<li style="--delay: 13;">陈皮（Citrus reticulata）</li>
+				<li style="--delay: 14;">川芎（Ligusticum chuanxiong）</li>
+				<li style="--delay: 15;">麦冬（Ophiopogon japonicus）</li>
+				<li style="--delay: 16;">枸杞子（Lycium barbarum）</li>
+				<li style="--delay: 17;">黄连（Coptis chinensis）</li>
+				<li style="--delay: 18;">地黄（Rehmannia glutinosa）</li>
+				<li style="--delay: 19;">何首乌（Polygonum multiflorum）</li>
+				<li style="--delay: 20;">肉桂（Cinnamomum cassia）</li>
+				<li style="--delay: 21;">柴胡（Bupleurum chinense）</li>
+				<li style="--delay: 22;">黄芩（Scutellaria baicalensis）</li>
+				<li style="--delay: 23;">白术（Atractylodes macrocephala）</li>
+				<li style="--delay: 24;">桔梗（Platycodon grandiflorus）</li>
+				<li style="--delay: 25;">紫苏（Perilla frutescens）</li>
+				<li style="--delay: 26;">荆芥（Schizonepeta tenuifolia）</li>
+				<li style="--delay: 27;">薏苡仁（Coix lacryma-jobi）</li>
+				<li style="--delay: 28;">酸枣仁（Ziziphus jujuba var. spinosa）</li>
+				<li style="--delay: 29;">钩藤（Uncaria rhynchophylla）</li>
+				<li style="--delay: 30;">葛根（Pueraria lobata）</li>
+				<li style="--delay: 31;">红花（Carthamus tinctorius）</li>
+				<li style="--delay: 32;">牛蒡子（Arctium lappa）</li>
+				<li style="--delay: 33;">薤白（Allium chinense）</li>
+				<li style="--delay: 34;">香附（Cyperi Rhizoma）</li>
+				<li style="--delay: 35;">龙骨（Fossilia ossis mastodi）</li>
+				<li style="--delay: 36;">龙眼肉（Dimocarpus longan）</li>
+				<li style="--delay: 37;">乌梅（Prunus mume）</li>
+				<li style="--delay: 38;">木瓜（Papaya）</li>
+				<li style="--delay: 39;">沙棘（Hippophae rhamnoides）</li>
+				<li style="--delay: 40;">石斛（Dendrobium nobile）</li>
+				<li style="--delay: 41;">五味子（Schisandra chinensis）</li>
+				<li style="--delay: 42;">肉苁蓉（Cistanche deserticola）</li>
+				<li style="--delay: 43;">贝母（Fritillaria thunbergii）</li>
+				<li style="--delay: 44;">艾叶（Artemisia argyi）</li>
+				<li style="--delay: 45;">蒲公英（Taraxacum officinale）</li>
+				<li style="--delay: 46;">罗汉松（Podocarpus macrophyllus）</li>
+				<li style="--delay: 47;">沉香（Aquilaria sinensis）</li>
+				<li style="--delay: 48;">穿心莲（Andrographis paniculata）</li>
+				<li style="--delay: 49;">马齿苋（Portulaca oleracea）</li>
+				<li style="--delay: 50;">鸡血藤（Spatholobus suberectus）</li>
+				<li style="--delay: 51;">芦荟（Aloe vera）</li>
+				<li style="--delay: 52;">罗汉果（Siraitia grosvenorii）</li>
+				<li style="--delay: 53;">薤白（Allium chinense）</li>
+				<li style="--delay: 54;">蒺藜（Tribulus terrestris）</li>
+				<li style="--delay: 55;">桑寄生（Taxillus chinensis）</li>
+				<li style="--delay: 56;">地锦草（Herba siegesbeckiae）</li>
+				<li style="--delay: 57;">马勃（Puffball）</li>
+				<li style="--delay: 58;">马齿苋（Portulaca oleracea）</li>
+				<li style="--delay: 59;">马钱子（Strychnos nux-vomica）</li>
+				<li style="--delay: 60;">麻黄（Ephedra sinica）</li>
+				<li style="--delay: 61;">麦冬（Ophiopogon japonicus）</li>
+				<li style="--delay: 62;">牡丹皮（Paeonia suffruticosa）</li>
+				<li style="--delay: 63;">木贼（Equisetum arvense）</li>
+				<li style="--delay: 64;">木瓜（Papaya）</li>
+				<li style="--delay: 65;">牛膝（Achyranthes bidentata）</li>
+				<li style="--delay: 66;">牛黄（Calculus bovis）</li>
+				<li style="--delay: 67;">蒲公英（Taraxacum officinale）</li>
+				<li style="--delay: 68;">茜草（Rubia cordifolia）</li>
+				<li style="--delay: 69;">茜草藤（Rubia cordifolia）</li>
+				<li style="--delay: 70;">茜根（Rubia cordifolia）</li>
+				<li style="--delay: 71;">桑白皮（Morus alba）</li>
+				<li style="--delay: 72;">桑葚（Morus alba）</li>
+				<li style="--delay: 73;">桑枝（Morus alba）</li>
+				<li style="--delay: 74;">桑叶（Morus alba）</li>
+				<li style="--delay: 75;">桑椹（Morus alba）</li>
+				<li style="--delay: 76;">芍药（Paeonia lactiflora）</li>
+				<li style="--delay: 77;">蛇床子（Cnidium monnieri）</li>
+				<li style="--delay: 78;">石斛（Dendrobium nobile）</li>
+				<li style="--delay: 79;">石菖蒲（Acorus tatarinowii）</li>
+				<li style="--delay: 80;">石韦（Pyrrosia sheareri）</li>
+				<li style="--delay: 81;">石楠叶（Photinia serratifolia）</li>
+				<li style="--delay: 82;">石蒜（Lycoris radiata）</li>
+				<li style="--delay: 83;">石楠（Photinia serratifolia）</li>
+				<li style="--delay: 84;">石决明（Haliotis diversicolor）</li>
+				<li style="--delay: 85;">石榴皮（Punica granatum）</li>
+				<li style="--delay: 86;">石榴花（Punica granatum）</li>
+				<li style="--delay: 87;">石榴子（Punica granatum）</li>
+				<li style="--delay: 88;">酸枣仁（Ziziphus jujuba var. spinosa）</li>
+				<li style="--delay: 89;">酸橙（Citrus aurantiifolia）</li>
+				<li style="--delay: 90;">酸橙皮（Citrus aurantiifolia）</li>
+				<li style="--delay: 91;">艾叶（Artemisia argyi）</li>
+				<li style="--delay: 92;">荷叶（Nelumbo nucifera）</li>
+				<li style="--delay: 93;">荷叶蒂（Nelumbo nucifera）</li>
+				<li style="--delay: 94;">荷叶边（Nelumbo nucifera）</li>
+				<li style="--delay: 95;">荷梗（Nelumbo nucifera）</li>
+				<li style="--delay: 96;">荷包草（Lysimachia christinae）</li>
+				<li style="--delay: 97;">荷香（Nelumbo nucifera）</li>
+				<li style="--delay: 98;">荷梗（Nelumbo nucifera）</li>
+				<li style="--delay: 99;">荷钱草（Lysimachia christinae）</li>
+				<li style="--delay: 100;">荷包草（Lysimachia christinae）</li>
+				<li style="--delay: 101;">荷莲（Nelumbo nucifera）</li>
+				<li style="--delay: 102;">荷蕚（Nelumbo nucifera）</li>
+				<li style="--delay: 103;">黄芪（Astragalus membranaceus）</li>
+				<li style="--delay: 104;">荷蕊（Nelumbo nucifera）</li>
+				<li style="--delay: 105;">荷心（Nelumbo nucifera）</li>
+				<li style="--delay: 106;">荷须（Nelumbo nucifera）</li>
+				<li style="--delay: 107;">荷蒂（Nelumbo nucifera）</li>
+				<li style="--delay: 108;">荷梗（Nelumbo nucifera）</li>
+				<li style="--delay: 109;">荷盘（Nelumbo nucifera）</li>
+				<li style="--delay: 110;">荷盘草（Lysimachia christinae）</li>
+				<li style="--delay: 111;">荷盘叶（Nelumbo nucifera）</li>
+				<li style="--delay: 112;">荷盘边（Nelumbo nucifera）</li>
+				<li style="--delay: 113;">荷盘蒂（Nelumbo nucifera）</li>
+				<li style="--delay: 114;">荷盘梗（Nelumbo nucifera）</li>
+				<li style="--delay: 115;">荷盘心（Nelumbo nucifera）</li>
+				<li style="--delay: 116;">荷盘须（Nelumbo nucifera）</li>
+				<li style="--delay: 117;">荷盘蕊（Nelumbo nucifera）</li>
+				<li style="--delay: 118;">荷盘香（Nelumbo nucifera）</li>
+				<li style="--delay: 119;">荷盘钱草（Lysimachia christinae）</li>
+				<li style="--delay: 120;">荷盘莲（Nelumbo nucifera）</li>
+			</ul>
+			<h2>关于中草药</h2>
+			<p>中草药是中医药学的重要组成部分，具有悠久的历史和丰富的文化内涵。中草药种类繁多，作用各异，广泛应用于疾病预防和治疗。中草药的使用应根据中医理论，结合个人体质和病情，在专业医生的指导下进行。</p>
+		</div>
+	</body>
+</html>

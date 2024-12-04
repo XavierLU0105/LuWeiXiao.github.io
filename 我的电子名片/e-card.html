@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的电子名片</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* 明亮的白色背景 */
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #ff7e5f, #feb47d); /* 新的鲜艳渐变色 */
+    background-size: 300% 300%;
+    animation: gradientBG 10s ease infinite;
+  }
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .card {
+    background-color: #fff;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  .card .module {
+    margin-bottom: 20px;
+  }
+  .card .module:last-child {
+    margin-bottom: 0;
+  }
+  .card img {
+    width: 120px;
+    height: auto;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+  .card img:hover {
+    transform: scale(1.05);
+  }
+  .card h1 {
+    color: #333;
+    margin: 5px 0;
+    font-size: 24px;
+  }
+  .card p {
+    color: #666;
+    margin: 5px 0;
+    font-size: 18px;
+  }
+  .social-icons {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  .social-module {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    position: relative;
+  }
+  .social-module a {
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .social-module a:hover {
+    color: #0056b3;
+  }
+  .qr-code {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: opacity 0.3s ease;
+    opacity: 0; /* 初始透明度设置为0 */
+    z-index: 10;
+  }
+  .social-module:hover .qr-code {
+    display: block;
+    opacity: 1; /* 鼠标悬停时透明度变为1 */
+  }
+  @media (max-width: 768px) {
+    .card {
+      width: 90%;
+      padding: 15px;
+    }
+    .card img {
+      width: 100px;
+    }
+    .card h1 {
+      font-size: 20px;
+    }
+    .card p {
+      font-size: 14px;
+    }
+    .social-icons .social-module {
+      margin: 5px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="module">
+    <img src="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%88%91%E7%9A%84%E7%94%B5%E5%AD%90%E5%90%8D%E7%89%87/%E5%A4%B4%E5%83%8F.jpg" alt="头像">
+    <h1>LWX</h1>
+    <p>自称：上海武庸</p>
+  </div>
+  <div class="module">
+    <p>邮箱：2976065315@qq.com</p>
+  </div>
+  <div class="module social-icons">
+	  
+    <div class="social-module">
+      <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2976065315" target="_blank">QQ: 2976065315</a>
+      <img src="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%88%91%E7%9A%84%E7%94%B5%E5%AD%90%E5%90%8D%E7%89%87/%E6%88%91%E7%9A%84QQ%E4%BA%8C%E7%BB%B4%E7%A0%81.jpg" alt="QQQ QR Code" class="qr-code">
+    </div>
+	  
+    <div class="social-module">
+      <a href="weixin://添加好友/?username=Xavier-LWX0105" target="_blank">微信: Xavier-LWX0105</a>
+      <img src="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%88%91%E7%9A%84%E7%94%B5%E5%AD%90%E5%90%8D%E7%89%87/%E6%88%91%E7%9A%84%E5%BE%AE%E4%BF%A1%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="微信 QR Code" class="qr-code">
+    </div>
+	  
+	  <div class="social-module">
+      <a href="https://www.kuaishou.com/profile/3xbz75md4axnyvw" target="_blank">快手: Xavier-LWX0105</a>
+    </div>
+	  
+    <div class="social-module">
+      <a href="https://www.douyin.com/user/MS4wLjABAAAAWDMjkmAL1rvzosrkWCqI9ewBnlhiNG7_6TQ652eJ5EI?from_tab_name=main" target="_blank">抖音: XAVIERLU0105</a>
+    </div>
+	  
+	  <div class="social-module">
+      <a href="https://space.bilibili.com/455887431?spm_id_from=333.337.0.0" target="_blank">哔哩哔哩: UID:455887431</a>
+    </div>
+	  
+    <div class="social-module">
+      <a href="https://www.xiaohongshu.com/user/profile/5f3e6780000000000101e9c6?xsec_token=AB7Qdpkv9FPvso9j0mYZ4eDvksPjiuGIxAnAaqxkuDFZU%3D&xsec_source=pc_search" target="_blank">小红书: XAVIERLU0105</a>
+    </div>
+	  
+	  <div class="social-module">
+      <a href="https://www.zhihu.com/people/qi-yuan-53-96?utm_source=qq&utm_medium=social&utm_oi=1303058422574321664" target="_blank">知乎: 上海武庸</a>
+    </div>
+	  
+	  <div class="social-module">
+      <a href="https://weibo.com/7539875620" target="_blank">微博: 上海武庸</a>
+    </div>
+	  
+	  <div class="social-module">
+      <a href="https://www.coolapk.com/u/22918468" target="_blank">酷安: XAVIERKING</a>
+    </div>
+	  
+  </div>
+</div>
+</body>
+</html>

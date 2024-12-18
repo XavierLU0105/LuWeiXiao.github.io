@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%AF%95%E8%AE%BExxh/%E5%9B%BE%E7%89%87/%E5%9B%BE%E6%A0%87logo.ico" type="image/x-icon">
+  <title>水果的分类</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    nav {
+      background-color: #2c7873;
+      width: 200px;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    nav h1 {
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 10px 0;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav ul li {
+      margin-bottom: 10px;
+    }
+
+    nav ul li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+    }
+
+    nav ul li a:hover {
+      background-color: #1e5753;
+      transform: scale(1.05);
+      color: #e7f7ff;
+    }
+
+    /* 为导航栏链接添加点击动画效果 */
+    nav ul li a:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+
+    main {
+      margin-left: 200px;
+      max-width: 800px;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+  .fruit-item {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+  .fruit-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+  .fruit-item h2 {
+      color: #44cef6;
+      margin-top: 0;
+      display: inline-block; /* 让类别标题水平排列 */
+      margin-right: 20px; /* 调整类别标题之间的间距 */
+    }
+
+  .fruit-item ul {
+      list-style-type: none;
+      padding: 0;
+      display: inline-block; /* 让水果列表项与标题在一行显示 */
+    }
+
+  .fruit-item li {
+      background-color: #e7f7ff;
+      border-radius: 3px;
+      padding: 5px 10px;
+      margin: 5px 0;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    /* 为水果列表项添加点击动画效果 */
+  .fruit-item li:active {
+      transform: scale(0.95);
+      background-color: #d3edf5;
+      transition: transform 0.1s ease, background-color 0.1s ease;
+    }
+
+    /* 模态框样式 */
+  .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+  .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+  .modal-content.show {
+      transform: translateY(0);
+    }
+
+  .modal-content.hide {
+      transform: translateY(-100%);
+    }
+
+  .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+  .close:hover,
+  .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+  .modal-description {
+      text-align: justify;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    /* 为关闭按钮添加点击动画效果 */
+  .close:active {
+      transform: scale(0.9);
+      transition: transform 0.1s ease;
+    }
+
+    /* 返回按钮样式 */
+  .back-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: #2c7873;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+  .back-button:hover {
+      background-color: #1e5753;
+      transform: scale(1.05);
+    }
+
+  .back-button:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <h1>水果分类</h1>
+    <ul>
+      <li><a href="#" onclick="showClassification('植物学分类')">按植物学分类</a></li>
+      <li><a href="#" onclick="showClassification('生长习性分类')">按生长习性分类</a></li>
+      <li><a href="#" onclick="showClassification('食用部分分类')">按食用部分分类</a></li>
+      <li><a href="#" onclick="showClassification('含糖量分类')">按含糖量分类</a></li>
+    }
+    </ul>
+  </nav>
+  <main id="水果列表">
+    <!-- 这里将通过 JavaScript 动态插入水果列表 -->
+  </main>
+
+  <!-- 模态框 HTML 结构 -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDescription" class="modal-description"></p>
+    </div>
+  </div>
+
+  <!-- 添加返回按钮 -->
+  <button class="back-button" onclick="goToLink()">返回</button>
+
+  <script>
+    // 水果分类数据
+    const 水果数据 = {
+      植物学分类: {
+        浆果类: ["葡萄", "草莓", "蓝莓", "蔓越莓", "醋栗", "树莓（覆盆子）", "桑葚", "黑加仑", "沙棘", "灯笼果", "人心果", "蛋黄果", "番石榴", "西番莲（百香果）", "神秘果"],
+
+        核果类: ["桃子", "李子", "杏子", "樱桃", "枣", "油桃", "扁桃（巴旦木）", "青梅", "杨梅", "芒果", "荔枝", "龙眼", "西梅", "黄皮", "余甘子", "欧李", "山杏", "沙枣"],
+
+        柑果类: ["椪柑", "温州蜜柑", "南丰蜜桔", "血橙", "冰糖橙", "新奇士橙", "琯溪蜜柚", "沙田柚", "葡萄柚", "春见", "不知火", "沃柑"],
+
+        梨果类: ["苹果", "梨", "山楂"],
+
+        聚合果类: ["树莓", "黑莓", "草莓树果", "茅莓"],
+
+        聚花果类: ["菠萝", "桑葚", "无花果", "菠萝蜜"]
+      },
+      生长习性分类: {
+        热带水果: ["芒果", "火龙果", "香蕉", "榴莲", "山竹"],
+
+        亚热带水果: ["柑橘类（部分品种）", "枇杷", "杨梅", "龙眼（桂圆）", "橄榄"],
+
+        温带水果: ["苹果", "梨", "樱桃", "葡萄（部分品种）", "桃（部分品种）"]
+      },
+      食用部分分类: {
+        果肉类: ["苹果", "香蕉", "橙子", "草莓", "芒果"],
+
+        果皮类: ["金橘", "柚子（部分食用果皮）"],
+
+        种子类: ["板栗", "莲子"]
+      },
+      含糖量分类: {
+        高糖水果: ["荔枝", "桂圆", "甘蔗"],
+
+        中糖水果: ["猕猴桃", "火龙果", "梨（部分品种）"],
+
+        低糖水果: ["草莓", "柚子", "柠檬"]
+      }
+    };
+
+    function showClassification(分类方式) {
+      const 水果列表 = document.getElementById('水果列表');
+      水果列表.innerHTML = "";
+
+      for (const 类别 in 水果数据[分类方式]) {
+        const 类别Div = document.createElement('div');
+        类别Div.className = 'fruit-item';
+        类别Div.innerHTML = `<h2>${类别}</h2>`;
+        const ul = document.createElement('ul');
+        水果数据[分类方式][类别].forEach(水果 => {
+          const li = document.createElement('li');
+          li.textContent = 水果;
+          // 为每个水果名称添加点击事件，用于弹出模态框显示详细信息
+          li.onclick = function () {
+            showModal(水果);
+          };
+          ul.appendChild(li);
+        });
+        类别Div.appendChild(ul);
+        水果列表.appendChild(类别Div);
+      }
+    }
+
+    // 显示模态框的函数
+    function showModal(水果名称) {
+      const modal = document.getElementById('myModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDescription = document.getElementById('modalDescription');
+
+      // 根据水果名称设置模态框的标题和描述信息（这里只是简单示例，实际可根据数据库或 API 获取更详细准确的信息）
+      if (水果名称 === "葡萄") {
+        modalTitle.textContent = "葡萄";
+        modalDescription.textContent = "葡萄是一种常见的浆果类水果，果实呈圆形或椭圆形，颜色多样，有紫、绿、红等，外皮薄且光滑，果肉多汁、酸甜可口，富含葡萄糖、维生素、矿物质等营养成分，既可鲜食，也用于酿酒、制作葡萄干等多种加工品。";
+
+      } else if (水果名称 === "草莓") {
+        modalTitle.textContent = "草莓";
+        modalDescription.textContent = "草莓是一种广为人知的浆果类水果，它外形呈心形或圆锥形，色泽鲜红娇艳，果肉柔软多汁、酸甜适口，表面布满细小的种子，富含维生素C、维生素B族、膳食纤维以及多种矿物质，既可以直接食用，也能用于制作果酱、甜品、果酒等诸多美味。";
+
+      } else if (水果名称 === "蓝莓") {
+        modalTitle.textContent = "蓝莓";
+        modalDescription.textContent = "蓝莓是浆果类水果，果实呈蓝色，圆形或椭圆形，个头较小，被一层白色果粉包裹，果肉细腻，酸甜适度，汁水丰富，含有丰富的花青素、维生素C、维生素K、锰元素等营养成分，具有抗氧化等诸多保健功效，可鲜食，也常用于制作果酱、果干、果汁和烘焙食品等。";
+
+      } else if (水果名称 === "蔓越莓") {
+        modalTitle.textContent = "蔓越莓";
+        modalDescription.textContent = "蔓越莓是一种小巧的浆果，呈圆形，颜色多为鲜艳的红色，表皮光滑且有弹性，果肉酸涩，富含原花青素、维生素C、类黄酮等抗氧化物质，对泌尿系统健康等有诸多益处，通常鲜食较酸，更多是被加工成果汁、果酱、果干，还广泛用于制作烘焙食品和保健品。";
+
+      } else if (水果名称 === "醋栗") {
+        modalTitle.textContent = "醋栗";
+        modalDescription.textContent = "醋栗是浆果类水果，果实近圆形或椭圆形，大小不一，颜色丰富，有绿色、红色、黄色等多种，表皮光滑且有光泽，包裹着多汁的果肉，味道酸甜，含有丰富的维生素C、生物类黄酮等营养成分，可直接食用，也能用于制作果酱、果酒、果冻等加工食品。";
+      } else {
+        // 如果没有特定水果的详细信息，显示一个通用的描述
+        modalTitle.textContent = 水果名称;
+        modalDescription.textContent = "暂无该水果的详细信息。";
+      }
+
+      const modalContent = document.querySelector('.modal-content');
+      modalContent.classList.add('show');
+      modal.style.display = "block";
+
+      // 关闭模态框的事件处理
+      const closeBtn = document.getElementsByClassName("close")[0];
+      closeBtn.onclick = function () {
+        modalContent.classList.remove('show');
+        modalContent.classList.add('hide');
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+
+      // 点击模态框外部关闭模态框
+      window.onclick = function (event) {
+        if (event.target === modal) {
+          modalContent.classList.remove('show');
+          modalContent.classList.add('hide');
+          setTimeout(() => {
+            modal.style.display = "none";
+          }, 300);
+        }
+      }
+    }
+
+    // 跳转到特定链接的函数
+    function goToLink() {
+      window.location.href = "https://www.baidu.com/";
+    }
+  </script>
+</body>
+
+</html>

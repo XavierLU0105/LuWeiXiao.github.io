@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%AF%95%E8%AE%BExxh/%E5%9B%BE%E7%89%87/%E5%9B%BE%E6%A0%87logo.ico" type="image/x-icon">
+  <title>时令水果指南</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #007BFF;
+      padding: 30px 0;
+      animation: fadeInDown 1s ease;
+    }
+
+    h2 {
+      color: #0056b3;
+      margin-top: 40px;
+      animation: fadeInLeft 1s ease;
+    }
+
+    p {
+      text-align: justify;
+      animation: fadeInUp 1s ease;
+    }
+
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      animation: fadeInRight 1s ease;
+    }
+
+    li {
+      margin-bottom: 10px;
+      animation: fadeInUp 1s ease;
+    }
+
+  .season {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+
+  .season:hover {
+      transform: translateY(-5px);
+    }
+
+    /* 返回按钮样式 */
+  .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      animation: fadeInLeft 1s ease;
+    }
+
+  .back-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+  .back-button:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+
+    /* 动画keyframes */
+    @keyframes fadeInDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInRight {
+      0% {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 返回按钮 -->
+  <button class="back-button" onclick="goBack()">返回</button>
+  <h1>时令水果指南</h1>
+  <div class="season">
+    <h2>春季（3 月 - 5 月）</h2>
+    <p>春季是万物复苏的季节，也是许多新鲜水果上市的时节。</p>
+    <ul>
+      <li>草莓：色泽鲜艳，味道酸甜可口，富含维生素 C 和多种抗氧化物质，是春季备受欢迎的水果之一。无论是直接食用，还是制作成各种甜品，都非常美味。</li>
+      <li>樱桃：玲珑剔透的樱桃在春季成熟，它们不仅口感甜美，还含有丰富的铁元素，具有一定的补血功效，同时还富含维生素 A、C 等多种维生素，对皮肤和眼睛健康有益。</li>
+      <li>枇杷：有着止咳润肺功效的枇杷在春季大量上市。其果实柔软多汁，味道清甜，除了直接食用，还可以制成枇杷膏，用于缓解咳嗽等症状。</li>
+    </ul>
+  </div>
+  <div class="season">
+    <h2>夏季（6 月 - 8 月）</h2>
+    <p>夏季阳光充足，各类水果纷纷成熟，带来了丰富多样的选择。</p>
+    <ul>
+      <li>西瓜：堪称夏季消暑解渴的必备水果，其水分含量高，口感清甜多汁。富含维生素 C、维生素 B6 和钾等营养成分，能有效补充人体在炎热天气中流失的水分和电解质。</li>
+      <li>葡萄：品种繁多，有紫葡萄、绿葡萄等，口感酸甜各异。葡萄富含葡萄糖、维生素、矿物质和类黄酮等，具有抗氧化、预防心血管疾病等功效，可直接食用，也可制成葡萄干或葡萄酒。</li>
+      <li>桃子：有毛桃、油桃等多个品种，肉质鲜美多汁，富含多种维生素和膳食纤维，具有补益气血、养阴生津的作用，是夏季水果中的佳品。</li>
+      <li>杨梅：酸甜的杨梅在夏季成熟，其独特的口感让人回味无穷。杨梅含有维生素 C、纤维素、矿物质等营养物质，还具有一定的抗菌消炎功效，可生食，也可加工成果酱、蜜饯等。</li>
+      <li>荔枝：果肉晶莹剔透，味道甜美，香气诱人。荔枝富含丰富的葡萄糖、蔗糖、维生素和蛋白质等营养成分，但因其含糖量较高，食用时需适量。</li>
+      <li>龙眼：与荔枝相似，龙眼口感软糯，味道甘甜，具有滋补气血、安神定志等功效，是一种营养丰富的水果，可直接食用或制成桂圆干。</li>
+    </ul>
+  </div>
+  <div class="season">
+    <h2>秋季（9 月 - 11 月）</h2>
+    <p>秋季气候宜人，是收获的季节，许多水果在这个季节达到了最佳口感。</p>
+    <ul>
+      <li>苹果：秋季是苹果大量上市的季节，苹果富含果胶、纤维素等营养成分，有助于降低胆固醇、促进肠道蠕动。其口感脆甜或粉糯，品种多样，可满足不同人的口味需求。</li>
+      <li>梨：秋季干燥，梨具有清热降火、润肺止咳、生津止渴等功效，因而备受欢迎。梨的果肉多汁，口感清甜，可生食、榨汁或煮成梨汤，对缓解秋燥有很好的效果。</li>
+      <li>柿子：柿子在秋季成熟，其果实橙红鲜艳，口感软糯，富含胡萝卜素、维生素 C 和多种矿物质等营养成分。但需注意，未成熟的柿子含有较多鞣酸，不宜食用。</li>
+      <li>柚子：柚子果肉饱满，酸甜适中，富含维生素 C、类黄酮等营养物质，具有健胃消食、化痰止咳等功效。柚子的果皮还可用于制作柚子茶等饮品，具有独特的风味和保健作用。</li>
+      <li>石榴：石榴籽红如玛瑙，果汁酸甜可口，富含维生素 C、维生素 B、有机酸、糖类、蛋白质、脂肪以及钙、磷、钾等矿物质。石榴具有抗氧化、抗菌消炎等作用，还寓意着多子多福，是秋季受欢迎的水果之一。</li>
+    </ul>
+  </div>
+  <div class="season">
+    <h2>冬季（12 月 - 2 月）</h2>
+    <p>冬季虽然寒冷，但也有一些美味的时令水果可供选择。</p>
+    <ul>
+      <li>柑橘类水果（如橙子、橘子、柑子等）：这类水果在冬季大量上市，富含维生素 C、类黄酮等营养成分，具有增强免疫力、预防感冒等功效。其果实多汁，味道酸甜可口，是冬季补充维生素的优质选择。</li>
+      <li>猕猴桃：冬季的猕猴桃口感酸甜，富含维生素 C、维生素 K、膳食纤维等营养物质，具有抗氧化、促进消化等作用，可生食或制成猕猴桃汁饮用。</li>
+      <li>甘蔗：甘蔗汁多味甜，含有丰富的糖分、水分以及对人体新陈代谢非常有益的各种维生素、脂肪、蛋白质、有机酸、钙、铁等物质。冬季食用甘蔗，既能补充水分和能量，又能清热生津，润燥和中。</li>
+    </ul>
+  </div>
+
+  <script>
+    function goBack() {
+      // 这里需要你替换为实际的返回链接地址
+      window.location.href = "your_return_link";
+    }
+  </script>
+</body>
+
+</html>

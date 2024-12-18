@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://xavierlu0105.github.io/LuWeiXiao.github.io/%E6%AF%95%E8%AE%BExxh/%E5%9B%BE%E7%89%87/%E5%9B%BE%E6%A0%87logo.ico" type="image/x-icon">
+  <title>目录</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ffec61, #9c27b0);
+      background-size: 500% 500%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      width: 90%;
+      max-width: 800px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #0056b3;
+      margin-top: 20px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007BFF;
+      padding: 10px;
+      background-color: #e9f5ff;
+      border-radius: 5px;
+      display: block;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      z-index: 1000;
+      text-decoration: none;
+    }
+
+    .back-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .back-button:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="your_previous_page.html" class="back-button">
+    返回
+  </a>
+  <div class="container">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="fruit-classification.html">水果的分类</a></li>
+      <li><a href="fruit-nutrition-table.html">水果营养表</a></li>
+      <li><a href="fruit-fun-facts.html">水果趣闻</a></li>
+      <li><a href="seasonal-fruit.html">时令水果</a></li>
+    </ul>
+  </div>
+</body>
+
+</html>

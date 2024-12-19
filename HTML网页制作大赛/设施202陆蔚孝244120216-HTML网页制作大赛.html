@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <link rel="icon" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yNCAzMEMzMC42Mjc0IDMwIDM2IDI0LjQ2OTQgMzYgMTcuNjQ3MVY0SDEyVjE3LjY0NzFDMTIgMjQuNDY5NCAxNy4zNzI2IDMwIDI0IDMwWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEyIDIxVjExSDRDNCAxNy42NjY3IDggMjEgMTIgMjFaIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zNiAyMVYxMUg0NEM0NCAxNy42NjY3IDQwIDIxIDM2IDIxWiIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0yNCAzMlYzNiIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xNSA0MkwxOC42OSAzNkgyOS4wNDI1TDMzIDQySDE1WiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=" type="image/x-icon">
+    <title>设施202 陆蔚孝 244120216 HTML网页制作大赛</title>
+    <style>
+
+        .text-effect {
+          transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .text-effect:hover {
+          transform: scale(1.1); /* 鼠标悬停时文字大小放大10% */
+          color: #ff0080; /* 鼠标悬停时文字颜色变为粉色 */
+        }
+
+        /* 数字科技节简介的动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+
+        /* 背景选项弹出层的动画 */
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .background-options {
+            animation: slideDown 0.5s ease forwards;
+        }
+
+        /* 颜色选择器的动画 */
+        #colorPicker {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #colorPicker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 按钮的动画 */
+        .apply-btn {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .apply-btn:hover {
+            background-color: #ff0080; /* 悬停时的背景色 */
+        }
+
+        .apply-btn:active {
+            background-color: #BE002F; /* 按下时的背景色 */
+            transform: scale(0.95);
+        }
+
+        /* 时间轴界面的动画 */
+        @keyframes slideInFromBottom {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #timeline {
+            animation: slideInFromBottom 0.5s ease forwards;
+        }
+
+        /* 列表项的动画 */
+        @keyframes fadeInItem {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #timelineList li {
+            animation: fadeInItem 0.5s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        /* 使用JavaScript为每个列表项设置不同的动画延迟 */
+        var items = document.querySelectorAll('#timelineList li');
+        items.forEach((item, index) => {
+            item.style.setProperty('--delay', `${index * 0.1}s`);
+        });
+
+        /* 关闭按钮的动画 */
+        #timeline button {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        #timeline button:hover {
+            background-color: #ff0080; /* 悬停时的背景色 */
+        }
+
+        #timeline button:active {
+            background-color: #BE002F; /* 按下时的背景色 */
+            transform: scale(0.95);
+        }
+
+        @font-face {
+            font-family: 'MyCustomFont';
+            src: url('path/to/your/font/file.woff2') format('woff2'),
+                 url('path/to/your/font/file.woff') format('woff');
+        }
+
+        @keyframes textAnimation {
+            0% {
+                transform: scale(1);
+                color: #FFB3A7;
+            }
+            50% {
+                transform: scale(1.1);
+                color: #FF0097;
+            }
+            100% {
+                transform: scale(1);
+                color: #BE002F;
+            }
+        }
+
+        h1 {
+            font-family: 'MyCustomFont', Arial, sans-serif;
+            animation: textAnimation 3s infinite alternate;
+        }
+
+        body, html {
+            font-family: Arial, sans-serif;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+        }
+        body {
+            background: linear-gradient(135deg, #ff0080, #00bfff);
+            background-size: 400% 400%;
+            animation: animateBG 25s ease-in-out infinite;
+            transition: background 0.5s ease;
+            background-clip: border-box;
+        }
+
+        @keyframes animateBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            top: 100px;
+            border-radius: 10px;
+            min-height: 400px;
+            overflow: hidden;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        #backgroundOptions {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        .background-selector {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1001;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .background-selector:hover {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+        .background-selector:active {
+            transform: scale(0.9);
+            background-color: #0056b3;
+        }
+
+        #changeableImage {
+            max-width: 50%;
+            height: auto;
+            margin-top: 15px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease;
+        }
+        @keyframes rotateImage {
+            0% {
+                transform: rotateZ(0deg);
+            }
+            100% {
+                transform: rotateZ(360deg);
+            }
+        }
+        #changeableImage:hover {
+            animation: rotateImage 4s linear infinite;
+        }
+
+        #introduction {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: justify;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #introduction h2 {
+            font-family: 'MyCustomFont', Arial, sans-serif;
+            color: #007bff;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        #introduction h2:hover {
+            color: #ff0080;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        #introduction p {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+            transition: background-color 0.3s ease;
+        }
+
+        #introduction p:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .rounded-image {
+            border-radius: 5.7%; /* 使图片的角变得圆滑 */
+        }
+
+        .fade-in-text {
+            animation: fadeIn 5s ease-in-out forwards;
+            opacity: 0; /* 初始不透明度为0，使文字开始时不可见 */
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        #timelineButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #6a5acd; /* 更好看的紫色 */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+        }
+        #timelineButton:hover {
+            background-color: #483d8b; /* 悬停时的深紫色 */
+        }
+        #timelineButton:active {
+            background-color: #312450; /* 按下时的更深的紫色 */
+            transform: scale(0.95);
+        }
+
+        /* 时间轴容器样式 */
+        #timeline {
+            top: 40px;
+            background-color: transparent; /* 透明背景 */
+            border: none; /* 去除边框 */
+            padding: 20px;
+            border-radius: 5px; /* 圆角边框 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 阴影效果 */
+            max-width: 200px; /* 最大宽度 */
+            max-height: 710px; /* 最大垂直高度 */
+            margin: 20px auto; /* 水平居中 */
+        }
+
+        /* 时间轴列表样式 */
+        #timelineList {
+            list-style: none; /* 去除默认列表样式 */
+            padding: 0;
+            display: flex; /* 设置为弹性布局 */
+            flex-direction: column; /* 列表项垂直排列 */
+        }
+
+        /* 时间轴列表项样式 */
+        #timelineList li {
+            border-left: 2px solid #FFC773; /* 左边线 */
+            padding-left: 20px;
+            margin-bottom: 10px;
+            position: relative;
+            text-align: left; /* 左对齐文本 */
+        }
+
+        /* 时间轴列表项前的小图标 */
+        #timelineList li::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #F0C239;
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+            top: 6px;
+        }
+
+        /* 鼠标悬停时的高亮效果 */
+        #timelineList li:hover {
+            background-color: #e9e9e9;
+            cursor: pointer;
+        }
+
+        /* 动画效果 */
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 应用动画效果 */
+        #timelineList li {
+            animation: slideIn 1s ease forwards;
+        }
+
+        #timeline h2 {
+            margin-top: 0px;
+        }
+
+        /* 修改“关闭时间轴”按钮的样式 */
+        #timeline button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: black;
+            background-color: #EAFF56; /* 按钮背景色 */
+            border: none;
+            border-radius: 5px; /* 圆角边框 */
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* 过渡效果 */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+        }
+
+        #timeline button:hover {
+            background-color: #FFF143; /* 悬停时的背景色 */
+        }
+
+        #timeline button:active {
+            background-color: #FFA631; /* 按下时的背景色 */
+            transform: scale(0.95);
+        }
+
+        /* 修改“更改背景”界面的样式 */
+        #backgroundOptions {
+            position: fixed; /* 固定定位 */
+            top: 9px; /* 上移9像素 */
+            right: 995px; /* 右侧距离 */
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            height: 30px; /* 设置高度为30像素 */
+        }
+
+        #introduction-content-1 {
+          text-indent: 2em;
+        }
+
+        #introduction-content-2 {
+          text-indent: 2em;
+        }
+
+        #realtime-clock {
+          position: fixed;
+          top: 3%;
+          left: 81.5%;
+          transform: translate(-50%, -50%);
+          padding: 10px;
+          color: white;
+          z-index: 1001;
+        }
+
+        @keyframes flyIn {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        #introduction p {
+          animation: flyIn 3s ease forwards;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="backgroundSelector" class="background-selector">更换背景</div>
+    <div id="backgroundOptions" class="background-options">
+        <input type="radio" id="gradientBG" name="backgroundType" value="gradient" checked>
+        <label for="gradientBG">动态渐变背景</label>
+        <input type="radio" id="solidColor" name="backgroundType" value="solid">
+        <label for="solidColor">纯色背景: </label>
+        <input type="color" id="colorPicker" value="#ff0080">
+        <input type="radio" id="imageBG" name="backgroundType" value="image">
+        <label for="imageBG">图片背景: </label>
+        <input type="text" id="imageURL" placeholder="图片URL">
+        <button class="apply-btn" onclick="applyBackground()">确定</button>
+    </div>
+    <div class="container">
+        <h1>欢迎来到数字科技节！</h1>
+        <p class="text-effect">这里是设施202班陆蔚孝（学号：244120216）的HTML网页制作大赛作品。</p>
+        <img id="changeableImage" src="https://mmbiz.qpic.cn/sz_mmbiz_jpg/0OWoGbRW1ic8kOx3R3awcxoxWbubquKMuFHjcbjYznqt3cNmGdeJJaeTOqOIjQ4AD7ghKdnZbk1r2biazAfy0UkQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="陆蔚孝图片1" class="rounded-image">
+        <div id="introduction">
+            <h2>数字科技节简介</h2>
+            <div id="introduction-content-1">
+            <p>数字科技节是一种以展示、探讨和推动数字技术及其应用为主题的活动，通常包括展览、会议、研讨会、工作坊等形式。这些活动旨在促进科技创新，加强业界与学术界的交流合作，以及向公众普及最新的数字技术和信息。</p></div>
+            <div id="introduction-content-2">
+            <p>在数字科技节上，参与者可以了解到最前沿的数字技术动态，如人工智能、大数据、云计算、物联网、区块链、虚拟现实和增强现实等。同时，这些活动也为企业提供了一个展示其技术产品和解决方案的平台，帮助它们寻找合作伙伴和投资者。</p></div>
+        </div>
+
+        <!-- 设置提示文字1的绝对定位和固定位置 -->
+        <span class="fade-in-text" id="提示文字1" style='position: absolute; bottom: 293.3px; right: 0px; padding: 5px 10px; color: #9C6680; font-size: 15px;'>*把鼠标放到图片上可以旋转哦</span>
+
+        <!-- 设置提示文字2的绝对定位和固定位置 -->
+        <span class="fade-in-text" id="提示文字2" style='position: absolute; bottom: 199px; right: 420px; padding: 5px 10px; color: #9C6680; font-size: 15px;'>*把鼠标放到标题上会变色哦</span>
+
+        <!-- 设置提示文字3的绝对定位和固定位置 -->
+        <span class="fade-in-text" id="提示文字3" style='position: absolute; bottom: 699.9px; right: 0px; padding: 5px 10px; color: #9C6680; font-size: 15px;'>*把鼠标放到这段字上可以变大哦</span>
+    </div>
+
+    <div id="realtime-clock">
+        现在的时间是：<span id="current-time"></span>
+    </div>
+
+    <div style="position:fixed; bottom:5px; left:10px; font-size:18px; color:#FF7500;">
+        本HTML网页由陆蔚孝Xavier原创 ©
+    </div>
+
+        <button id="timelineButton">时间轴</button>
+
+        <!-- 时间轴界面 -->
+        <div class="container" id="timeline" style="display: none; position: fixed; bottom: 0; right: 10px; background: white; padding: 20px; border: 1px solid black; z-index: 1001;">
+            <h2>时间轴</h2>
+            <ul id="timelineList">
+                <li>2020 ECI国际数字创新节</li>
+                <li>2020三一科技节</li>
+                <li>2021年上海科技节</li>
+                <li>2021年上海科技节“智慧媒体点亮数字之都”系列活动</li>
+                <li>电气与信息工程学院第十七届数字科技节</li>
+                <li>广东东软学院第五届数字科技文化节</li>
+                <li>中国电信科技节</li>
+                <li>电气与信息工程学院第十八届数字科技节</li>
+                <li>西安工业大学数字科技文化节</li>
+                <li>太原学院首届数字科技文化节</li>
+                <li>2024年上海科技节</li>
+                <li>2024年世界电信和信息社会日</li>
+                <li>2024年数字科技前沿应用趋势</li>
+            </ul>
+            <button onclick="document.getElementById('timeline').style.display='none';">关闭时间轴</button>
+        </div>
+
+        <script>
+            document.getElementById('timelineButton').onclick = function() {
+                var timeline = document.getElementById('timeline');
+                if (timeline.style.display === 'none') {
+                    timeline.style.display = 'block';
+                } else {
+                    timeline.style.display = 'none';
+                }
+            };
+        </script>
+
+    <script>
+
+        function updateClock() {
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth() + 1;
+          var date = now.getDate();
+          var hours = now.getHours().toString().padStart(2, '0');
+          var minutes = now.getMinutes().toString().padStart(2, '0');
+          var seconds = now.getSeconds().toString().padStart(2, '0');
+          var timeStr = year + '年' + month + '月' + date + '日 ' + hours + ':' + minutes + ':' + seconds;
+          document.getElementById('current-time').innerText = timeStr;
+        }
+
+        // 每秒更新一次时间
+        setInterval(updateClock, 1000);
+
+
+        // 获取图片元素的DOM引用
+        var image = document.getElementById('changeableImage');
+
+        // 定义鼠标悬停时和离开时图片的URL
+        var originalSrc = image.src; // 原始图片的URL
+        var newSrc = 'https://mmbiz.qpic.cn/sz_mmbiz_jpg/0OWoGbRW1ic8kOx3R3awcxoxWbubquKMuCWZVwKJRiareYnkicPNp8CuEXh6kvfYyJr7MOzHnfR0UD90hhrk6TXKQ/640?wx_fmt=jpeg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1'; // 鼠标悬停时图片的URL，请替换为实际的图片URL
+
+        // 鼠标悬停事件处理函数
+        function mouseOverHandler() {
+            image.src = newSrc; // 鼠标悬停时更换图片的来源
+        }
+
+        // 鼠标离开事件处理函数
+        function mouseOutHandler() {
+            image.src = originalSrc; // 鼠标离开时恢复原始图片的来源
+        }
+
+        // 为图片元素添加事件监听器
+        image.addEventListener('mouseover', mouseOverHandler); // 鼠标悬停时触发的事件
+        image.addEventListener('mouseout', mouseOutHandler); // 鼠标离开时触发的事件
+
+        // 获取背景选择器和背景选项弹出层的DOM元素
+        var backgroundSelector = document.getElementById('backgroundSelector');
+        var backgroundOptions = document.getElementById('backgroundOptions');
+
+        // 显示背景选项弹出层
+        function showBackgroundOptions() {
+            backgroundOptions.style.display = 'block';
+        }
+
+        // 隐藏背景选项弹出层
+        function hideBackgroundOptions() {
+            backgroundOptions.style.display = 'none';
+        }
+
+        // 应用背景设置
+        function applyBackground() {
+            var backgroundType = document.querySelector('input[name="backgroundType"]:checked').value;
+            var colorPicker = document.getElementById('colorPicker');
+            var imageURL = document.getElementById('imageURL').value;
+
+            if (backgroundType === 'solid') {
+                document.body.style.background = colorPicker.value;
+            } else if (backgroundType === 'image') {
+                document.body.style.background = 'url(' + imageURL + ') no-repeat center center fixed';
+                document.body.style.backgroundSize = 'cover';
+            } else {
+                // 如果是渐变背景，我们可以重新启动动画
+                var newBackground = document.createElement('div');
+                newBackground.style.background = 'linear-gradient(135deg, #ff0080, #00bfff)';
+                newBackground.style.backgroundSize = '400% 400%';
+                newBackground.style.animation = 'animateBG 25s ease-in-out infinite';
+                document.body.appendChild(newBackground);
+                setTimeout(function() {
+                    document.body.style.background = newBackground.style.background;
+                    document.body.style.backgroundSize = newBackground.style.backgroundSize;
+                    document.body.style.animation = newBackground.style.animation;
+                    document.body.removeChild(newBackground);
+                }, 0);
+            }
+
+            hideBackgroundOptions();
+        }
+
+        // 为背景选择器按钮添加点击事件监听器
+        backgroundSelector.addEventListener('click', function() {
+            if (backgroundOptions.style.display === 'none') {
+                showBackgroundOptions();
+            } else {
+                hideBackgroundOptions();
+            }
+        });
+
+        // 点击背景外的区域时隐藏弹出层
+        document.addEventListener('click', function(event) {
+            if (event.target !== backgroundSelector && backgroundOptions.style.display === 'block') {
+                hideBackgroundOptions();
+            }
+        });
+
+        // 阻止背景选项弹出层内部点击事件的冒泡
+        backgroundOptions.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        document.getElementById('timelineButton').onclick = function() {
+            var timeline = document.getElementById('timeline');
+            if (timeline.style.display === 'none') {
+                timeline.style.display = 'block';
+                timeline.classList.add('open');
+            } else {
+                timeline.style.display = 'none';
+                timeline.classList.remove('open');
+            }
+        };
+
+    </script>
+</body>
+</html>

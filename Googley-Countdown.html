@@ -43,9 +43,6 @@
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Lunar Calendar Lib -->
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
-
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -219,6 +216,16 @@
                     if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive');
                 }
 
+                // Check LocalStorage for cached Google Token
+                const cachedToken = localStorage.getItem('md_g_token');
+                if (cachedToken) {
+                    const parsedToken = JSON.parse(cachedToken);
+                    if (parsedToken.expiresAt > Date.now()) {
+                        setGAccessToken(parsedToken);
+                        setDriveConnection('connected');
+                    }
+                }
+
                 const savedTheme = localStorage.getItem('md_app_theme') || 'blue';
                 const savedDark = localStorage.getItem('md_dark_mode') || 'system';
                 setAppTheme(savedTheme);
@@ -235,10 +242,12 @@
 
             // Auto Login Effect for Google Drive
             useEffect(() => {
+                // If we already restored a valid token from LS, don't auto-login again
+                if (driveConnection === 'connected') return;
+                
                 if (!driveConfig.clientId) return;
                 
                 const autoLoginDrive = async () => {
-                    // Wait for GIS script
                     let tries = 0;
                     while (!window.google && tries < 10) {
                         await new Promise(r => setTimeout(r, 500));
@@ -246,13 +255,11 @@
                     }
                     if (!window.google) return;
                     
-                    // Try silent login / check status
                     setDriveConnection('connecting');
-                    // We trigger a 'connect' action which basically tries to list files silently
+                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
 
-                // Trigger if we have a client ID (likely previously configured)
                 if (driveConfig.clientId) {
                     autoLoginDrive();
                 }
@@ -277,7 +284,6 @@
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
-                // Set pending status immediately on change if auto sync is on
                 if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
                      setSaveStatus('pending');
                 }
@@ -392,9 +398,17 @@
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
                     const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => {
-                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); setSaveStatus('error'); return; }
+                        if (resp.error) { 
+                            if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); 
+                            setSaveStatus('error');
+                            setDriveConnection('disconnected');
+                            return; 
+                        }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                        setGAccessToken({ token: resp.access_token, expiresAt });
+                        const tokenObj = { token: resp.access_token, expiresAt };
+                        setGAccessToken(tokenObj);
+                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj)); // Cache token
+                        setDriveConnection('connected');
                     }});
                     setTokenClient(client);
                     return client;
@@ -412,12 +426,26 @@
                 if (isSilent) setSaveStatus('syncing');
 
                 if (!isTokenValid) {
-                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); setSaveStatus('idle'); return; }
+                    if (isSilent) { 
+                        console.log("Auto-sync skipped: Token expired."); 
+                        setSaveStatus('idle');
+                        if (action === 'connect') setDriveConnection('disconnected'); // Only reset if explicit connect check failed
+                        return; 
+                    }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
                     client.callback = async (resp) => {
-                        if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); setSaveStatus('error'); return; }
+                        if (resp.error) { 
+                            setSyncStatus({type: 'error', msg: '授权失败'}); 
+                            setIsLoading(false); 
+                            setSaveStatus('error'); 
+                            setDriveConnection('disconnected');
+                            return; 
+                        }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                        setGAccessToken({ token: resp.access_token, expiresAt });
+                        const tokenObj = { token: resp.access_token, expiresAt };
+                        setGAccessToken(tokenObj);
+                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj));
+                        setDriveConnection('connected');
                         await performDriveOp(resp.access_token, action, isSilent);
                     };
                     client.requestAccessToken();
@@ -455,7 +483,6 @@
                     const fileDataInFolder = await fileSearchInFolder.json();
                     if (fileDataInFolder.files && fileDataInFolder.files.length > 0) fileId = fileDataInFolder.files[0].id;
                     else if (action === 'download') {
-                         // ... fallback to root check ...
                          const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
@@ -478,7 +505,6 @@
                             if (isSilent) { setSaveStatus('success'); setTimeout(() => setSaveStatus('idle'), 2000); }
                         } else throw new Error('Upload failed');
                     } else if (action === 'download') {
-                         // ... download logic ...
                          if (!fileId) throw new Error('未找到备份文件');
                          const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
                          if (downRes.ok) { 
@@ -574,7 +600,10 @@
                                             driveConnection === 'connected' ? 'bg-green-50 text-green-700 border-green-200' : 
                                             driveConnection === 'connecting' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
                                             'bg-slate-50 text-slate-500 border-slate-200'
-                                        }`} onClick={() => setModalMode('settings')}>
+                                        }`} onClick={() => {
+                                            if(driveConnection === 'disconnected') handleGoogleDriveAction('connect');
+                                            else setModalMode('settings');
+                                        }}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${
                                                 driveConnection === 'connected' ? 'bg-green-500 animate-pulse' : 
                                                 driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 

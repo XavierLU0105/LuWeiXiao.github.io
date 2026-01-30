@@ -50,7 +50,7 @@
 
     <style>
         :root {
-            /* Material Design 3 Baseline Colors */
+            /* Default MD3 Orange/Coffee Palette */
             --md-sys-color-primary: #8b5000;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #ffdcbe;
@@ -110,10 +110,8 @@
 
         .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        
         .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
         @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -156,7 +154,7 @@
         };
 
         const App = () => {
-            // --- 1. Basic State ---
+            // --- 1. CORE State ---
             const [items, setItems] = useState([]);
             const [modalMode, setModalMode] = useState(null); 
             const [editingItem, setEditingItem] = useState(null);
@@ -178,7 +176,7 @@
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // --- 2. CORE Handlers (Hoisted) ---
+            // --- 2. MD3 Theme Logic (Hoisted) ---
             const handleThemeChange = (color, mode) => {
                 const t = THEMES[color] || THEMES['orange']; 
                 const isDark = mode === 'system' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode === 'dark';
@@ -198,6 +196,39 @@
                 if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
             };
 
+            // --- 3. Memoized Helpers (Hoisted) ---
+            const availableCategories = useMemo(() => {
+                const cats = new Set();
+                items.forEach(i => { if (i.category && i.category.trim() !== '') cats.add(i.category); });
+                return ['All', ...Array.from(cats)];
+            }, [items]);
+
+            const calculateDaysInternal = (item) => {
+                if (item.endDate) {
+                    const start = new Date(item.date); const end = new Date(item.endDate);
+                    start.setHours(0,0,0,0); end.setHours(0,0,0,0);
+                    const diffDays = Math.ceil(Math.abs(end - start) / 86400000);
+                    return { days: diffDays, date: end, isPast: true, isDuration: true };
+                }
+                const now = new Date(); now.setHours(0,0,0,0);
+                if (!item.date) return { days: 0, date: now, isPast: false };
+                const [y, m, d] = item.date.split('-').map(Number);
+                const targetBase = new Date(y, m - 1, d);
+                let target = new Date(targetBase); let isPast = false;
+                if (item.repeatType && item.repeatType !== 'none') {
+                    let next = new Date(targetBase);
+                    if (item.repeatType === 'week') { while(next < now) next.setDate(next.getDate() + 7); }
+                    else if (item.repeatType === 'month') { while(next < now) next.setMonth(next.getMonth() + 1); }
+                    else if (item.repeatType === 'year') { while(next < now) next.setFullYear(next.getFullYear() + 1); }
+                    target = next;
+                } else if (target < now) { isPast = true; }
+                const rawDays = Math.ceil((target - now) / 86400000);
+                return { days: Math.abs(rawDays), date: target, isPast };
+            };
+
+            const shareItemInfo = useMemo(() => editingItem ? calculateDaysInternal(formData) : { days: 0, isPast: false }, [editingItem, formData]);
+
+            // --- 4. Sync Operations (Hoisted) ---
             const performDriveOp = async (accessToken, action, isSilent) => {
                 try {
                     const FOLDER_NAME = 'Googley Countdown Data'; const FILENAME = 'countdown_backup.json';
@@ -255,46 +286,16 @@
                 } catch(e) { setSaveStatus('error'); } finally { setIsLoading(false); }
             };
 
-            // --- 3. Memoized Data (Hoisted) ---
-            const availableCategories = useMemo(() => {
-                const cats = new Set();
-                items.forEach(i => { if (i.category && i.category.trim() !== '') cats.add(i.category); });
-                return ['All', ...Array.from(cats)];
-            }, [items]);
-
-            const calculateDaysInternal = (item) => {
-                if (item.endDate) {
-                    const start = new Date(item.date); const end = new Date(item.endDate);
-                    start.setHours(0,0,0,0); end.setHours(0,0,0,0);
-                    const diffDays = Math.ceil(Math.abs(end - start) / 86400000);
-                    return { days: diffDays, date: end, isPast: true, isDuration: true };
-                }
-                const now = new Date(); now.setHours(0,0,0,0);
-                if (!item.date) return { days: 0, date: now, isPast: false };
-                const [y, m, d] = item.date.split('-').map(Number);
-                const targetBase = new Date(y, m - 1, d);
-                let target = new Date(targetBase); let isPast = false;
-                if (item.repeatType && item.repeatType !== 'none') {
-                    let next = new Date(targetBase);
-                    if (item.repeatType === 'week') { while(next < now) next.setDate(next.getDate() + 7); }
-                    else if (item.repeatType === 'month') { while(next < now) next.setMonth(next.getMonth() + 1); }
-                    else if (item.repeatType === 'year') { while(next < now) next.setFullYear(next.getFullYear() + 1); }
-                    target = next;
-                } else if (target < now) { isPast = true; }
-                const rawDays = Math.ceil((target - now) / 86400000);
-                return { days: Math.abs(rawDays), date: target, isPast };
-            };
-
-            const shareItemInfo = useMemo(() => editingItem ? calculateDaysInternal(formData) : { days: 0, isPast: false }, [editingItem, formData]);
-
-            // --- 4. Main Effects ---
+            // --- 5. Lifecycle Effects ---
             useEffect(() => {
-                const savedItems = localStorage.getItem('md_countdowns'); if (savedItems) setItems(JSON.parse(savedItems));
-                const savedConfig = localStorage.getItem('md_webdav_config'); if (savedConfig) setWebdavConfig(JSON.parse(savedConfig));
-                const savedDrive = localStorage.getItem('md_drive_config'); if (savedDrive) { const parsed = JSON.parse(savedDrive); setDriveConfig(parsed); if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive'); }
-                const cachedToken = localStorage.getItem('md_g_token'); if (cachedToken) { const parsedToken = JSON.parse(cachedToken); if (parsedToken.expiresAt > Date.now()) { setGAccessToken(parsedToken); setDriveConnection('connected'); }}
-                const savedTheme = localStorage.getItem('md_app_theme') || 'orange'; const savedDark = localStorage.getItem('md_dark_mode') || 'system';
-                handleThemeChange(savedTheme, savedDark); 
+                try {
+                    const savedItems = localStorage.getItem('md_countdowns'); if (savedItems) setItems(JSON.parse(savedItems));
+                    const savedConfig = localStorage.getItem('md_webdav_config'); if (savedConfig) setWebdavConfig(JSON.parse(savedConfig));
+                    const savedDrive = localStorage.getItem('md_drive_config'); if (savedDrive) { const parsed = JSON.parse(savedDrive); setDriveConfig(parsed); if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive'); }
+                    const cachedToken = localStorage.getItem('md_g_token'); if (cachedToken) { const parsedToken = JSON.parse(cachedToken); if (parsedToken.expiresAt > Date.now()) { setGAccessToken(parsedToken); setDriveConnection('connected'); }}
+                    const savedTheme = localStorage.getItem('md_app_theme') || 'orange'; const savedDark = localStorage.getItem('md_dark_mode') || 'system';
+                    handleThemeChange(savedTheme, savedDark); 
+                } catch (e) { console.error("LocalStorage parsing error", e); }
                 if (window.plus) setIsAppMode(true);
             }, []);
 
@@ -310,14 +311,13 @@
                 return () => clearTimeout(timer);
             }, [items, driveConfig.autoSync, webdavConfig.autoSync]);
 
-            // --- 5. UI Logic ---
+            // --- 6. UI Interaction ---
             const handleRefresh = () => { if (isLoading) return; if (driveConfig.clientId) handleGoogleDriveAction('download'); else if (webdavConfig.url) handleWebDAV(false); else location.reload(); };
             const handleSave = (e) => { e.preventDefault(); const newItem = { ...formData, id: editingItem ? editingItem.id : Date.now().toString() }; setItems(editingItem ? items.map(i => i.id === newItem.id ? newItem : i) : [...items, newItem]); setModalMode(null); };
             const handleDelete = () => { if (confirm('确定删除?')) { setItems(items.filter(i => i.id !== editingItem.id)); setModalMode(null); } };
             const openAddEdit = (item = null) => { setEditingItem(item); if (item) setFormData(item); else setFormData({ title: '', date: getLocalDateString(), endDate: '', repeatType: 'none', isPinned: false, category: (activeCategory !== 'All') ? activeCategory : '', statusText: '', remarks: '' }); setModalMode('add'); };
             const handleExportLocal = () => { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ items, settings: { appTheme, darkMode } })); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `googley_backup_${Date.now()}.json`); dl.click(); };
-            const handleImportLocal = (ev) => { const reader = new FileReader(); reader.onload = (e) => { const json = JSON.parse(e.target.result); if (json.items) { setItems(json.items); setModalMode(null); } }; reader.readAsText(ev.target.files[0]); };
-
+            
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -340,9 +340,9 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success font-bold text-xs"><MIcon name="check_circle" size={16} />已保存</div>}
-                                    {saveStatus === 'error' && <button onClick={() => handleGoogleDriveAction('connect')} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm"><MIcon name="login" size={16} />登录同步</button>}
+                                    {saveStatus === 'error' && <button onClick={() => handleGoogleDriveAction('connect')} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm active:scale-95 transition-all"><MIcon name="login" size={16} />登录同步</button>}
                                     {saveStatus === 'idle' && driveConnection === 'connected' && (
-                                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-600/30 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] font-bold"><div className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></div>Drive 已连接</div>
+                                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-600/30 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>Drive 已连接</div>
                                     )}
                                 </div>
                                 <button onClick={handleRefresh} className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant ${isLoading ? 'animate-spin' : ''}`}><MIcon name="refresh" /></button>
@@ -362,10 +362,8 @@
                                     return (
                                         <div key={item.id} onClick={() => openAddEdit(item)} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-5 border border-outline/10 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between min-h-[170px]">
                                             <div className="mb-4">
-                                                <div className="flex justify-between items-start">
-                                                    <h3 className="text-lg font-bold text-on-surface truncate pr-6 leading-tight">{item.title}</h3>
-                                                    {item.isPinned && <MIcon name="keep" filled size={20} className="text-primary" />}
-                                                </div>
+                                                {item.category && (<div className="flex items-center gap-2 mb-2"><span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant border border-outline/10">{item.category}</span></div>)}
+                                                <h3 className="text-lg font-bold text-on-surface truncate pr-6 leading-tight">{item.title}</h3>
                                                 <div className="flex items-center gap-1 text-xs text-on-surface-variant opacity-80 mt-1"><MIcon name={isDuration ? 'date_range' : 'event'} size={14} /><span>{getDisplayDateText(item, date)}</span></div>
                                                 {item.remarks && (<p className="text-[10px] text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">{item.remarks}</p>)}
                                             </div>
@@ -391,9 +389,9 @@
                                     {editingItem && (<button onClick={handleShare} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container active:scale-95 transition-all"><MIcon name="ios_share" size={20} /></button>)}
                                     <h2 className="text-2xl font-normal text-on-surface mb-6">{editingItem ? '编辑' : '新建'}</h2>
                                     <form onSubmit={handleSave} className="space-y-4">
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">名称</label><input className="w-full bg-transparent outline-none py-1 text-on-surface font-medium" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required /></div>
-                                        <div className="flex gap-3"><div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">起始日期</label><input type="date" className="w-full bg-transparent outline-none py-1 h-8 text-on-surface" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required /></div></div>
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">备注 (可选)</label><textarea className="w-full bg-transparent outline-none py-1 h-12 text-sm resize-none text-on-surface" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} /></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">名称</label><input className="w-full bg-transparent outline-none py-1 text-on-surface font-medium" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required /></div>
+                                        <div className="flex gap-3"><div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">起始日期</label><input type="date" className="w-full bg-transparent outline-none py-1 h-8 text-on-surface" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required /></div></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">备注 (可选)</label><textarea className="w-full bg-transparent outline-none py-1 h-12 text-sm resize-none text-on-surface" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} /></div>
                                         <div className="flex items-center gap-3"><div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-all ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}><MIcon name="keep" size={18} />置顶</div></div>
                                         <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">{editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium">删除</button>}<button type="button" onClick={()=>setModalMode(null)} className="px-4 text-primary font-medium">取消</button><button type="submit" className="bg-primary text-on-primary px-8 py-2.5 rounded-full shadow-md font-bold active:scale-95 transition-all">保存</button></div>
                                     </form>
@@ -411,50 +409,27 @@
                         </div>
                     )}
 
-                    {/* HIDDEN SQUARE CAPTURE AREA (1:1) */}
+                    {/* SQUARE CAPTURE AREA (1:1) */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '500px', height: '500px', backgroundColor: '#f0f4f9'}}>
                         <div ref={shareRef} className="w-full h-full p-8 flex flex-col items-center justify-center relative overflow-hidden" style={{backgroundColor: '#f0f4f9'}}>
-                             {/* MD3 Decorative Blobs */}
                              <div className="absolute top-[-120px] right-[-120px] w-[350px] h-[350px] bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
                              <div className="absolute bottom-[-120px] left-[-120px] w-[350px] h-[350px] bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
-                             
-                            {/* Final Card - No justify-between to avoid overlap */}
                             <div className="relative z-10 bg-white p-10 rounded-[56px] shadow-sm w-full h-full flex flex-col items-center border border-[#e7e7e7]">
-                                
-                                {/* 1. Title - Top Area */}
                                 <div className="mt-6 mb-8 w-full flex flex-col items-center justify-center h-20">
-                                    <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-tight break-words w-full px-4">
-                                        {formData.title || '倒数日'}
-                                    </h1>
+                                    <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-tight break-words w-full px-4">{formData.title || '倒数日'}</h1>
                                 </div>
-
-                                {/* 2. MD3 Pill for Status */}
                                 <div className="px-6 py-2.5 bg-primary-container text-on-primary-container rounded-full text-sm font-black shadow-sm mb-12">
                                     {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
-
-                                {/* 3. The Number Group */}
                                 <div className="flex items-baseline justify-center mb-12">
-                                     <span className="text-[110px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                                        {shareItemInfo.days}
-                                    </span>
-                                    <span className="text-2xl text-[#444746] font-bold ml-4 -translate-y-4">
-                                        天
-                                    </span>
+                                     <span className="text-[110px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>{shareItemInfo.days}</span>
+                                     <span className="text-2xl text-[#444746] font-bold ml-4 -translate-y-4">天</span>
                                 </div>
-
-                                {/* 4. Bottom Metadata with MD3 Divider */}
                                 <div className="mt-auto w-full flex flex-col items-center mb-4">
                                     <div className="h-[1.5px] w-1/3 bg-[#e0e2e0] mb-6"></div>
-                                    <div className="text-[#444746] text-sm font-bold tracking-[0.15em] opacity-80 uppercase">
-                                        {editingItem ? getDisplayDateText(formData, shareItemInfo.date || new Date()) : ''}
-                                    </div>
+                                    <div className="text-[#444746] text-sm font-bold tracking-[0.15em] opacity-80 uppercase">{editingItem ? getDisplayDateText(formData, shareItemInfo.date || new Date()) : ''}</div>
                                 </div>
-                                
-                                {/* 5. Subtle Footer Branding */}
-                                <div className="text-[9px] text-[#8e918f] font-black uppercase tracking-[0.4em] opacity-30 mt-2">
-                                    Googley Countdown
-                                </div>
+                                <div className="text-[9px] text-[#8e918f] font-black uppercase tracking-[0.4em] opacity-30 mt-2">Googley Countdown</div>
                             </div>
                         </div>
                     </div>

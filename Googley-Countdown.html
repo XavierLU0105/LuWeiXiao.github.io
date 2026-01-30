@@ -130,7 +130,6 @@
             <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
         );
 
-        // Safe Local Date Generator
         const getLocalDateString = () => {
             const now = new Date();
             const year = now.getFullYear();
@@ -157,7 +156,6 @@
             if(metaThemeColor) metaThemeColor.setAttribute("content", isDark ? "#1a1c1e" : "#fdfcff");
         };
 
-        // Native Fetch Adapter for HBuilderX/5+ Apps
         const nativeFetch = (url, options = {}) => {
             return new Promise((resolve, reject) => {
                 if (window.plus && window.plus.net) {
@@ -190,14 +188,17 @@
             const [isSyncing, setIsSyncing] = useState(false);
             const [shareImgUrl, setShareImgUrl] = useState(null);
             const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
+            
+            // Google Auth State
             const [tokenClient, setTokenClient] = useState(null);
+            const [gAccessToken, setGAccessToken] = useState(null); // Access Token object { token, expiresAt }
 
             const isFirstMount = useRef(true);
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // Form Data
-            const [formData, setFormData] = useState({ title: '', date: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
+            // Form Data - Added endDate
+            const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
 
             useEffect(() => {
                 const savedItems = localStorage.getItem('md_countdowns');
@@ -243,7 +244,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced)
+            // Auto Sync Logic (Improved)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 const timer = setTimeout(() => {
@@ -253,17 +254,29 @@
                 return () => clearTimeout(timer);
             }, [items]);
 
-            // --- Calculation (Safe Local Time Logic) ---
+            // --- Calculation (Fixed Logic with End Date) ---
             const calculateDays = (item) => {
-                // Current time at 00:00:00 local
+                // If End Date is set, calculate fixed duration
+                if (item.endDate) {
+                    const start = new Date(item.date);
+                    const end = new Date(item.endDate);
+                    // Use start of day for both
+                    start.setHours(0,0,0,0);
+                    end.setHours(0,0,0,0);
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    // For duration, it's always "Total" days, past tense usually.
+                    return { days: diffDays, date: end, subText: '', isPast: true, isDuration: true };
+                }
+
+                // Normal Countdown Logic
                 const now = new Date(); 
                 now.setHours(0,0,0,0);
                 
                 if (!item.date) return { days: 0, date: now, subText: '', isPast: false };
 
-                // Parse YYYY-MM-DD manually to avoid UTC conversion issues
                 const [y, m, d] = item.date.split('-').map(Number);
-                const targetBase = new Date(y, m - 1, d); // Month is 0-indexed
+                const targetBase = new Date(y, m - 1, d);
                 
                 let target = new Date(targetBase);
                 let subText = null;
@@ -299,6 +312,11 @@
             };
 
             const getDisplayDateText = (item, calculatedDate) => {
+                // If duration mode, show range
+                if (item.endDate) {
+                    return `${item.date.replace(/-/g, '/')} - ${item.endDate.replace(/-/g, '/')}`;
+                }
+
                 const d = calculatedDate;
                 if(item.repeatType==='year') return `每年 ${d.getMonth()+1}月${d.getDate()}日`;
                 if(item.repeatType==='month') return `每月 ${d.getDate()}日`;
@@ -337,6 +355,7 @@
                 else setFormData({ 
                     title: '', 
                     date: getLocalDateString(),
+                    endDate: '', // Reset end date
                     repeatType: 'none', 
                     isPinned: false, 
                     category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '',
@@ -364,11 +383,23 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive Logic
+            // Google Drive Logic (Enhanced for Silent Sync)
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
-                    const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: '' });
+                    const client = google.accounts.oauth2.initTokenClient({
+                        client_id: driveConfig.clientId,
+                        scope: 'https://www.googleapis.com/auth/drive.file',
+                        callback: (resp) => {
+                            if (resp.error) {
+                                console.error(resp);
+                                return;
+                            }
+                            // Store token and expiration (approx 3500s buffer)
+                            const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
+                            setGAccessToken({ token: resp.access_token, expiresAt });
+                        }
+                    });
                     setTokenClient(client);
                     return client;
                 }
@@ -378,13 +409,43 @@
             const handleGoogleDriveAction = async (action, isSilent = false) => {
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
-                if (!client) return;
-                if (!isSilent) { setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'}); } else { setIsSyncing(true); }
-                client.callback = async (resp) => {
-                    if (resp.error) { if(!isSilent) setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); setIsSyncing(false); return; }
-                    await performDriveOp(resp.access_token, action, isSilent);
-                };
-                if (isSilent) { try { client.requestAccessToken({prompt: 'none'}); } catch(e) { setIsSyncing(false); } } else { client.requestAccessToken(); }
+                if (!client && !isSilent) return; 
+
+                // --- Token Management Strategy ---
+                let accessToken = gAccessToken?.token;
+                const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
+
+                if (!isTokenValid) {
+                    if (isSilent) {
+                        // Silent mode: If token invalid, DO NOT prompt user. Just pause sync.
+                        console.log("Auto-sync skipped: Token expired or missing.");
+                        return; 
+                    }
+                    // Manual mode: Prompt user
+                    setIsLoading(true);
+                    setSyncStatus({type: 'info', msg: '正在连接 Google...'});
+                    
+                    // We need to wait for the callback to set the token. 
+                    // To keep it simple in this flow, we override the callback temporarily for this manual action
+                    client.callback = async (resp) => {
+                        if (resp.error) {
+                            setSyncStatus({type: 'error', msg: '授权失败'});
+                            setIsLoading(false);
+                            return;
+                        }
+                        const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
+                        setGAccessToken({ token: resp.access_token, expiresAt });
+                        await performDriveOp(resp.access_token, action, isSilent);
+                    };
+                    client.requestAccessToken();
+                    return;
+                }
+
+                // If token is valid, proceed immediately
+                if (!isSilent) setIsLoading(true);
+                else setIsSyncing(true);
+                
+                await performDriveOp(accessToken, action, isSilent);
             };
 
             const performDriveOp = async (accessToken, action, isSilent) => {
@@ -500,7 +561,7 @@
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
                                 {sortedItems.map((item, index) => {
-                                    const { days, date, subText, isPast } = calculateDays(item);
+                                    const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
                                         <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-transform animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-md">
                                             {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
@@ -512,13 +573,13 @@
                                                 )}
                                                 <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6">{item.title}</h3>
                                                 <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
-                                                    <MIcon name={item.repeatType!=='none'?'update':'event'} size={16} />
+                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-end">
-                                                <span className={`text-xs px-2.5 py-1 rounded-lg font-bold ${isPast ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
-                                                    {item.statusText || (isPast ? '已过去' : '还有')}
+                                                <span className={`text-xs px-2.5 py-1 rounded-lg font-bold ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                    {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
                                                 </span>
                                                 <div className="flex items-baseline text-primary">
                                                     <span className="text-6xl font-medium tracking-tighter leading-none">{days}</span>
@@ -559,11 +620,18 @@
                                         
                                         <div className="flex gap-3">
                                             <div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                                <label className="text-xs text-primary font-medium">日期 (本地时间)</label>
+                                                <label className="text-xs text-primary font-medium">起始日期</label>
                                                 <input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required />
                                             </div>
                                         </div>
 
+                                        {/* End Date Input */}
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
+                                            <label className="text-xs text-primary font-medium">结束日期 (可选 - 计算时长)</label>
+                                            <input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.endDate || ''} onChange={e=>setFormData({...formData, endDate: e.target.value})} />
+                                        </div>
+
+                                        {/* Custom Category Input */}
                                         <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20 relative">
                                             <label className="text-xs text-primary font-medium">分类 (可选)</label>
                                             <input list="cat-suggestions" className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="例如: 追星" />
@@ -572,9 +640,10 @@
                                             </datalist>
                                         </div>
 
+                                        {/* Status Text Input */}
                                         <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
                                             <label className="text-xs text-primary font-medium">状态标签 (可选)</label>
-                                            <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder="例如: 已用, 还有, 坚持了..." />
+                                            <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} />
                                         </div>
 
                                         <div className="flex items-center gap-3 py-2">
@@ -584,13 +653,16 @@
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {['none:无', 'week:周', 'month:月', 'year:年'].map(t => {
-                                                const [val, label] = t.split(':');
-                                                return <div key={val} onClick={()=>setFormData({...formData, repeatType: val})} 
-                                                    className={`py-2 text-center rounded-lg text-xs cursor-pointer border transition-all ${formData.repeatType===val ? 'bg-primary text-on-primary border-primary font-bold' : 'border-outline/20 text-on-surface hover:bg-surface-container-high'}`}>{label}</div>
-                                            })}
-                                        </div>
+                                        {/* Hide Repeat options if End Date is set */}
+                                        {!formData.endDate && (
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {['none:无', 'week:周', 'month:月', 'year:年'].map(t => {
+                                                    const [val, label] = t.split(':');
+                                                    return <div key={val} onClick={()=>setFormData({...formData, repeatType: val})} 
+                                                        className={`py-2 text-center rounded-lg text-xs cursor-pointer border transition-all ${formData.repeatType===val ? 'bg-primary text-on-primary border-primary font-bold' : 'border-outline/20 text-on-surface hover:bg-surface-container-high'}`}>{label}</div>
+                                                })}
+                                            </div>
+                                        )}
 
                                         <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">
                                             {editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium px-2">删除</button>}
@@ -697,8 +769,7 @@
                         </div>
                     )}
 
-                    {/* HIDDEN CAPTURE AREA - Moved outside main modals to prevent overlap */}
-                    {/* Fixed Font Family explicitly to sans-serif to ensure system font fallback works on mobile */}
+                    {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
                             <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
@@ -707,7 +778,7 @@
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
                                 
                                 <div className="text-2xl text-[#0061a4] font-bold mb-2">
-                                    {formData.statusText || (shareItemInfo.isPast ? '已过去' : '还有')}
+                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
                                 
                                 <div className="flex justify-center w-full">
@@ -737,4 +808,3 @@
     </script>
 </body>
 </html>
-

@@ -188,7 +188,10 @@
             const [syncStatus, setSyncStatus] = useState({ type: '', msg: '' });
             const [isLoading, setIsLoading] = useState(false);
             const [isAppMode, setIsAppMode] = useState(false);
-            const [isSyncing, setIsSyncing] = useState(false);
+            
+            // New Sync Status State: 'idle', 'pending', 'syncing', 'success', 'error'
+            const [saveStatus, setSaveStatus] = useState('idle');
+            
             const [shareImgUrl, setShareImgUrl] = useState(null);
             const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
             const [tokenClient, setTokenClient] = useState(null);
@@ -243,11 +246,19 @@
                 applyTheme(color, isDark);
             };
 
+            // Auto Sync Logic (Debounced)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
+                
+                // Set pending status immediately on change if auto sync is on
+                if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
+                     setSaveStatus('pending');
+                }
+
                 const timer = setTimeout(() => {
                     if (driveConfig.autoSync && driveConfig.clientId) handleGoogleDriveAction('upload', true);
                     else if (webdavConfig.autoSync && webdavConfig.url) handleWebDAV(true, true);
+                    else setSaveStatus('idle');
                 }, 2000); 
                 return () => clearTimeout(timer);
             }, [items]);
@@ -361,7 +372,7 @@
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
                     const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => {
-                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); return; }
+                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); setSaveStatus('error'); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
                     }});
@@ -375,12 +386,16 @@
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
                 if (!client && !isSilent) return; 
+                
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
+                
+                if (isSilent) setSaveStatus('syncing');
+
                 if (!isTokenValid) {
-                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); return; }
+                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); setSaveStatus('idle'); return; }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
                     client.callback = async (resp) => {
-                        if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); return; }
+                        if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); setSaveStatus('error'); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
                         await performDriveOp(resp.access_token, action, isSilent);
@@ -388,7 +403,8 @@
                     client.requestAccessToken();
                     return;
                 }
-                if (!isSilent) setIsLoading(true); else setIsSyncing(true);
+                
+                if (!isSilent) setIsLoading(true);
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -425,29 +441,43 @@
                         if (fileId && fileDataInFolder.files && fileDataInFolder.files.length > 0) { uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`; method = 'PATCH'; }
                         else { metadata.parents = [folderId]; const formNew = new FormData(); formNew.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); formNew.append('file', new Blob([fileContent], { type: 'application/json' })); uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart'; method = 'POST'; const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: formNew }); if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed'); return; }
                         const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-                        if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed');
+                        if (upRes.ok) { 
+                            if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'});
+                            if (isSilent) { setSaveStatus('success'); setTimeout(() => setSaveStatus('idle'), 2000); }
+                        } else throw new Error('Upload failed');
                     } else if (action === 'download') {
                         if (!fileId) throw new Error('未找到备份文件');
                         const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
                         if (downRes.ok) { const data = await downRes.json(); if(Array.isArray(data)) setItems(data); setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); } else throw new Error('Download failed');
                     }
-                } catch (e) { if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); } finally { setIsLoading(false); setIsSyncing(false); }
+                } catch (e) { 
+                    if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
+                    if (isSilent) setSaveStatus('error');
+                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); } // isSyncing handled by saveStatus logic in silent mode
             };
 
             // WebDAV Logic
             const handleWebDAV = async (isUpload, isSilent) => {
                 if(!webdavConfig.url) return !isSilent && setSyncStatus({type:'error',msg:'URL为空'});
-                if(isSilent) setIsSyncing(true); else setIsLoading(true);
+                if(isSilent) setSaveStatus('syncing'); else setIsLoading(true);
                 try {
                     let u = webdavConfig.url.endsWith('/') ? webdavConfig.url : webdavConfig.url + '/'; u += webdavConfig.filename;
                     const options = { method: isUpload ? 'PUT' : 'GET', headers: {'Authorization': 'Basic ' + btoa(unescape(encodeURIComponent(webdavConfig.username + ':' + webdavConfig.password)))} };
                     if(isUpload) { options.headers['Content-Type']='application/json'; options.body=JSON.stringify(items); } else u += `?t=${Date.now()}`;
                     const res = await nativeFetch(u, options);
-                    if(res.ok) { if(!isUpload) { const data = await res.json(); if(Array.isArray(data)) setItems(data); } if(!isSilent) setSyncStatus({type:'success',msg:'成功'}); } else throw new Error(res.status);
-                } catch(e) { if(!isSilent) setSyncStatus({type:'error',msg:'失败'}); } finally { if(isSilent) setTimeout(()=>setIsSyncing(false),500); else setIsLoading(false); }
+                    if(res.ok) { 
+                        if(!isUpload) { const data = await res.json(); if(Array.isArray(data)) setItems(data); } 
+                        if(!isSilent) setSyncStatus({type:'success',msg:'成功'});
+                        if(isSilent && isUpload) { setSaveStatus('success'); setTimeout(() => setSaveStatus('idle'), 2000); }
+                    } else throw new Error(res.status);
+                } catch(e) { 
+                    if(!isSilent) setSyncStatus({type:'error',msg:'失败'}); 
+                    if(isSilent) setSaveStatus('error');
+                } finally { 
+                    if(isSilent) { /* managed by saveStatus state */ } else setIsLoading(false); 
+                }
             };
 
-            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -492,8 +522,14 @@
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
-                            <div className="flex gap-2">
-                                {isSyncing && <MIcon name="cloud_sync" className="text-primary animate-spin" size={24} />}
+                            <div className="flex items-center gap-3">
+                                {/* Dynamic Status Indicator */}
+                                <div className={`flex items-center gap-1.5 transition-all duration-300 ${saveStatus === 'idle' ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}>
+                                    {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
+                                    {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
+                                    {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
+                                    {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
+                                </div>
                                 <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
                             </div>
                         </div>

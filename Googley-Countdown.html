@@ -27,6 +27,20 @@
                     },
                     screens: {
                         '3xl': '1800px',
+                    },
+                    animation: {
+                        'gradient-flow': 'gradient-flow 15s ease infinite',
+                        'breathe': 'breathe 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'gradient-flow': {
+                            '0%, 100%': { 'background-position': '0% 50%' },
+                            '50%': { 'background-position': '100% 50%' },
+                        },
+                        'breathe': {
+                            '0%, 100%': { 'box-shadow': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' },
+                            '50%': { 'box-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' },
+                        }
                     }
                 } 
             }
@@ -116,8 +130,19 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background-color: var(--md-sys-color-outline); border-radius: 4px; opacity: 0.2; }
         
-        .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
-        @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* Spring Animations */
+        @keyframes slide-up-fade {
+            0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        @keyframes scale-in-center {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-enter { animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-modal { animation: scale-in-center 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body>
@@ -129,6 +154,37 @@
         const MIcon = ({ name, className = "", filled = false, size = 24 }) => (
             <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
         );
+
+        // Animated Number Component
+        const CountUp = ({ end, duration = 800 }) => {
+            const [count, setCount] = useState(0);
+            
+            useEffect(() => {
+                let startTime;
+                let animationFrame;
+                const startValue = 0; // Always start from 0 for fresh feel
+                
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const progress = Math.min((timestamp - startTime) / duration, 1);
+                    // Ease Out Quart
+                    const ease = 1 - Math.pow(1 - progress, 4);
+                    
+                    setCount(Math.floor(startValue + (end - startValue) * ease));
+                    
+                    if (progress < 1) {
+                        animationFrame = requestAnimationFrame(step);
+                    } else {
+                        setCount(end);
+                    }
+                };
+                
+                animationFrame = requestAnimationFrame(step);
+                return () => cancelAnimationFrame(animationFrame);
+            }, [end]);
+            
+            return <>{count}</>;
+        };
 
         const getLocalDateString = () => {
             const now = new Date();
@@ -216,16 +272,6 @@
                     if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive');
                 }
 
-                // Check LocalStorage for cached Google Token
-                const cachedToken = localStorage.getItem('md_g_token');
-                if (cachedToken) {
-                    const parsedToken = JSON.parse(cachedToken);
-                    if (parsedToken.expiresAt > Date.now()) {
-                        setGAccessToken(parsedToken);
-                        setDriveConnection('connected');
-                    }
-                }
-
                 const savedTheme = localStorage.getItem('md_app_theme') || 'blue';
                 const savedDark = localStorage.getItem('md_dark_mode') || 'system';
                 setAppTheme(savedTheme);
@@ -255,7 +301,6 @@
                     if (!window.google) return;
                     
                     setDriveConnection('connecting');
-                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
 
@@ -279,7 +324,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced & Strict Logic)
+            // Auto Sync Logic (Debounced)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
@@ -383,6 +428,13 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
+            // Auto switch if current category becomes empty
+            useEffect(() => {
+                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
+                    setActiveCategory('All');
+                }
+            }, [availableCategories, activeCategory]);
+
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -392,22 +444,14 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive Logic (Strict Error Handling)
+            // Google Drive
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
                     const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => {
-                        if (resp.error) { 
-                            if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); 
-                            setSaveStatus('error');
-                            setDriveConnection('disconnected');
-                            return; 
-                        }
+                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); setSaveStatus('error'); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                        const tokenObj = { token: resp.access_token, expiresAt };
-                        setGAccessToken(tokenObj);
-                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj)); 
-                        setDriveConnection('connected');
+                        setGAccessToken({ token: resp.access_token, expiresAt });
                     }});
                     setTokenClient(client);
                     return client;
@@ -426,10 +470,9 @@
 
                 if (!isTokenValid) {
                     if (isSilent) { 
-                        // CRITICAL FIX: If silent sync fails auth, SHOW ERROR, don't just idle
-                        console.log("Auto-sync failed: Token expired/missing."); 
-                        setSaveStatus('error'); 
-                        if (action === 'connect') setDriveConnection('disconnected'); 
+                        console.log("Auto-sync skipped: Token expired."); 
+                        setSaveStatus('idle');
+                        if (action === 'connect') setDriveConnection('disconnected');
                         return; 
                     }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
@@ -442,10 +485,7 @@
                             return; 
                         }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                        const tokenObj = { token: resp.access_token, expiresAt };
-                        setGAccessToken(tokenObj);
-                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj));
-                        setDriveConnection('connected');
+                        setGAccessToken({ token: resp.access_token, expiresAt });
                         await performDriveOp(resp.access_token, action, isSilent);
                     };
                     client.requestAccessToken();
@@ -462,9 +502,6 @@
                     const FILENAME = 'countdown_backup.json';
                     let folderId = null;
                     const folderSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                    
-                    if (!folderSearch.ok) throw new Error("Auth/Network Error"); // Catch token invalidation here
-
                     const folderData = await folderSearch.json();
                     if (folderData.files && folderData.files.length > 0) folderId = folderData.files[0].id;
                     else {
@@ -543,7 +580,6 @@
                 }
             };
 
-            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -584,7 +620,7 @@
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
-                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''}`}>
+                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''} ${appTheme !== 'blue' ? 'bg-surface' : ''}`}>
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
@@ -594,17 +630,7 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    
-                                    {/* Updated Error State: Show Unlogged/Error status explicitly */}
-                                    {saveStatus === 'error' && (
-                                        <div className="flex items-center gap-1 text-error cursor-pointer bg-error/10 px-2 py-1 rounded-full hover:bg-error/20 transition-colors" onClick={() => {
-                                            if(driveConfig.clientId && driveConnection === 'disconnected') handleGoogleDriveAction('connect');
-                                            else setModalMode('settings');
-                                        }}>
-                                            <MIcon name="error" className="text-sm" size={16} />
-                                            <span className="text-xs font-bold">{driveConnection === 'disconnected' ? '未登录' : '同步失败'}</span>
-                                        </div>
-                                    )}
+                                    {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
                                     
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
@@ -675,7 +701,7 @@
                                                     {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
                                                 </div>
                                                 <div className="flex items-baseline text-primary">
-                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
+                                                    <span className="text-5xl font-medium tracking-tighter leading-none"><CountUp end={days} /></span>
                                                     <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
                                                 </div>
                                             </div>
@@ -686,7 +712,7 @@
                         )}
                     </main>
 
-                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl">
+                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl animate-breathe">
                         <MIcon name="add" size={28} /> 新建
                     </button>
 
@@ -697,7 +723,7 @@
                             
                             {/* ADD / EDIT */}
                             {modalMode === 'add' && (
-                                <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
+                                <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-modal z-50 relative">
                                     {editingItem && (
                                         <button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">
                                             {isLoading ? <MIcon name="progress_activity" className="animate-spin" size={20} /> : <MIcon name="ios_share" size={20} />}
@@ -767,7 +793,7 @@
 
                             {/* SHARE PREVIEW */}
                             {modalMode === 'share_preview' && (
-                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-enter z-50 flex flex-col items-center">
+                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-modal z-50 flex flex-col items-center">
                                     <h3 className="text-lg font-medium text-on-surface mb-4">保存分享图片</h3>
                                     {shareImgUrl && <img src={shareImgUrl} className="w-full rounded-xl shadow-md mb-6 border border-outline/10" />}
                                     <div className="flex gap-3 w-full">
@@ -779,7 +805,7 @@
 
                             {/* SETTINGS */}
                             {modalMode === 'settings' && (
-                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]">
+                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-modal z-50 overflow-y-auto max-h-[85vh]">
                                     <h2 className="text-xl font-medium mb-6">设置</h2>
                                     
                                     <div className="mb-6">
@@ -864,7 +890,7 @@
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/80"></div>
+                            <div className="absolute inset-0 bg-white/90"></div>
                             <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
                                 <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>

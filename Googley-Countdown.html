@@ -50,7 +50,6 @@
 
     <style>
         :root {
-            /* Default MD3 Orange/Coffee Palette */
             --md-sys-color-primary: #8b5000;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #ffdcbe;
@@ -110,8 +109,10 @@
 
         .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
         .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
         @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -154,7 +155,6 @@
         };
 
         const App = () => {
-            // --- 1. CORE State ---
             const [items, setItems] = useState([]);
             const [modalMode, setModalMode] = useState(null); 
             const [editingItem, setEditingItem] = useState(null);
@@ -167,16 +167,18 @@
             const [driveConnection, setDriveConnection] = useState('disconnected');
             const [shareImgUrl, setShareImgUrl] = useState(null);
             const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
+            const [tokenClient, setTokenClient] = useState(null);
             const [gAccessToken, setGAccessToken] = useState(null);
             const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '', remarks: '' });
             const [isLoading, setIsLoading] = useState(false);
+            const [isAppMode, setIsAppMode] = useState(false);
             const [syncStatus, setSyncStatus] = useState({ type: '', msg: '' });
 
             const isFirstMount = useRef(true);
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // --- 2. MD3 Theme Logic (Hoisted) ---
+            // --- 1. MD3 Theme Helper (Hoisted) ---
             const handleThemeChange = (color, mode) => {
                 const t = THEMES[color] || THEMES['orange']; 
                 const isDark = mode === 'system' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode === 'dark';
@@ -196,7 +198,7 @@
                 if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
             };
 
-            // --- 3. Memoized Helpers (Hoisted) ---
+            // --- 2. Derived States (Hoisted) ---
             const availableCategories = useMemo(() => {
                 const cats = new Set();
                 items.forEach(i => { if (i.category && i.category.trim() !== '') cats.add(i.category); });
@@ -228,7 +230,7 @@
 
             const shareItemInfo = useMemo(() => editingItem ? calculateDaysInternal(formData) : { days: 0, isPast: false }, [editingItem, formData]);
 
-            // --- 4. Sync Operations (Hoisted) ---
+            // --- 3. Sync Handlers (Hoisted) ---
             const performDriveOp = async (accessToken, action, isSilent) => {
                 try {
                     const FOLDER_NAME = 'Googley Countdown Data'; const FILENAME = 'countdown_backup.json';
@@ -286,17 +288,16 @@
                 } catch(e) { setSaveStatus('error'); } finally { setIsLoading(false); }
             };
 
-            // --- 5. Lifecycle Effects ---
+            // --- 4. Main Effects ---
             useEffect(() => {
-                try {
-                    const savedItems = localStorage.getItem('md_countdowns'); if (savedItems) setItems(JSON.parse(savedItems));
-                    const savedConfig = localStorage.getItem('md_webdav_config'); if (savedConfig) setWebdavConfig(JSON.parse(savedConfig));
-                    const savedDrive = localStorage.getItem('md_drive_config'); if (savedDrive) { const parsed = JSON.parse(savedDrive); setDriveConfig(parsed); if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive'); }
-                    const cachedToken = localStorage.getItem('md_g_token'); if (cachedToken) { const parsedToken = JSON.parse(cachedToken); if (parsedToken.expiresAt > Date.now()) { setGAccessToken(parsedToken); setDriveConnection('connected'); }}
-                    const savedTheme = localStorage.getItem('md_app_theme') || 'orange'; const savedDark = localStorage.getItem('md_dark_mode') || 'system';
-                    handleThemeChange(savedTheme, savedDark); 
-                } catch (e) { console.error("LocalStorage parsing error", e); }
+                const savedItems = localStorage.getItem('md_countdowns'); if (savedItems) setItems(JSON.parse(savedItems));
+                const savedConfig = localStorage.getItem('md_webdav_config'); if (savedConfig) setWebdavConfig(JSON.parse(savedConfig));
+                const savedDrive = localStorage.getItem('md_drive_config'); if (savedDrive) { const parsed = JSON.parse(savedDrive); setDriveConfig(parsed); if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive'); }
+                const cachedToken = localStorage.getItem('md_g_token'); if (cachedToken) { const parsedToken = JSON.parse(cachedToken); if (parsedToken.expiresAt > Date.now()) { setGAccessToken(parsedToken); setDriveConnection('connected'); }}
+                const savedTheme = localStorage.getItem('md_app_theme') || 'orange'; const savedDark = localStorage.getItem('md_dark_mode') || 'system';
+                handleThemeChange(savedTheme, savedDark); // Safe now because defined above
                 if (window.plus) setIsAppMode(true);
+                document.addEventListener('plusready', () => setIsAppMode(true));
             }, []);
 
             useEffect(() => {
@@ -311,7 +312,7 @@
                 return () => clearTimeout(timer);
             }, [items, driveConfig.autoSync, webdavConfig.autoSync]);
 
-            // --- 6. UI Interaction ---
+            // --- 5. UI Handlers ---
             const handleRefresh = () => { if (isLoading) return; if (driveConfig.clientId) handleGoogleDriveAction('download'); else if (webdavConfig.url) handleWebDAV(false); else location.reload(); };
             const handleSave = (e) => { e.preventDefault(); const newItem = { ...formData, id: editingItem ? editingItem.id : Date.now().toString() }; setItems(editingItem ? items.map(i => i.id === newItem.id ? newItem : i) : [...items, newItem]); setModalMode(null); };
             const handleDelete = () => { if (confirm('确定删除?')) { setItems(items.filter(i => i.id !== editingItem.id)); setModalMode(null); } };
@@ -331,7 +332,7 @@
             };
 
             return (
-                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${getThemeBackground()}`}>
+                <div className={`min-h-screen pb-24 flex flex-col bg-surface transition-colors duration-300 ${getThemeBackground()}`}>
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
@@ -340,9 +341,9 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success font-bold text-xs"><MIcon name="check_circle" size={16} />已保存</div>}
-                                    {saveStatus === 'error' && <button onClick={() => handleGoogleDriveAction('connect')} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm active:scale-95 transition-all"><MIcon name="login" size={16} />登录同步</button>}
+                                    {saveStatus === 'error' && <button onClick={() => handleGoogleDriveAction('connect')} className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary text-on-primary shadow-sm"><MIcon name="login" size={16} />登录同步</button>}
                                     {saveStatus === 'idle' && driveConnection === 'connected' && (
-                                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-600/30 bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>Drive 已连接</div>
+                                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-600/30 bg-green-500/10 text-green-600 text-[10px] font-bold"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>Drive 已连接</div>
                                     )}
                                 </div>
                                 <button onClick={handleRefresh} className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant ${isLoading ? 'animate-spin' : ''}`}><MIcon name="refresh" /></button>
@@ -368,7 +369,7 @@
                                                 {item.remarks && (<p className="text-[10px] text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">{item.remarks}</p>)}
                                             </div>
                                             <div className="mt-auto flex justify-between items-end border-t border-outline/5 pt-3">
-                                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isPast ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>{item.statusText || (isPast ? '已过去' : '还有')}</span>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isPast ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>{item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}</span>
                                                 <div className="flex items-baseline text-primary"><span className="text-4xl font-bold tracking-tighter leading-none">{days}</span><span className="text-[10px] ml-1 font-bold opacity-60">天</span></div>
                                             </div>
                                         </div>
@@ -383,15 +384,15 @@
                     {/* Modals */}
                     {modalMode && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setModalMode(null)}></div>
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalMode(null)}></div>
                             {modalMode === 'add' && (
                                 <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
                                     {editingItem && (<button onClick={handleShare} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container active:scale-95 transition-all"><MIcon name="ios_share" size={20} /></button>)}
                                     <h2 className="text-2xl font-normal text-on-surface mb-6">{editingItem ? '编辑' : '新建'}</h2>
                                     <form onSubmit={handleSave} className="space-y-4">
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">名称</label><input className="w-full bg-transparent outline-none py-1 text-on-surface font-medium" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required /></div>
-                                        <div className="flex gap-3"><div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">起始日期</label><input type="date" className="w-full bg-transparent outline-none py-1 h-8 text-on-surface" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required /></div></div>
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium uppercase tracking-wider">备注 (可选)</label><textarea className="w-full bg-transparent outline-none py-1 h-12 text-sm resize-none text-on-surface" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} /></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">名称</label><input className="w-full bg-transparent outline-none py-1 text-on-surface font-medium" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required /></div>
+                                        <div className="flex gap-3"><div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">起始日期</label><input type="date" className="w-full bg-transparent outline-none py-1 h-8 text-on-surface" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required /></div></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">备注 (可选)</label><textarea className="w-full bg-transparent outline-none py-1 h-12 text-sm resize-none text-on-surface" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} /></div>
                                         <div className="flex items-center gap-3"><div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-all ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}><MIcon name="keep" size={18} />置顶</div></div>
                                         <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">{editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium">删除</button>}<button type="button" onClick={()=>setModalMode(null)} className="px-4 text-primary font-medium">取消</button><button type="submit" className="bg-primary text-on-primary px-8 py-2.5 rounded-full shadow-md font-bold active:scale-95 transition-all">保存</button></div>
                                     </form>
@@ -401,35 +402,34 @@
                             {modalMode === 'settings' && (
                                 <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]"><h2 className="text-xl font-medium mb-6">设置</h2>
                                     <div className="mb-6"><p className="text-xs font-bold text-primary mb-3">外观主题 (Material You)</p><div className="flex gap-2 justify-center mb-4">{Object.keys(THEMES).map(c => (<div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer ${appTheme===c ? 'border-on-surface scale-125' : 'border-transparent opacity-60'}`} style={{background: THEMES[c].light.primary}}></div>))}</div></div>
-                                    <div className="bg-surface-container-high rounded-xl p-4 space-y-3"><p className="text-[10px] text-primary bg-primary/10 p-2 rounded">填写 Google Client ID 开启云端自动备份同步。</p><input className="w-full bg-surface p-3 rounded-lg text-xs outline-none" placeholder="Client ID" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} /><div className="flex gap-2"><button onClick={()=>handleGoogleDriveAction('upload')} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold active:scale-95 transition-all">登录备份</button><button onClick={()=>handleGoogleDriveAction('download')} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold active:scale-95 transition-all">登录恢复</button></div></div>
-                                    <div><p className="text-xs font-bold text-primary mt-6 mb-3">本地数据管理</p><div className="bg-surface-container-high rounded-xl p-4 flex gap-2"><button onClick={handleExportLocal} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><MIcon name="download" size={16}/> 导出</button><button onClick={()=>fileInputRef.current.click()} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><MIcon name="upload" size={16}/> 导入</button><input type="file" ref={fileInputRef} onChange={handleImportLocal} accept=".json" className="hidden" /></div></div>
-                                    <div className="mt-8 text-center text-[10px] opacity-40">Version 3.6.3 • Build 39</div><button onClick={()=>setModalMode(null)} className="w-full mt-2 text-primary font-medium">关闭</button>
+                                    <div className="bg-surface-container-high rounded-xl p-4 space-y-3"><p className="text-[10px] text-primary bg-primary/10 p-2 rounded">填写 Google Client ID 开启云端同步。</p><input className="w-full bg-surface p-3 rounded-lg text-xs outline-none" placeholder="Client ID" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} /><div className="flex gap-2"><button onClick={()=>handleGoogleDriveAction('upload')} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold">备份</button><button onClick={()=>handleGoogleDriveAction('download')} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold">恢复</button></div></div>
+                                    <div className="mt-8 text-center text-[10px] opacity-40">Version 3.6.2 • Build 38</div><button onClick={()=>setModalMode(null)} className="w-full mt-4 text-primary font-medium">关闭</button>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    {/* SQUARE CAPTURE AREA (1:1) */}
+                    {/* SQUARE CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '500px', height: '500px', backgroundColor: '#f0f4f9'}}>
-                        <div ref={shareRef} className="w-full h-full p-8 flex flex-col items-center justify-center relative overflow-hidden" style={{backgroundColor: '#f0f4f9'}}>
-                             <div className="absolute top-[-120px] right-[-120px] w-[350px] h-[350px] bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
-                             <div className="absolute bottom-[-120px] left-[-120px] w-[350px] h-[350px] bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
-                            <div className="relative z-10 bg-white p-10 rounded-[56px] shadow-sm w-full h-full flex flex-col items-center border border-[#e7e7e7]">
-                                <div className="mt-6 mb-8 w-full flex flex-col items-center justify-center h-20">
-                                    <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-tight break-words w-full px-4">{formData.title || '倒数日'}</h1>
+                        <div ref={shareRef} className="w-full h-full p-8 flex items-center justify-center relative overflow-hidden" style={{backgroundColor: '#f0f4f9'}}>
+                             <div className="absolute top-[-100px] right-[-100px] w-96 h-96 bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
+                             <div className="absolute bottom-[-100px] left-[-100px] w-96 h-96 bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-[80px] opacity-60"></div>
+                            <div className="relative z-10 bg-white p-10 rounded-[56px] shadow-sm w-full h-full flex flex-col items-center justify-center border border-[#e7e7e7]">
+                                <div className="flex-1 flex flex-col items-center justify-center w-full">
+                                    <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-tight break-words w-full px-6 mb-8">{formData.title || '倒数日'}</h1>
+                                    <div className="px-6 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-black shadow-sm mb-2 uppercase tracking-wide">{formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}</div>
                                 </div>
-                                <div className="px-6 py-2.5 bg-primary-container text-on-primary-container rounded-full text-sm font-black shadow-sm mb-12">
-                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
+                                <div className="flex-1 flex items-center justify-center">
+                                    <div className="flex items-baseline justify-center">
+                                         <span className="text-[110px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>{shareItemInfo.days}</span>
+                                         <span className="text-2xl text-[#444746] font-bold ml-3 -translate-y-4">天</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-baseline justify-center mb-12">
-                                     <span className="text-[110px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>{shareItemInfo.days}</span>
-                                     <span className="text-2xl text-[#444746] font-bold ml-4 -translate-y-4">天</span>
+                                <div className="flex-1 flex flex-col items-center justify-end w-full">
+                                    <div className="h-[1px] w-2/3 bg-[#e0e2e0] mb-8"></div>
+                                    <div className="text-[#444746] text-sm font-black tracking-[0.2em] opacity-80 mb-6 uppercase">{editingItem ? getDisplayDateText(formData, shareItemInfo.date || new Date()) : ''}</div>
+                                    <div className="absolute bottom-6 text-[9px] text-[#8e918f] font-black uppercase tracking-[0.4em] opacity-40">Googley Countdown</div>
                                 </div>
-                                <div className="mt-auto w-full flex flex-col items-center mb-4">
-                                    <div className="h-[1.5px] w-1/3 bg-[#e0e2e0] mb-6"></div>
-                                    <div className="text-[#444746] text-sm font-bold tracking-[0.15em] opacity-80 uppercase">{editingItem ? getDisplayDateText(formData, shareItemInfo.date || new Date()) : ''}</div>
-                                </div>
-                                <div className="text-[9px] text-[#8e918f] font-black uppercase tracking-[0.4em] opacity-30 mt-2">Googley Countdown</div>
                             </div>
                         </div>
                     </div>

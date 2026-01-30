@@ -25,7 +25,9 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                         sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
                     },
-                    screens: { '3xl': '1800px' }
+                    screens: {
+                        '3xl': '1800px',
+                    }
                 } 
             }
         }
@@ -167,12 +169,18 @@
             const t = THEMES[colorKey] || THEMES['orange']; 
             const palette = isDark ? t.dark : t.light;
             const root = document.documentElement;
+            
             if (isDark) root.classList.add('dark-theme');
             else root.classList.remove('dark-theme');
+
+            // Map keys to CSS variables
             for (const [key, value] of Object.entries(palette)) {
+                // key: primaryContainer -> --md-sys-color-primary-container
                 const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
                 root.style.setProperty(`--md-sys-color-${kebabKey}`, value);
             }
+            
+            // Set PWA Theme Color
             const metaThemeColor = document.querySelector("meta[name=theme-color]");
             if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
         };
@@ -180,9 +188,6 @@
         // Dynamic Background Class
         const getThemeBackground = () => {
             const isDark = document.documentElement.classList.contains('dark-theme');
-            // Using Tailwind classes that don't depend on complex JS logic for class generation is safer here
-            // But since we are using style tag for colors, we can rely on body background-color
-            // However, user wanted gradient. Let's map themes to specific gradient hexes that match the palette
             const theme = localStorage.getItem('md_app_theme') || 'orange';
             
             if (isDark) {
@@ -311,7 +316,6 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced & Safe)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
@@ -462,7 +466,7 @@
                 if (!isTokenValid) {
                     if (isSilent) { 
                         console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('error');
+                        setSaveStatus('error'); 
                         if (action === 'connect') setDriveConnection('disconnected');
                         return; 
                     }
@@ -495,7 +499,13 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-                    if (action === 'connect') { setDriveConnection('connected'); if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'}); return; }
+                    
+                    if (action === 'connect') {
+                         setDriveConnection('connected');
+                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
+                         return;
+                    }
+
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -505,6 +515,7 @@
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
+
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -534,7 +545,7 @@
                     setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); }
+                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); }
             };
 
             // WebDAV Logic
@@ -609,6 +620,8 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
+                                    
+                                    {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
                                         <button 
                                             onClick={() => {
@@ -617,8 +630,8 @@
                                             }}
                                             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${
                                                 driveConnection === 'disconnected' && driveConfig.clientId 
-                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md'
-                                                : 'bg-error-container text-error hover:bg-error-container/80'
+                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' // Login Button Style
+                                                : 'bg-error-container text-error hover:bg-error-container/80' // Error Style
                                             }`}
                                         >
                                             <MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} />
@@ -627,6 +640,7 @@
                                             </span>
                                         </button>
                                     )}
+                                    
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
                                         <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${
@@ -768,7 +782,7 @@
                                             <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} />
                                         </div>
 
-                                        {/* Remarks Input */}
+                                        {/* Remarks Input - NEW */}
                                         <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
                                             <label className="text-xs text-primary font-medium">备注 (可选)</label>
                                             <textarea className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30 resize-none h-16 text-sm" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} placeholder="例如: 账号、密码、纪念日故事..." />
@@ -900,46 +914,44 @@
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-6 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
-                             {/* Soft Background Accent - Material Blobs */}
+                             {/* Material Blobs */}
                              <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
                              <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
                              
                             {/* Card Container */}
-                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-between border border-[#e7e7e7]">
-                                {/* Top Section */}
-                                <div className="w-full flex flex-col items-center mt-8">
-                                    <h1 className="text-3xl font-bold text-[#1f1f1f] mb-8 text-center leading-snug break-words w-full px-2">
-                                        {formData.title || '倒数日'}
-                                    </h1>
+                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-center border border-[#e7e7e7] gap-8">
+                                
+                                {/* 1. Title */}
+                                <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-snug break-words w-full px-2">
+                                    {formData.title || '倒数日'}
+                                </h1>
 
-                                    {/* Status Pill */}
-                                    <div className="px-5 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-bold mb-8 shadow-sm">
-                                        {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
-                                    </div>
-
-                                    {/* Big Number */}
-                                    <div className="flex items-baseline justify-center">
-                                         <span className="text-[120px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                                            {shareItemInfo.days}
-                                        </span>
-                                        <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-4">
-                                            天
-                                        </span>
-                                    </div>
+                                {/* 2. Status Pill */}
+                                <div className="px-5 py-2 bg-[#c2e7ff] text-[#001d35] rounded-full text-sm font-bold shadow-sm">
+                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
 
-                                {/* Bottom Section */}
-                                <div className="w-full flex flex-col items-center mb-6">
-                                     {/* Date Pill - Subtle Text Only */}
-                                    <div className="border-t border-[#e0e2e0] w-full mb-4"></div>
-                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 mb-8 uppercase">
+                                {/* 3. Big Number with Unit */}
+                                <div className="flex items-baseline justify-center">
+                                     <span className="text-[100px] font-bold text-[#0061a4] leading-none tracking-tighter">
+                                        {shareItemInfo.days}
+                                    </span>
+                                    <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-2">
+                                        天
+                                    </span>
+                                </div>
+
+                                {/* 4. Bottom Date (with separator) */}
+                                <div className="w-full flex flex-col items-center mt-4">
+                                    <div className="border-t border-[#e0e2e0] w-full mb-6"></div>
+                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 uppercase">
                                         {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
                                     </div>
-                                    
-                                    {/* Footer Branding - Subtle */}
-                                    <div className="text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
-                                        Googley Countdown
-                                    </div>
+                                </div>
+                                
+                                {/* 5. Branding Footer */}
+                                <div className="absolute bottom-6 text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
+                                    Googley Countdown
                                 </div>
                             </div>
                         </div>

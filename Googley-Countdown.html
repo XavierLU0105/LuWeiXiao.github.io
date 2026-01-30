@@ -25,9 +25,7 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                         sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
                     },
-                    screens: {
-                        '3xl': '1800px',
-                    }
+                    screens: { '3xl': '1800px' }
                 } 
             }
         }
@@ -169,44 +167,14 @@
             const t = THEMES[colorKey] || THEMES['orange']; 
             const palette = isDark ? t.dark : t.light;
             const root = document.documentElement;
-            
             if (isDark) root.classList.add('dark-theme');
             else root.classList.remove('dark-theme');
-
-            // Map keys to CSS variables
             for (const [key, value] of Object.entries(palette)) {
-                // key: primaryContainer -> --md-sys-color-primary-container
                 const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
                 root.style.setProperty(`--md-sys-color-${kebabKey}`, value);
             }
-            
-            // Set PWA Theme Color
             const metaThemeColor = document.querySelector("meta[name=theme-color]");
             if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
-        };
-
-        // Dynamic Background Class
-        const getThemeBackground = () => {
-            const isDark = document.documentElement.classList.contains('dark-theme');
-            const theme = localStorage.getItem('md_app_theme') || 'orange';
-            
-            if (isDark) {
-                switch (theme) {
-                    case 'orange': return 'bg-gradient-to-br from-[#1e1b16] to-[#332b24]'; 
-                    case 'green': return 'bg-gradient-to-br from-[#1a1c1e] to-[#142318]';
-                    case 'purple': return 'bg-gradient-to-br from-[#1a1c1e] to-[#20182b]';
-                    case 'red': return 'bg-gradient-to-br from-[#1a1c1e] to-[#2b1816]';
-                    default: return 'bg-gradient-to-br from-[#1a1c1e] to-[#121418]';
-                }
-            } else {
-                switch (theme) {
-                    case 'orange': return 'bg-gradient-to-br from-[#fff8f6] to-[#fcece4]'; 
-                    case 'green': return 'bg-gradient-to-br from-[#fdfcff] to-[#e6f4ea]';
-                    case 'purple': return 'bg-gradient-to-br from-[#fffbfe] to-[#f3eefc]';
-                    case 'red': return 'bg-gradient-to-br from-[#fffbfa] to-[#fae8e7]';
-                    default: return 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff]'; 
-                }
-            }
         };
 
         const nativeFetch = (url, options = {}) => {
@@ -288,7 +256,6 @@
                 });
             }, []);
 
-            // Auto Login Effect for Google Drive
             useEffect(() => {
                 if (driveConnection === 'connected') return;
                 if (!driveConfig.clientId) return;
@@ -314,6 +281,28 @@
                 if (mode === 'system') isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 else isDark = (mode === 'dark');
                 applyTheme(color, isDark);
+            };
+
+            const getThemeBackground = () => {
+                const isDark = document.documentElement.classList.contains('dark-theme');
+                const theme = localStorage.getItem('md_app_theme') || 'orange';
+                if (isDark) {
+                    switch (theme) {
+                        case 'orange': return 'bg-gradient-to-br from-[#1e1b16] to-[#332b24]'; 
+                        case 'green': return 'bg-gradient-to-br from-[#1a1c1e] to-[#142318]';
+                        case 'purple': return 'bg-gradient-to-br from-[#1a1c1e] to-[#20182b]';
+                        case 'red': return 'bg-gradient-to-br from-[#1a1c1e] to-[#2b1816]';
+                        default: return 'bg-gradient-to-br from-[#1a1c1e] to-[#121418]';
+                    }
+                } else {
+                    switch (theme) {
+                        case 'orange': return 'bg-gradient-to-br from-[#fff8f6] to-[#fcece4]'; 
+                        case 'green': return 'bg-gradient-to-br from-[#fdfcff] to-[#e6f4ea]';
+                        case 'purple': return 'bg-gradient-to-br from-[#fffbfe] to-[#f3eefc]';
+                        case 'red': return 'bg-gradient-to-br from-[#fffbfa] to-[#fae8e7]';
+                        default: return 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff]'; 
+                    }
+                }
             };
 
             useEffect(() => {
@@ -425,13 +414,6 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
-            // Auto switch if current category becomes empty
-            useEffect(() => {
-                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
-                    setActiveCategory('All');
-                }
-            }, [availableCategories, activeCategory]);
-
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -464,12 +446,7 @@
                 if (!client && !isSilent) return; 
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
                 if (!isTokenValid) {
-                    if (isSilent) { 
-                        console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('error'); 
-                        if (action === 'connect') setDriveConnection('disconnected');
-                        return; 
-                    }
+                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); setSaveStatus('error'); if (action === 'connect') setDriveConnection('disconnected'); return; }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
                     client.callback = async (resp) => {
                         if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); return; }
@@ -499,13 +476,7 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-                    
-                    if (action === 'connect') {
-                         setDriveConnection('connected');
-                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
-                         return;
-                    }
-
+                    if (action === 'connect') { setDriveConnection('connected'); if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'}); return; }
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -515,7 +486,6 @@
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
-
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -545,10 +515,9 @@
                     setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); }
+                } finally { setIsLoading(false); }
             };
 
-            // WebDAV Logic
             const handleWebDAV = async (isUpload, isSilent) => {
                 if(!webdavConfig.url) return !isSilent && setSyncStatus({type:'error',msg:'URL为空'});
                 if(isSilent) setSaveStatus('syncing'); else setIsLoading(true);
@@ -607,6 +576,7 @@
                 event.target.value = '';
             };
 
+            // Calculated value for sharing
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
@@ -615,342 +585,105 @@
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
                             <div className="flex items-center gap-3">
-                                {/* Dynamic Status Indicator / Drive Status */}
                                 <div className={`flex items-center gap-1.5 transition-all duration-300 ${saveStatus !== 'idle' ? 'opacity-100' : ''}`}>
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    
-                                    {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
-                                        <button 
-                                            onClick={() => {
-                                                if(driveConfig.clientId && driveConnection === 'disconnected') handleGoogleDriveAction('connect');
-                                                else setModalMode('settings');
-                                            }}
-                                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${
-                                                driveConnection === 'disconnected' && driveConfig.clientId 
-                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' // Login Button Style
-                                                : 'bg-error-container text-error hover:bg-error-container/80' // Error Style
-                                            }`}
-                                        >
-                                            <MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} />
-                                            <span>
-                                                {driveConnection === 'disconnected' && driveConfig.clientId ? '登录同步' : '同步失败'}
-                                            </span>
-                                        </button>
+                                        <button onClick={() => { if(driveConfig.clientId && driveConnection === 'disconnected') handleGoogleDriveAction('connect'); else setModalMode('settings'); }} className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${driveConnection === 'disconnected' && driveConfig.clientId ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' : 'bg-error-container text-error hover:bg-error-container/80' }`}><MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} /><span>{driveConnection === 'disconnected' && driveConfig.clientId ? '登录同步' : '同步失败'}</span></button>
                                     )}
-                                    
-                                    {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
-                                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${
-                                            driveConnection === 'connected' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800' : 
-                                            driveConnection === 'connecting' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800' : 
-                                            'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                                        }`} onClick={() => {
-                                            if(driveConnection === 'disconnected') handleGoogleDriveAction('connect');
-                                            else setModalMode('settings');
-                                        }}>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${
-                                                driveConnection === 'connected' ? 'bg-green-600 animate-pulse' : 
-                                                driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 
-                                                'bg-slate-400'
-                                            }`}></div>
-                                            <span className="hidden sm:inline">{driveConnection === 'connected' ? 'Drive 已连接' : driveConnection === 'connecting' ? '连接中...' : 'Drive 未连接'}</span>
-                                            <span className="sm:hidden">{driveConnection === 'connected' ? '已连接' : driveConnection === 'connecting' ? '...' : '未连接'}</span>
-                                        </div>
+                                        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${driveConnection === 'connected' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800' : driveConnection === 'connecting' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800' : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'}`} onClick={() => { if(driveConnection === 'disconnected') handleGoogleDriveAction('connect'); else setModalMode('settings'); }}><div className={`w-1.5 h-1.5 rounded-full ${driveConnection === 'connected' ? 'bg-green-600 animate-pulse' : driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 'bg-slate-400'}`}></div><span className="hidden sm:inline">{driveConnection === 'connected' ? 'Drive 已连接' : driveConnection === 'connecting' ? '连接中...' : 'Drive 未连接'}</span><span className="sm:hidden">{driveConnection === 'connected' ? '已连接' : driveConnection === 'connecting' ? '...' : '未连接'}</span></div>
                                     )}
                                 </div>
-                                <button onClick={handleRefresh} className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors ${isLoading ? 'animate-spin' : ''}`}>
-                                    <MIcon name="refresh" />
-                                </button>
+                                <button onClick={handleRefresh} className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors ${isLoading ? 'animate-spin' : ''}`}><MIcon name="refresh" /></button>
                                 <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
                             </div>
                         </div>
-                        {availableCategories.length > 1 && (
-                            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                                {availableCategories.map(cat => (
-                                    <button key={cat} onClick={()=>setActiveCategory(cat)} 
-                                        className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${activeCategory===cat ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-high/80'}`}>
-                                        {cat === 'All' ? '全部' : cat}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        {availableCategories.length > 1 && (<div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">{availableCategories.map(cat => (<button key={cat} onClick={()=>setActiveCategory(cat)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${activeCategory===cat ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-high/80'}`}>{cat === 'All' ? '全部' : cat}</button>))}</div>)}
                     </header>
 
                     <main className="w-full px-6 mt-4 flex-1">
-                        {sortedItems.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-32 animate-enter opacity-50">
-                                <MIcon name="event_busy" size={64} className="text-on-surface-variant mb-4" />
-                                <p className="text-sm text-on-surface-variant">暂无倒数日</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
-                                {sortedItems.map((item, index) => {
-                                    const { days, date, subText, isPast, isDuration } = calculateDays(item);
-                                    return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
-                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
-                                            <div className="mb-4">
-                                                {item.category && (
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80 border border-outline/10">{item.category}</span>
-                                                    </div>
-                                                )}
-                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
-                                                <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
-                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
-                                                    <span>{getDisplayDateText(item, date)}</span>
-                                                </div>
-                                                {/* Card Remark Snippet */}
-                                                {item.remarks && (
-                                                    <p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
-                                                        {item.remarks}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            
-                                            <div className="mt-auto flex justify-between items-end">
-                                                <div className="flex flex-col">
-                                                    <span className={`text-sm px-3 py-1 rounded-lg font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
-                                                        {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
-                                                    </span>
-                                                    {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
-                                                </div>
-                                                <div className="flex items-baseline text-primary">
-                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
-                                                    <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
+                        {sortedItems.length === 0 ? (<div className="flex flex-col items-center justify-center py-32 animate-enter opacity-50"><MIcon name="event_busy" size={64} className="text-on-surface-variant mb-4" /><p className="text-sm text-on-surface-variant">暂无倒数日</p></div>) : (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">{sortedItems.map((item, index) => { const { days, date, subText, isPast, isDuration } = calculateDays(item); return (<div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">{item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}<div className="mb-4">{item.category && (<div className="flex items-center gap-2 mb-2"><span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80 border border-outline/10">{item.category}</span></div>)}<h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3><div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80"><MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} /><span>{getDisplayDateText(item, date)}</span></div>{item.remarks && (<p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">{item.remarks}</p>)}</div><div className="mt-auto flex justify-between items-end"><div className="flex flex-col"><span className={`text-sm px-3 py-1 rounded-lg font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>{item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}</span>{subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}</div><div className="flex items-baseline text-primary"><span className="text-5xl font-medium tracking-tighter leading-none">{days}</span><span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span></div></div></div>) })}</div>)}
                     </main>
 
-                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl">
-                        <MIcon name="add" size={28} /> 新建
-                    </button>
+                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl"><MIcon name="add" size={28} /> 新建</button>
 
-                    {/* --- Modals --- */}
+                    {/* Modals Section */}
                     {modalMode && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setModalMode(null)}></div>
-                            
-                            {/* ADD / EDIT */}
                             {modalMode === 'add' && (
                                 <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
-                                    {editingItem && (
-                                        <button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">
-                                            {isLoading ? <MIcon name="progress_activity" className="animate-spin" size={20} /> : <MIcon name="ios_share" size={20} />}
-                                        </button>
-                                    )}
+                                    {editingItem && (<button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">{isLoading ? <MIcon name="progress_activity" className="animate-spin" size={20} /> : <MIcon name="ios_share" size={20} />}</button>)}
                                     <h2 className="text-2xl font-normal text-on-surface mb-6">{editingItem ? '编辑' : '新建'}</h2>
                                     <form onSubmit={handleSave} className="space-y-4">
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                            <label className="text-xs text-primary font-medium">名称</label>
-                                            <input className="w-full bg-transparent outline-none text-on-surface text-lg py-1" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required placeholder="例如: 结婚纪念日" />
-                                        </div>
-                                        
-                                        <div className="flex gap-3">
-                                            <div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                                <label className="text-xs text-primary font-medium">起始日期</label>
-                                                <input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required />
-                                            </div>
-                                        </div>
-
-                                        {/* End Date Input */}
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                            <label className="text-xs text-primary font-medium">结束日期 (可选 - 计算时长)</label>
-                                            <input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.endDate || ''} onChange={e=>setFormData({...formData, endDate: e.target.value})} />
-                                        </div>
-
-                                        {/* Custom Category Input */}
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20 relative">
-                                            <label className="text-xs text-primary font-medium">分类 (可选)</label>
-                                            <input list="cat-suggestions" className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="例如: 追星" />
-                                            <datalist id="cat-suggestions">
-                                                {availableCategories.filter(c=>c!=='All').map(c => <option key={c} value={c} />)}
-                                            </datalist>
-                                        </div>
-
-                                        {/* Status Text Input */}
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                            <label className="text-xs text-primary font-medium">状态标签 (可选)</label>
-                                            <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} />
-                                        </div>
-
-                                        {/* Remarks Input - NEW */}
-                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
-                                            <label className="text-xs text-primary font-medium">备注 (可选)</label>
-                                            <textarea className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30 resize-none h-16 text-sm" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} placeholder="例如: 账号、密码、纪念日故事..." />
-                                        </div>
-
-                                        <div className="flex items-center gap-3 py-2">
-                                            <div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-colors ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}>
-                                                <MIcon name="keep" size={18} className={formData.isPinned ? "text-on-secondary-container" : "text-outline"} />
-                                                <span className="text-xs font-bold">置顶</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Hide Repeat options if End Date is set */}
-                                        {!formData.endDate && (
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {['none:无', 'week:周', 'month:月', 'year:年'].map(t => {
-                                                    const [val, label] = t.split(':');
-                                                    return <div key={val} onClick={()=>setFormData({...formData, repeatType: val})} 
-                                                        className={`py-2 text-center rounded-lg text-xs cursor-pointer border transition-all ${formData.repeatType===val ? 'bg-primary text-on-primary border-primary font-bold' : 'border-outline/20 text-on-surface hover:bg-surface-container-high'}`}>{label}</div>
-                                                })}
-                                            </div>
-                                        )}
-
-                                        <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">
-                                            {editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium px-2">删除</button>}
-                                            <button type="button" onClick={()=>setModalMode(null)} className="text-primary text-sm font-medium px-4">取消</button>
-                                            <button type="submit" className="bg-primary text-on-primary px-8 py-2.5 rounded-full text-sm font-medium shadow-md">保存</button>
-                                        </div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">名称</label><input className="w-full bg-transparent outline-none text-on-surface text-lg py-1" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required placeholder="例如: 结婚纪念日" /></div>
+                                        <div className="flex gap-3"><div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">起始日期</label><input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required /></div></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">结束日期 (可选 - 计算时长)</label><input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.endDate || ''} onChange={e=>setFormData({...formData, endDate: e.target.value})} /></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20 relative"><label className="text-xs text-primary font-medium">分类 (可选)</label><input list="cat-suggestions" className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="例如: 追星" /><datalist id="cat-suggestions">{availableCategories.filter(c=>c!=='All').map(c => <option key={c} value={c} />)}</datalist></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">状态标签 (可选)</label><input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} /></div>
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20"><label className="text-xs text-primary font-medium">备注 (可选)</label><textarea className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30 resize-none h-16 text-sm" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} placeholder="例如: 账号、密码、纪念日故事..." /></div>
+                                        <div className="flex items-center gap-3 py-2"><div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-colors ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}><MIcon name="keep" size={18} className={formData.isPinned ? "text-on-secondary-container" : "text-outline"} /><span className="text-xs font-bold">置顶</span></div></div>
+                                        {!formData.endDate && (<div className="grid grid-cols-4 gap-2">{['none:无', 'week:周', 'month:月', 'year:年'].map(t => { const [val, label] = t.split(':'); return <div key={val} onClick={()=>setFormData({...formData, repeatType: val})} className={`py-2 text-center rounded-lg text-xs cursor-pointer border transition-all ${formData.repeatType===val ? 'bg-primary text-on-primary border-primary font-bold' : 'border-outline/20 text-on-surface hover:bg-surface-container-high'}`}>{label}</div> })}</div>)}
+                                        <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">{editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium px-2">删除</button>}<button type="button" onClick={()=>setModalMode(null)} className="text-primary text-sm font-medium px-4">取消</button><button type="submit" className="bg-primary text-on-primary px-8 py-2.5 rounded-full text-sm font-medium shadow-md">保存</button></div>
                                     </form>
                                 </div>
                             )}
-
-                            {/* SHARE PREVIEW */}
-                            {modalMode === 'share_preview' && (
-                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-enter z-50 flex flex-col items-center">
-                                    <h3 className="text-lg font-medium text-on-surface mb-4">保存分享图片</h3>
-                                    {shareImgUrl && <img src={shareImgUrl} className="w-full rounded-xl shadow-md mb-6 border border-outline/10" />}
-                                    <div className="flex gap-3 w-full">
-                                        <button onClick={()=>setModalMode('add')} className="flex-1 py-2.5 text-primary font-medium text-sm">返回</button>
-                                        <a href={shareImgUrl} download={`countdown_${Date.now()}.png`} className="flex-1 py-2.5 bg-primary text-on-primary rounded-full text-center text-sm font-medium shadow-md">保存图片</a>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* SETTINGS */}
+                            {modalMode === 'share_preview' && (<div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-enter z-50 flex flex-col items-center"><h3 className="text-lg font-medium text-on-surface mb-4">保存分享图片</h3>{shareImgUrl && <img src={shareImgUrl} className="w-full rounded-xl shadow-md mb-6 border border-outline/10" />}<div className="flex gap-3 w-full"><button onClick={()=>setModalMode('add')} className="flex-1 py-2.5 text-primary font-medium text-sm">返回</button><a href={shareImgUrl} download={`countdown_${Date.now()}.png`} className="flex-1 py-2.5 bg-primary text-on-primary rounded-full text-center text-sm font-medium shadow-md">保存图片</a></div></div>)}
                             {modalMode === 'settings' && (
-                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]">
-                                    <h2 className="text-xl font-medium mb-6">设置</h2>
-                                    
-                                    <div className="mb-6">
-                                        <p className="text-xs font-bold text-primary mb-3">外观</p>
-                                        <div className="flex gap-2 justify-center mb-4">
-                                            {Object.keys(THEMES).map(c => ( <div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-transform ${appTheme===c ? 'border-on-surface scale-110' : 'border-transparent'}`} style={{background: THEMES[c].light.primary}}></div> ))}
-                                        </div>
-                                        <div className="bg-surface-container-high p-1 rounded-xl flex">
-                                            {['light:☀️', 'system:🌗', 'dark:🌙'].map(m => {
-                                                const [val, icon] = m.split(':');
-                                                return <button key={val} onClick={()=>handleThemeChange(appTheme, val)} className={`flex-1 py-1.5 rounded-lg text-sm transition-all ${darkMode===val ? 'bg-surface shadow-sm text-on-surface' : 'text-on-surface-variant'}`}>{icon}</button>
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* Sync Settings */}
-                                    <div>
-                                        <p className="text-xs font-bold text-primary mb-3">云同步 (WebDAV / Drive)</p>
-                                        <div className="flex bg-surface-container-high p-1 rounded-xl mb-4">
-                                            <button onClick={()=>setActiveSyncTab('webdav')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='webdav' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>WebDAV</button>
-                                            <button onClick={()=>setActiveSyncTab('drive')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='drive' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>Google Drive</button>
-                                        </div>
-
-                                        {activeSyncTab === 'webdav' ? (
-                                            <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
-                                                {!isAppMode && <p className="text-[10px] text-error mb-2 bg-error/10 p-2 rounded">网页版受跨域限制，WebDAV 可能无法连接。建议打包成 APP 使用。</p>}
-                                                <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="WebDAV URL" value={webdavConfig.url} onChange={e=>setWebdavConfig({...webdavConfig, url: e.target.value})} />
-                                                <div className="flex gap-2">
-                                                    <input className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="用户" value={webdavConfig.username} onChange={e=>setWebdavConfig({...webdavConfig, username: e.target.value})} />
-                                                    <input type="password" className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="密码" value={webdavConfig.password} onChange={e=>setWebdavConfig({...webdavConfig, password: e.target.value})} />
-                                                </div>
-                                                <div className="flex items-center justify-between py-1">
-                                                    <span className="text-xs text-on-surface">自动同步</span>
-                                                    <div onClick={()=>setWebdavConfig({...webdavConfig, autoSync: !webdavConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${webdavConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>
-                                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${webdavConfig.autoSync ? 'translate-x-3' : ''}`}></div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={()=>handleWebDAV(true)} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">备份</button>
-                                                    <button onClick={()=>handleWebDAV(false)} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">恢复</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
-                                                <p className="text-[10px] text-primary mb-2 bg-primary/10 p-2 rounded">网页版直接可用。需在 Google Cloud Console 申请 Client ID。</p>
-                                                <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="Client ID (apps.googleusercontent.com)" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} />
-                                                <div className="flex items-center justify-between py-1">
-                                                    <span className="text-xs text-on-surface">自动同步</span>
-                                                    <div onClick={()=>setDriveConfig({...driveConfig, autoSync: !driveConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${driveConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>
-                                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${driveConfig.autoSync ? 'translate-x-3' : ''}`}></div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={()=>handleGoogleDriveAction('upload')} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">登录并备份</button>
-                                                    <button onClick={()=>handleGoogleDriveAction('download')} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">登录并恢复</button>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <p className={`text-[10px] text-center mt-2 ${syncStatus.type==='error'?'text-error':'text-success'}`}>{syncStatus.msg}</p>
-                                    </div>
-
-                                    {/* Local Backup Section */}
-                                    <div>
-                                        <p className="text-xs font-bold text-primary mb-3">本地备份与恢复</p>
-                                        <div className="bg-surface-container-high rounded-xl p-4 flex gap-2">
-                                            <button onClick={handleExportLocal} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container flex items-center justify-center gap-1">
-                                                <MIcon name="download" size={16}/> 导出
-                                            </button>
-                                            <button onClick={()=>fileInputRef.current.click()} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface flex items-center justify-center gap-1">
-                                                <MIcon name="upload" size={16}/> 导入
-                                            </button>
-                                            <input type="file" ref={fileInputRef} onChange={handleImportLocal} accept=".json" className="hidden" />
-                                        </div>
-                                    </div>
-
-                                    <button onClick={()=>setModalMode(null)} className="w-full mt-6 text-primary text-sm font-medium">关闭</button>
+                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]"><h2 className="text-xl font-medium mb-6">设置</h2>
+                                    <div className="mb-6"><p className="text-xs font-bold text-primary mb-3">外观</p><div className="flex gap-2 justify-center mb-4">{Object.keys(THEMES).map(c => ( <div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-transform ${appTheme===c ? 'border-on-surface scale-110' : 'border-transparent'}`} style={{background: THEMES[c].light.primary}}></div> ))}</div><div className="bg-surface-container-high p-1 rounded-xl flex">{['light:☀️', 'system:🌗', 'dark:🌙'].map(m => { const [val, icon] = m.split(':'); return <button key={val} onClick={()=>handleThemeChange(appTheme, val)} className={`flex-1 py-1.5 rounded-lg text-sm transition-all ${darkMode===val ? 'bg-surface shadow-sm text-on-surface' : 'text-on-surface-variant'}`}>{icon}</button> })}</div></div>
+                                    <div><p className="text-xs font-bold text-primary mb-3">云同步 (WebDAV / Drive)</p><div className="flex bg-surface-container-high p-1 rounded-xl mb-4"><button onClick={()=>setActiveSyncTab('webdav')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='webdav' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>WebDAV</button><button onClick={()=>setActiveSyncTab('drive')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='drive' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>Google Drive</button></div>
+                                        {activeSyncTab === 'webdav' ? (<div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">{!isAppMode && <p className="text-[10px] text-error mb-2 bg-error/10 p-2 rounded">网页版受跨域限制，WebDAV 可能无法连接。建议打包成 APP 使用。</p>}<input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="WebDAV URL" value={webdavConfig.url} onChange={e=>setWebdavConfig({...webdavConfig, url: e.target.value})} /><div className="flex gap-2"><input className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="用户" value={webdavConfig.username} onChange={e=>setWebdavConfig({...webdavConfig, username: e.target.value})} /><input type="password" className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="密码" value={webdavConfig.password} onChange={e=>setWebdavConfig({...webdavConfig, password: e.target.value})} /></div><div className="flex items-center justify-between py-1"><span className="text-xs text-on-surface">自动同步</span><div onClick={()=>setWebdavConfig({...webdavConfig, autoSync: !webdavConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${webdavConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}><div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${webdavConfig.autoSync ? 'translate-x-3' : ''}`}></div></div></div><div className="flex gap-2"><button onClick={()=>handleWebDAV(true)} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">备份</button><button onClick={()=>handleWebDAV(false)} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">恢复</button></div></div>) : (
+                                        <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter"><p className="text-[10px] text-primary mb-2 bg-primary/10 p-2 rounded">网页版直接可用。需在 Google Cloud Console 申请 Client ID。</p><input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="Client ID (apps.googleusercontent.com)" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} /><div className="flex items-center justify-between py-1"><span className="text-xs text-on-surface">自动同步</span><div onClick={()=>setDriveConfig({...driveConfig, autoSync: !driveConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${driveConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}><div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${driveConfig.autoSync ? 'translate-x-3' : ''}`}></div></div></div><div className="flex gap-2"><button onClick={()=>handleGoogleDriveAction('upload')} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">登录并备份</button><button onClick={()=>handleGoogleDriveAction('download')} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">登录并恢复</button></div></div>)}<p className={`text-[10px] text-center mt-2 ${syncStatus.type==='error'?'text-error':'text-success'}`}>{syncStatus.msg}</p></div>
+                                    <div><p className="text-xs font-bold text-primary mb-3">本地备份与恢复</p><div className="bg-surface-container-high rounded-xl p-4 flex gap-2"><button onClick={handleExportLocal} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container flex items-center justify-center gap-1"><MIcon name="download" size={16}/> 导出</button><button onClick={()=>fileInputRef.current.click()} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface flex items-center justify-center gap-1"><MIcon name="upload" size={16}/> 导入</button><input type="file" ref={fileInputRef} onChange={handleImportLocal} accept=".json" className="hidden" /></div></div>
+                                    <div className="mt-8 text-center text-[10px] text-on-surface-variant opacity-40">Version 3.5.0 • Build 35</div><button onClick={()=>setModalMode(null)} className="w-full mt-2 text-primary text-sm font-medium">关闭</button>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    {/* HIDDEN CAPTURE AREA */}
-                    <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
-                        <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-6 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
+                    {/* HIDDEN CAPTURE AREA (SQUARE 1:1) */}
+                    <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '500px', height: '500px', fontFamily: 'sans-serif'}}>
+                        <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-8 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
                              {/* Material Blobs */}
-                             <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
-                             <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+                             <div className="absolute top-[-100px] right-[-100px] w-80 h-80 bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+                             <div className="absolute bottom-[-100px] left-[-100px] w-80 h-80 bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
                              
-                            {/* Card Container */}
-                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-center border border-[#e7e7e7] gap-8">
+                            {/* Square Card Container */}
+                            <div className="relative z-10 bg-white p-10 rounded-[40px] shadow-sm w-full h-full flex flex-col items-center justify-center border border-[#e7e7e7] gap-8">
                                 
                                 {/* 1. Title */}
-                                <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-snug break-words w-full px-2">
+                                <h1 className="text-3xl font-bold text-[#1f1f1f] text-center leading-snug break-words w-full px-4">
                                     {formData.title || '倒数日'}
                                 </h1>
 
                                 {/* 2. Status Pill */}
-                                <div className="px-5 py-2 bg-[#c2e7ff] text-[#001d35] rounded-full text-sm font-bold shadow-sm">
+                                <div className="px-6 py-2.5 bg-[#c2e7ff] text-[#001d35] rounded-full text-sm font-extrabold shadow-sm">
                                     {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
 
                                 {/* 3. Big Number with Unit */}
                                 <div className="flex items-baseline justify-center">
-                                     <span className="text-[100px] font-bold text-[#0061a4] leading-none tracking-tighter">
+                                     <span className="text-[120px] font-bold text-[#0061a4] leading-none tracking-tighter" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                                         {shareItemInfo.days}
                                     </span>
-                                    <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-2">
+                                    <span className="text-2xl text-[#444746] font-bold ml-2 -translate-y-4">
                                         天
                                     </span>
                                 </div>
 
-                                {/* 4. Bottom Date (with separator) */}
-                                <div className="w-full flex flex-col items-center mt-4">
-                                    <div className="border-t border-[#e0e2e0] w-full mb-6"></div>
-                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 uppercase">
+                                {/* 4. Bottom Info Group */}
+                                <div className="w-full flex flex-col items-center">
+                                    <div className="border-t border-[#e0e2e0] w-2/3 mb-6"></div>
+                                    <div className="text-[#444746] text-sm font-bold tracking-widest opacity-80 uppercase">
                                         {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
                                     </div>
                                 </div>
                                 
-                                {/* 5. Branding Footer */}
-                                <div className="absolute bottom-6 text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
+                                {/* 5. Subtle branding footer */}
+                                <div className="absolute bottom-6 text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.3em] flex items-center gap-2 opacity-40">
                                     Googley Countdown
                                 </div>
                             </div>

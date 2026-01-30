@@ -25,9 +25,7 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                         sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
                     },
-                    screens: {
-                        '3xl': '1800px',
-                    }
+                    screens: { '3xl': '1800px' }
                 } 
             }
         }
@@ -42,9 +40,6 @@
 
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <!-- Lunar Calendar Lib -->
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
 
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -141,15 +136,16 @@
             return `${year}-${month}-${day}`;
         };
 
+        const themePalettes = {
+            'blue': { light: '#0061a4', dark: '#9ecaff' },
+            'green': { light: '#006e1c', dark: '#80d996' },
+            'purple': { light: '#6b4ea2', dark: '#d0bcff' },
+            'orange': { light: '#8b5000', dark: '#ffb870' },
+            'red': { light: '#b3261e', dark: '#ffb4ab' },
+            'monet': { light: '#475d92', dark: '#b0c6ff' }
+        };
+
         const applyTheme = (colorKey, isDark) => {
-            const themePalettes = {
-                'blue': { light: '#0061a4', dark: '#9ecaff' },
-                'green': { light: '#006e1c', dark: '#80d996' },
-                'purple': { light: '#6b4ea2', dark: '#d0bcff' },
-                'orange': { light: '#8b5000', dark: '#ffb870' },
-                'red': { light: '#b3261e', dark: '#ffb4ab' },
-                'monet': { light: '#475d92', dark: '#b0c6ff' }
-            };
             const root = document.documentElement;
             if (isDark) root.classList.add('dark-theme');
             else root.classList.remove('dark-theme');
@@ -189,9 +185,8 @@
             const [isLoading, setIsLoading] = useState(false);
             const [isAppMode, setIsAppMode] = useState(false);
             
-            // Sync Status State
-            const [saveStatus, setSaveStatus] = useState('idle');
-            // Drive Connection State
+            // Status States
+            const [saveStatus, setSaveStatus] = useState('idle'); // idle, pending, syncing, success, error
             const [driveConnection, setDriveConnection] = useState('disconnected');
             
             const [shareImgUrl, setShareImgUrl] = useState(null);
@@ -246,7 +241,6 @@
             // Auto Login Effect for Google Drive
             useEffect(() => {
                 if (driveConnection === 'connected') return;
-                
                 if (!driveConfig.clientId) return;
                 
                 const autoLoginDrive = async () => {
@@ -256,15 +250,10 @@
                         tries++;
                     }
                     if (!window.google) return;
-                    
                     setDriveConnection('connecting');
-                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
-
-                if (driveConfig.clientId) {
-                    autoLoginDrive();
-                }
+                autoLoginDrive();
             }, [driveConfig.clientId]);
 
             useEffect(() => { localStorage.setItem('md_countdowns', JSON.stringify(items)); }, [items]);
@@ -402,7 +391,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive
+            // Google Drive Logic
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -422,7 +411,7 @@
             const handleGoogleDriveAction = async (action, isSilent = false) => {
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
-                if (!client && !isSilent) return; 
+                if (!client && !isSilent) return; // Silent sync needs initialized client
                 
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
                 
@@ -454,7 +443,8 @@
                     return;
                 }
                 
-                if (!isSilent) setIsLoading(true); else if (action !== 'connect') setIsSyncing(true);
+                if (!isSilent) setIsLoading(true); 
+                // Removed setIsSyncing logic entirely
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -517,7 +507,7 @@
                     setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); setIsSyncing(false); }
+                } finally { setIsLoading(false); }
             };
 
             // WebDAV Logic

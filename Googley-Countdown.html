@@ -43,6 +43,9 @@
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <!-- Lunar Calendar Lib -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -186,7 +189,7 @@
             const [isLoading, setIsLoading] = useState(false);
             const [isAppMode, setIsAppMode] = useState(false);
             
-            // Sync Status State: 'idle', 'pending', 'syncing', 'success', 'error'
+            // Sync Status State
             const [saveStatus, setSaveStatus] = useState('idle');
             // Drive Connection State: 'disconnected', 'connecting', 'connected'
             const [driveConnection, setDriveConnection] = useState('disconnected');
@@ -434,17 +437,15 @@
                     const folderData = await folderSearch.json();
                     if (folderData.files && folderData.files.length > 0) folderId = folderData.files[0].id;
                     else {
-                        // Create folder logic... (omitted for brevity, same as before)
                         const createFolder = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) });
                         const createData = await createFolder.json();
-                        if (createData.id) folderId = createData.id;
+                        if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
                     
                     // If action is connect, just verify we got here
                     if (action === 'connect') {
                          setDriveConnection('connected');
                          if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
-                         // Optionally store user info?
                          return;
                     }
 
@@ -515,7 +516,6 @@
                 }
             };
 
-            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -561,12 +561,29 @@
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
                             <div className="flex items-center gap-3">
-                                {/* Dynamic Status Indicator */}
-                                <div className={`flex items-center gap-1.5 transition-all duration-300 ${saveStatus === 'idle' ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}>
+                                {/* Dynamic Status Indicator / Drive Status */}
+                                <div className={`flex items-center gap-1.5 transition-all duration-300 ${saveStatus !== 'idle' ? 'opacity-100' : ''}`}>
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
                                     {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
+                                    
+                                    {/* Default to Drive Connection Status when idle and Drive configured */}
+                                    {saveStatus === 'idle' && driveConfig.clientId && (
+                                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-medium transition-colors cursor-pointer ${
+                                            driveConnection === 'connected' ? 'bg-green-50 text-green-700 border-green-200' : 
+                                            driveConnection === 'connecting' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
+                                            'bg-slate-50 text-slate-500 border-slate-200'
+                                        }`} onClick={() => setModalMode('settings')}>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${
+                                                driveConnection === 'connected' ? 'bg-green-500 animate-pulse' : 
+                                                driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 
+                                                'bg-slate-400'
+                                            }`}></div>
+                                            <span className="hidden sm:inline">{driveConnection === 'connected' ? 'Drive 已连接' : driveConnection === 'connecting' ? '连接中...' : 'Drive 未连接'}</span>
+                                            <span className="sm:hidden">{driveConnection === 'connected' ? '已连接' : driveConnection === 'connecting' ? '...' : '未连接'}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
                             </div>
@@ -767,20 +784,7 @@
                                         ) : (
                                             <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
                                                 <p className="text-[10px] text-primary mb-2 bg-primary/10 p-2 rounded">网页版直接可用。需在 Google Cloud Console 申请 Client ID。</p>
-                                                
                                                 <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="Client ID (apps.googleusercontent.com)" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} />
-                                                
-                                                {/* Connection Status Indicator */}
-                                                <div className="flex items-center justify-between py-2 border-b border-outline/5 mb-2">
-                                                    <span className="text-xs font-medium text-on-surface-variant">连接状态</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <div className={`w-2 h-2 rounded-full ${driveConnection === 'connected' ? 'bg-success' : (driveConnection === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-outline/50')}`}></div>
-                                                        <span className="text-[10px] text-on-surface-variant">
-                                                            {driveConnection === 'connected' ? '已连接' : (driveConnection === 'connecting' ? '连接中...' : '未连接')}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
                                                 <div className="flex items-center justify-between py-1">
                                                     <span className="text-xs text-on-surface">自动同步</span>
                                                     <div onClick={()=>setDriveConfig({...driveConfig, autoSync: !driveConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${driveConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>

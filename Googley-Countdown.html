@@ -25,8 +25,38 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                         sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
                     },
-                    screens: {
-                        '3xl': '1800px',
+                    screens: { '3xl': '1800px' },
+                    colors: {
+                        // Mapping Tailwind colors to CSS Variables
+                        primary: 'var(--md-sys-color-primary)',
+                        'on-primary': 'var(--md-sys-color-on-primary)',
+                        'primary-container': 'var(--md-sys-color-primary-container)',
+                        'on-primary-container': 'var(--md-sys-color-on-primary-container)',
+                        secondary: 'var(--md-sys-color-secondary)',
+                        'on-secondary': 'var(--md-sys-color-on-secondary)',
+                        'secondary-container': 'var(--md-sys-color-secondary-container)',
+                        'on-secondary-container': 'var(--md-sys-color-on-secondary-container)',
+                        tertiary: 'var(--md-sys-color-tertiary)',
+                        'on-tertiary': 'var(--md-sys-color-on-tertiary)',
+                        'tertiary-container': 'var(--md-sys-color-tertiary-container)',
+                        'on-tertiary-container': 'var(--md-sys-color-on-tertiary-container)',
+                        error: 'var(--md-sys-color-error)',
+                        'on-error': 'var(--md-sys-color-on-error)',
+                        'error-container': 'var(--md-sys-color-error-container)',
+                        'on-error-container': 'var(--md-sys-color-on-error-container)',
+                        background: 'var(--md-sys-color-background)',
+                        'on-background': 'var(--md-sys-color-on-background)',
+                        surface: 'var(--md-sys-color-surface)',
+                        'on-surface': 'var(--md-sys-color-on-surface)',
+                        'surface-variant': 'var(--md-sys-color-surface-variant)',
+                        'on-surface-variant': 'var(--md-sys-color-on-surface-variant)',
+                        outline: 'var(--md-sys-color-outline)',
+                        'outline-variant': 'var(--md-sys-color-outline-variant)',
+                        'surface-container-lowest': 'var(--md-sys-color-surface-container-lowest)',
+                        'surface-container-low': 'var(--md-sys-color-surface-container-low)',
+                        'surface-container': 'var(--md-sys-color-surface-container)',
+                        'surface-container-high': 'var(--md-sys-color-surface-container-high)',
+                        'surface-container-highest': 'var(--md-sys-color-surface-container-highest)',
                     }
                 } 
             }
@@ -52,43 +82,75 @@
 
     <style>
         :root {
+            /* Default Baseline (Blue) - Will be overwritten by JS */
             --md-sys-color-primary: #0061a4;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #d1e4ff;
             --md-sys-color-on-primary-container: #001d36;
+            --md-sys-color-secondary: #535f70;
+            --md-sys-color-on-secondary: #ffffff;
             --md-sys-color-secondary-container: #d7e3f7;
             --md-sys-color-on-secondary-container: #101c2b;
+            --md-sys-color-tertiary: #6b5778;
+            --md-sys-color-on-tertiary: #ffffff;
+            --md-sys-color-tertiary-container: #f2daff;
+            --md-sys-color-on-tertiary-container: #251431;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-error-container: #ffdad6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #fdfcff;
+            --md-sys-color-on-background: #1a1c1e;
             --md-sys-color-surface: #fdfcff;
-            --md-sys-color-surface-container: #f0f4f9;
-            --md-sys-color-surface-container-high: #e9eff6;
             --md-sys-color-on-surface: #1a1c1e;
+            --md-sys-color-surface-variant: #dfe2eb;
             --md-sys-color-on-surface-variant: #43474e;
             --md-sys-color-outline: #73777f;
-            --md-sys-color-error: #ba1a1a;
-            --md-sys-color-success: #146c2e;
+            --md-sys-color-outline-variant: #c3c7cf;
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #f7f9ff;
+            --md-sys-color-surface-container: #f1f4fa;
+            --md-sys-color-surface-container-high: #ebeef5;
+            --md-sys-color-surface-container-highest: #e5e8ef;
         }
 
+        /* Dark Mode defaults */
         .dark-theme {
             --md-sys-color-primary: #9ecaff;
             --md-sys-color-on-primary: #003258;
             --md-sys-color-primary-container: #00497d;
             --md-sys-color-on-primary-container: #d1e4ff;
-            --md-sys-color-secondary-container: #3e4755;
-            --md-sys-color-on-secondary-container: #dbe4f9;
+            --md-sys-color-secondary: #bbc7db;
+            --md-sys-color-on-secondary: #253140;
+            --md-sys-color-secondary-container: #3b4858;
+            --md-sys-color-on-secondary-container: #d7e3f7;
+            --md-sys-color-tertiary: #d7bee4;
+            --md-sys-color-on-tertiary: #3b2948;
+            --md-sys-color-tertiary-container: #523f5f;
+            --md-sys-color-on-tertiary-container: #f2daff;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-error-container: #93000a;
+            --md-sys-color-on-error-container: #ffdad6;
+            --md-sys-color-background: #1a1c1e;
+            --md-sys-color-on-background: #e2e2e6;
             --md-sys-color-surface: #1a1c1e;
-            --md-sys-color-surface-container: #1e2227; 
-            --md-sys-color-surface-container-high: #282c34;
             --md-sys-color-on-surface: #e2e2e6;
+            --md-sys-color-surface-variant: #43474e;
             --md-sys-color-on-surface-variant: #c3c7cf;
             --md-sys-color-outline: #8d9199;
-            --md-sys-color-error: #ffb4ab;
-            --md-sys-color-success: #6dd58c;
+            --md-sys-color-outline-variant: #43474e;
+            --md-sys-color-surface-container-lowest: #0c0e11;
+            --md-sys-color-surface-container-low: #1a1c1e;
+            --md-sys-color-surface-container: #1e2022;
+            --md-sys-color-surface-container-high: #282a2d;
+            --md-sys-color-surface-container-highest: #333538;
         }
 
         body {
             font-family: 'Roboto', 'Noto Sans SC', "Microsoft YaHei", sans-serif;
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
             transition: background-color 0.4s ease, color 0.4s ease;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -96,25 +158,6 @@
         }
 
         .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
-        /* Utility Classes */
-        .bg-surface { background-color: var(--md-sys-color-surface); }
-        .bg-surface-container { background-color: var(--md-sys-color-surface-container); }
-        .bg-surface-container-high { background-color: var(--md-sys-color-surface-container-high); }
-        .bg-primary { background-color: var(--md-sys-color-primary); }
-        .bg-primary-container { background-color: var(--md-sys-color-primary-container); }
-        .bg-secondary-container { background-color: var(--md-sys-color-secondary-container); }
-        
-        .text-on-surface { color: var(--md-sys-color-on-surface); }
-        .text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
-        .text-primary { color: var(--md-sys-color-primary); }
-        .text-on-primary { color: var(--md-sys-color-on-primary); }
-        .text-on-primary-container { color: var(--md-sys-color-on-primary-container); }
-        .text-on-secondary-container { color: var(--md-sys-color-on-secondary-container); }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background-color: var(--md-sys-color-outline); border-radius: 4px; opacity: 0.2; }
         
         .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
         @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -125,35 +168,55 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
+        const MIcon = ({ name, className = "", filled = false, size = 24 }) => (<span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>);
+        const getLocalDateString = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; };
 
-        const MIcon = ({ name, className = "", filled = false, size = 24 }) => (
-            <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
-        );
-
-        const getLocalDateString = () => {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+        // --- Material Theme Builder Palettes ---
+        const THEMES = {
+            'blue': {
+                light: { primary: '#0061a4', onPrimary: '#ffffff', primaryContainer: '#d1e4ff', onPrimaryContainer: '#001d36', secondary: '#535f70', onSecondary: '#ffffff', secondaryContainer: '#d7e3f7', onSecondaryContainer: '#101c2b', tertiary: '#6b5778', onTertiary: '#ffffff', tertiaryContainer: '#f2daff', onTertiaryContainer: '#251431', background: '#fdfcff', onBackground: '#1a1c1e', surface: '#fdfcff', onSurface: '#1a1c1e', surfaceVariant: '#dfe2eb', onSurfaceVariant: '#43474e', outline: '#73777f', surfaceContainer: '#f0f4f9', surfaceContainerHigh: '#ebeef5' },
+                dark: { primary: '#9ecaff', onPrimary: '#003258', primaryContainer: '#00497d', onPrimaryContainer: '#d1e4ff', secondary: '#bbc7db', onSecondary: '#253140', secondaryContainer: '#3b4858', onSecondaryContainer: '#d7e3f7', tertiary: '#d7bee4', onTertiary: '#3b2948', tertiaryContainer: '#523f5f', onTertiaryContainer: '#f2daff', background: '#1a1c1e', onBackground: '#e2e2e6', surface: '#1a1c1e', onSurface: '#e2e2e6', surfaceVariant: '#43474e', onSurfaceVariant: '#c3c7cf', outline: '#8d9199', surfaceContainer: '#1e2227', surfaceContainerHigh: '#282c34' }
+            },
+            'green': {
+                light: { primary: '#006e1c', onPrimary: '#ffffff', primaryContainer: '#94f990', onPrimaryContainer: '#002204', secondary: '#52634f', onSecondary: '#ffffff', secondaryContainer: '#d5e8cf', onSecondaryContainer: '#111f0c', tertiary: '#38656a', onTertiary: '#ffffff', tertiaryContainer: '#bcebf0', onTertiaryContainer: '#002023', background: '#fcfdf6', onBackground: '#1a1c1e', surface: '#fcfdf6', onSurface: '#1a1c1e', surfaceVariant: '#dee5d8', onSurfaceVariant: '#424940', outline: '#72796f', surfaceContainer: '#f0f5eb', surfaceContainerHigh: '#eaefe5' },
+                dark: { primary: '#78dc77', onPrimary: '#00390a', primaryContainer: '#005313', onPrimaryContainer: '#94f990', secondary: '#baccb3', onSecondary: '#253423', secondaryContainer: '#3b4b38', onSecondaryContainer: '#d5e8cf', tertiary: '#a0cfd4', onTertiary: '#00363b', tertiaryContainer: '#1f4d52', onTertiaryContainer: '#bcebf0', background: '#1a1c1e', onBackground: '#e2e2e6', surface: '#1a1c1e', onSurface: '#e2e2e6', surfaceVariant: '#424940', onSurfaceVariant: '#c2c8bd', outline: '#8c9388', surfaceContainer: '#1a211b', surfaceContainerHigh: '#252b26' }
+            },
+            'orange': { // Coffee / Milk Tea
+                light: { primary: '#8b5000', onPrimary: '#ffffff', primaryContainer: '#ffdcbe', onPrimaryContainer: '#2c1600', secondary: '#725a42', onSecondary: '#ffffff', secondaryContainer: '#fdddbd', onSecondaryContainer: '#2a1806', tertiary: '#58633a', onTertiary: '#ffffff', tertiaryContainer: '#dbe8b4', onTertiaryContainer: '#161f01', background: '#fff8f6', onBackground: '#1f1b16', surface: '#fff8f6', onSurface: '#1f1b16', surfaceVariant: '#f0e0cf', onSurfaceVariant: '#4f4539', outline: '#817567', surfaceContainer: '#fcece4', surfaceContainerHigh: '#f6e6de' },
+                dark: { primary: '#ffb870', onPrimary: '#4a2800', primaryContainer: '#6a3c00', onPrimaryContainer: '#ffdcbe', secondary: '#e0c1a3', onSecondary: '#402d18', secondaryContainer: '#58432c', onSecondaryContainer: '#fdddbd', tertiary: '#bfcca0', onTertiary: '#2b341a', tertiaryContainer: '#414b29', onTertiaryContainer: '#dbe8b4', background: '#1f1b16', onBackground: '#eae1d9', surface: '#1f1b16', onSurface: '#eae1d9', surfaceVariant: '#4f4539', onSurfaceVariant: '#d3c4b4', outline: '#9c8f80', surfaceContainer: '#2a241f', surfaceContainerHigh: '#352f29' }
+            },
+            'purple': {
+                light: { primary: '#74479e', onPrimary: '#ffffff', primaryContainer: '#efdbff', onPrimaryContainer: '#2c0051', secondary: '#665a6f', onSecondary: '#ffffff', secondaryContainer: '#edddf6', onSecondaryContainer: '#21182a', tertiary: '#805158', onTertiary: '#ffffff', tertiaryContainer: '#ffd9de', onTertiaryContainer: '#321017', background: '#fffbfe', onBackground: '#1d1b1e', surface: '#fffbfe', onSurface: '#1d1b1e', surfaceVariant: '#e9dfeb', onSurfaceVariant: '#4a454d', outline: '#7c757e', surfaceContainer: '#f5eff8', surfaceContainerHigh: '#f0e9f3' },
+                dark: { primary: '#dcb8ff', onPrimary: '#43126c', primaryContainer: '#5b2f84', onPrimaryContainer: '#efdbff', secondary: '#d0c1da', onSecondary: '#362c3f', secondaryContainer: '#4e4256', onSecondaryContainer: '#edddf6', tertiary: '#f3b7be', onTertiary: '#4b252b', tertiaryContainer: '#653b41', onTertiaryContainer: '#ffd9de', background: '#1d1b1e', onBackground: '#e6e1e6', surface: '#1d1b1e', onSurface: '#e6e1e6', surfaceVariant: '#4a454d', onSurfaceVariant: '#ccc4ce', outline: '#968e98', surfaceContainer: '#221f26', surfaceContainerHigh: '#2c2930' }
+            },
+            'red': {
+                light: { primary: '#bf0031', onPrimary: '#ffffff', primaryContainer: '#ffdadb', onPrimaryContainer: '#40000a', secondary: '#775656', onSecondary: '#ffffff', secondaryContainer: '#ffdadb', onSecondaryContainer: '#2c1516', tertiary: '#755a2f', onTertiary: '#ffffff', tertiaryContainer: '#ffdea6', onTertiaryContainer: '#271900', background: '#fffbfa', onBackground: '#201a1a', surface: '#fffbfa', onSurface: '#201a1a', surfaceVariant: '#f4dddd', onSurfaceVariant: '#534343', outline: '#857373', surfaceContainer: '#f5efef', surfaceContainerHigh: '#efe9e9' },
+                dark: { primary: '#ffb3b4', onPrimary: '#680016', primaryContainer: '#920023', onPrimaryContainer: '#ffdadb', secondary: '#e6bdbe', onSecondary: '#44292a', secondaryContainer: '#5d3f3f', onSecondaryContainer: '#ffdadb', tertiary: '#e5c18d', onTertiary: '#422c05', tertiaryContainer: '#5b421a', onTertiaryContainer: '#ffdea6', background: '#201a1a', onBackground: '#ece0e0', surface: '#201a1a', onSurface: '#ece0e0', surfaceVariant: '#534343', onSurfaceVariant: '#d8c2c2', outline: '#a08c8c', surfaceContainer: '#2a2021', surfaceContainerHigh: '#352a2b' }
+            },
+            'monet': {
+                light: { primary: '#475d92', onPrimary: '#ffffff', primaryContainer: '#dae2ff', onPrimaryContainer: '#001946', secondary: '#575e71', onSecondary: '#ffffff', secondaryContainer: '#dbe2f9', onSecondaryContainer: '#141b2c', tertiary: '#725572', onTertiary: '#ffffff', tertiaryContainer: '#fdd7fa', onTertiaryContainer: '#2a132c', background: '#fdfcff', onBackground: '#1a1c1e', surface: '#fdfcff', onSurface: '#1a1c1e', surfaceVariant: '#e1e2ec', onSurfaceVariant: '#44474f', outline: '#75777f', surfaceContainer: '#f0f4f9', surfaceContainerHigh: '#ebeef5' },
+                dark: { primary: '#b0c6ff', onPrimary: '#152e60', primaryContainer: '#2f4578', onPrimaryContainer: '#dae2ff', secondary: '#bfc6dc', onSecondary: '#293041', secondaryContainer: '#3f4759', onSecondaryContainer: '#dbe2f9', tertiary: '#e0bbdd', onTertiary: '#412842', tertiaryContainer: '#593e5a', onTertiaryContainer: '#fdd7fa', background: '#1a1c1e', onBackground: '#e2e2e6', surface: '#1a1c1e', onSurface: '#e2e2e6', surfaceVariant: '#44474f', onSurfaceVariant: '#c4c6cf', outline: '#8e9099', surfaceContainer: '#1e2227', surfaceContainerHigh: '#282c34' }
+            }
         };
 
         const applyTheme = (colorKey, isDark) => {
-            const themePalettes = {
-                'blue': { light: '#0061a4', dark: '#9ecaff' },
-                'green': { light: '#006e1c', dark: '#80d996' },
-                'purple': { light: '#6b4ea2', dark: '#d0bcff' },
-                'orange': { light: '#8b5000', dark: '#ffb870' },
-                'red': { light: '#b3261e', dark: '#ffb4ab' },
-                'monet': { light: '#475d92', dark: '#b0c6ff' }
-            };
+            const t = THEMES[colorKey] || THEMES['orange']; // Default to Orange (Coffee)
+            const palette = isDark ? t.dark : t.light;
             const root = document.documentElement;
+            
             if (isDark) root.classList.add('dark-theme');
             else root.classList.remove('dark-theme');
-            const p = themePalettes[colorKey] || themePalettes['blue'];
-            root.style.setProperty('--md-sys-color-primary', isDark ? p.dark : p.light);
+
+            // Map keys to CSS variables
+            for (const [key, value] of Object.entries(palette)) {
+                // key: primaryContainer -> --md-sys-color-primary-container
+                const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                root.style.setProperty(`--md-sys-color-${kebabKey}`, value);
+            }
+            
+            // Set PWA Theme Color
             const metaThemeColor = document.querySelector("meta[name=theme-color]");
-            if(metaThemeColor) metaThemeColor.setAttribute("content", isDark ? "#1a1c1e" : "#fdfcff");
+            if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
         };
 
         const nativeFetch = (url, options = {}) => {
@@ -174,21 +237,17 @@
             const [modalMode, setModalMode] = useState(null); 
             const [editingItem, setEditingItem] = useState(null);
             
-            // Configs
-            const [appTheme, setAppTheme] = useState('blue');
+            const [appTheme, setAppTheme] = useState('orange'); // Default Coffee
             const [darkMode, setDarkMode] = useState('system'); 
             const [webdavConfig, setWebdavConfig] = useState({ url: '', username: '', password: '', filename: 'countdown_backup.json', autoSync: false });
             const [driveConfig, setDriveConfig] = useState({ clientId: '', autoSync: false });
             
-            // Runtime
             const [activeCategory, setActiveCategory] = useState('All'); 
             const [syncStatus, setSyncStatus] = useState({ type: '', msg: '' });
             const [isLoading, setIsLoading] = useState(false);
             const [isAppMode, setIsAppMode] = useState(false);
             
-            // Sync Status State
             const [saveStatus, setSaveStatus] = useState('idle');
-            // Drive Connection State
             const [driveConnection, setDriveConnection] = useState('disconnected');
             
             const [shareImgUrl, setShareImgUrl] = useState(null);
@@ -216,7 +275,6 @@
                     if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive');
                 }
 
-                // Check LocalStorage for cached Google Token
                 const cachedToken = localStorage.getItem('md_g_token');
                 if (cachedToken) {
                     const parsedToken = JSON.parse(cachedToken);
@@ -226,7 +284,7 @@
                     }
                 }
 
-                const savedTheme = localStorage.getItem('md_app_theme') || 'blue';
+                const savedTheme = localStorage.getItem('md_app_theme') || 'orange';
                 const savedDark = localStorage.getItem('md_dark_mode') || 'system';
                 setAppTheme(savedTheme);
                 setDarkMode(savedDark);
@@ -240,28 +298,16 @@
                 });
             }, []);
 
-            // Auto Login Effect for Google Drive
             useEffect(() => {
                 if (driveConnection === 'connected') return;
-                
                 if (!driveConfig.clientId) return;
-                
                 const autoLoginDrive = async () => {
-                    let tries = 0;
-                    while (!window.google && tries < 10) {
-                        await new Promise(r => setTimeout(r, 500));
-                        tries++;
-                    }
+                    let tries = 0; while (!window.google && tries < 10) { await new Promise(r => setTimeout(r, 500)); tries++; }
                     if (!window.google) return;
-                    
                     setDriveConnection('connecting');
-                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
-
-                if (driveConfig.clientId) {
-                    autoLoginDrive();
-                }
+                if (driveConfig.clientId) autoLoginDrive();
             }, [driveConfig.clientId]);
 
             useEffect(() => { localStorage.setItem('md_countdowns', JSON.stringify(items)); }, [items]);
@@ -279,31 +325,18 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced & Safe)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
-                
-                // Only show pending if actually configured to sync
-                let canSync = false;
-                if (driveConfig.autoSync && driveConfig.clientId) canSync = true;
-                if (webdavConfig.autoSync && webdavConfig.url) canSync = true;
-
-                if (canSync) {
+                if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
                      setSaveStatus('pending');
-                } else {
-                     setSaveStatus('idle'); // Clear pending if auto sync is disabled
-                     return; 
-                }
-
+                } else { return; }
                 const timer = setTimeout(() => {
                     try {
                         if (driveConfig.autoSync && driveConfig.clientId) handleGoogleDriveAction('upload', true);
                         else if (webdavConfig.autoSync && webdavConfig.url) handleWebDAV(true, true);
                         else setSaveStatus('idle');
-                    } catch(e) {
-                        setSaveStatus('error');
-                    }
-                }, 1500); // Shorter delay 1.5s
+                    } catch(e) { setSaveStatus('error'); }
+                }, 2000); 
                 return () => clearTimeout(timer);
             }, [items, driveConfig, webdavConfig]);
 
@@ -374,18 +407,8 @@
 
             const handleRefresh = () => {
                 if (isLoading) return;
-                // If neither cloud is configured, reload page
-                if (!driveConfig.clientId && !webdavConfig.url) {
-                    location.reload();
-                    return;
-                }
-                
-                // Try download based on priority
-                if (driveConfig.clientId) {
-                    handleGoogleDriveAction('download');
-                } else if (webdavConfig.url) {
-                    handleWebDAV(false);
-                }
+                if (!driveConfig.clientId && !webdavConfig.url) { location.reload(); return; }
+                if (driveConfig.clientId) { handleGoogleDriveAction('download'); } else if (webdavConfig.url) { handleWebDAV(false); }
             };
 
             const handleSave = (e) => {
@@ -413,9 +436,7 @@
 
             // Auto switch if current category becomes empty
             useEffect(() => {
-                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
-                    setActiveCategory('All');
-                }
+                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) setActiveCategory('All');
             }, [availableCategories, activeCategory]);
 
             const sortedItems = useMemo(() => {
@@ -427,7 +448,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive
+            // Google Drive Logic
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -452,7 +473,7 @@
                 if (!isTokenValid) {
                     if (isSilent) { 
                         console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('error'); // SHOW ERROR IF EXPIRED
+                        setSaveStatus('error'); 
                         if (action === 'connect') setDriveConnection('disconnected');
                         return; 
                     }
@@ -485,13 +506,7 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-                    
-                    if (action === 'connect') {
-                         setDriveConnection('connected');
-                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
-                         return;
-                    }
-
+                    if (action === 'connect') { setDriveConnection('connected'); if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'}); return; }
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -501,7 +516,6 @@
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
-
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -596,7 +610,7 @@
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
-                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''}`}>
+                <div className="min-h-screen pb-24 select-none flex flex-col bg-background transition-colors duration-300">
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
@@ -606,8 +620,6 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    
-                                    {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
                                         <button 
                                             onClick={() => {
@@ -616,8 +628,8 @@
                                             }}
                                             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${
                                                 driveConnection === 'disconnected' && driveConfig.clientId 
-                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' // Login Button Style
-                                                : 'bg-error/10 text-error hover:bg-error/20' // Error Style
+                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md'
+                                                : 'bg-error-container text-error hover:bg-error-container/80'
                                             }`}
                                         >
                                             <MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} />
@@ -626,21 +638,20 @@
                                             </span>
                                         </button>
                                     )}
-                                    
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
                                         <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-medium transition-colors cursor-pointer ${
-                                            driveConnection === 'connected' ? 'bg-green-50 text-green-700 border-green-200' : 
-                                            driveConnection === 'connecting' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
-                                            'bg-slate-50 text-slate-500 border-slate-200'
+                                            driveConnection === 'connected' ? 'bg-success-container text-success border-transparent' : 
+                                            driveConnection === 'connecting' ? 'bg-primary-container text-primary border-transparent' : 
+                                            'bg-surface-container text-outline border-outline'
                                         }`} onClick={() => {
                                             if(driveConnection === 'disconnected') handleGoogleDriveAction('connect');
                                             else setModalMode('settings');
                                         }}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${
-                                                driveConnection === 'connected' ? 'bg-green-500 animate-pulse' : 
-                                                driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 
-                                                'bg-slate-400'
+                                                driveConnection === 'connected' ? 'bg-success animate-pulse' : 
+                                                driveConnection === 'connecting' ? 'bg-primary animate-ping' : 
+                                                'bg-outline'
                                             }`}></div>
                                             <span className="hidden sm:inline">{driveConnection === 'connected' ? 'Drive 已连接' : driveConnection === 'connecting' ? '连接中...' : 'Drive 未连接'}</span>
                                             <span className="sm:hidden">{driveConnection === 'connected' ? '已连接' : driveConnection === 'connecting' ? '...' : '未连接'}</span>
@@ -676,37 +687,37 @@
                                 {sortedItems.map((item, index) => {
                                     const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
-                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[24px] p-5 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
+                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-5 right-5 text-primary" />}
                                             <div className="mb-4">
                                                 {item.category && (
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80 border border-outline/10">{item.category}</span>
                                                     </div>
                                                 )}
-                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
-                                                <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
-                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
+                                                <h3 className="text-lg font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
+                                                <div className="flex items-center gap-1 text-xs text-on-surface-variant opacity-80">
+                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={14} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
-                                                {/* Card Remark Snippet - NEW */}
+                                                {/* Card Remark Snippet */}
                                                 {item.remarks && (
-                                                    <p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
+                                                    <p className="text-[10px] text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
                                                         {item.remarks}
                                                     </p>
                                                 )}
                                             </div>
                                             
-                                            <div className="mt-auto flex justify-between items-end">
+                                            <div className="mt-auto flex justify-between items-end border-t border-outline/5 pt-3">
                                                 <div className="flex flex-col">
-                                                    <span className={`text-sm px-3 py-1 rounded-lg font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold mb-0.5 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
                                                         {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
                                                     </span>
-                                                    {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
+                                                    {subText && <span className="text-[10px] text-on-surface-variant opacity-60">{subText}</span>}
                                                 </div>
                                                 <div className="flex items-baseline text-primary">
-                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
-                                                    <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
+                                                    <span className="text-4xl font-medium tracking-tighter leading-none">{days}</span>
+                                                    <span className="text-[10px] ml-1 font-medium opacity-60 mb-1">天</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -768,7 +779,7 @@
                                             <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} />
                                         </div>
 
-                                        {/* Remarks Input - NEW */}
+                                        {/* Remarks Input */}
                                         <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
                                             <label className="text-xs text-primary font-medium">备注 (可选)</label>
                                             <textarea className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30 resize-none h-16 text-sm" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} placeholder="例如: 账号、密码、纪念日故事..." />
@@ -821,7 +832,7 @@
                                     <div className="mb-6">
                                         <p className="text-xs font-bold text-primary mb-3">外观</p>
                                         <div className="flex gap-2 justify-center mb-4">
-                                            {['blue','green','purple','orange','red','monet'].map(c => ( <div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-transform ${appTheme===c ? 'border-on-surface scale-110' : 'border-transparent'}`} style={{background: c==='monet'?'#475d92':c}}></div> ))}
+                                            {Object.keys(THEMES).map(c => ( <div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-transform ${appTheme===c ? 'border-on-surface scale-110' : 'border-transparent'}`} style={{background: THEMES[c].light.primary}}></div> ))}
                                         </div>
                                         <div className="bg-surface-container-high p-1 rounded-xl flex">
                                             {['light:☀️', 'system:🌗', 'dark:🌙'].map(m => {
@@ -899,32 +910,48 @@
 
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
-                        <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/80"></div>
-                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
-                                <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
-                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
-                                
-                                <div className="text-2xl text-[#0061a4] font-bold mb-2">
-                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
-                                </div>
-                                
-                                <div className="flex justify-center w-full">
-                                    <div className="relative inline-block">
-                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
+                        <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-6 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
+                             {/* Soft Background Accent */}
+                             <div className="absolute top-0 left-0 w-full h-3 bg-primary"></div>
+                             
+                            {/* Card Container */}
+                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-between border border-[#e7e7e7]">
+                                {/* Top Section */}
+                                <div className="w-full flex flex-col items-center mt-8">
+                                    <h1 className="text-3xl font-bold text-[#1f1f1f] mb-8 text-center leading-snug break-words w-full px-2">
+                                        {formData.title || '倒数日'}
+                                    </h1>
+
+                                    {/* Status Pill - Use Primary Container */}
+                                    <div className="px-5 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-bold mb-8 shadow-sm">
+                                        {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
+                                    </div>
+
+                                    {/* Big Number */}
+                                    <div className="flex items-baseline justify-center">
+                                         <span className="text-[120px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                                             {shareItemInfo.days}
                                         </span>
-                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
+                                        <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-4">
                                             天
                                         </span>
                                     </div>
                                 </div>
-                                
-                                <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">
-                                    {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
+
+                                {/* Bottom Section */}
+                                <div className="w-full flex flex-col items-center mb-6">
+                                     {/* Date Pill - Subtle */}
+                                    <div className="border-t border-[#e0e2e0] w-full mb-4"></div>
+                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 mb-8 uppercase">
+                                        {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
+                                    </div>
+                                    
+                                    {/* Footer Branding - Subtle */}
+                                    <div className="text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
+                                        Googley Countdown
+                                    </div>
                                 </div>
                             </div>
-                            <div className="relative z-10 mt-10 text-xs text-slate-500 font-medium opacity-60">Generated by Googley Countdown</div>
                         </div>
                     </div>
                 </div>

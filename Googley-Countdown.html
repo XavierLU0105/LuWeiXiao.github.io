@@ -307,9 +307,15 @@
             const handleShare = async () => {
                 if (!shareRef.current) return;
                 setIsLoading(true);
+                // Delay slightly to allow UI (spinner) to render before blocking CPU
                 setTimeout(async () => {
                     try {
-                        const canvas = await html2canvas(shareRef.current, { backgroundColor: null, scale: 2, useCORS: true, logging: false });
+                        const canvas = await html2canvas(shareRef.current, { 
+                            backgroundColor: null, 
+                            scale: 2, 
+                            useCORS: true, 
+                            logging: false 
+                        });
                         setShareImgUrl(canvas.toDataURL("image/png"));
                         setModalMode('share_preview');
                     } catch (e) { alert("生成图片失败: " + e.message); }
@@ -558,7 +564,7 @@
                                 <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
                                     {editingItem && (
                                         <button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">
-                                            <MIcon name="ios_share" size={20} />
+                                            {isLoading ? <MIcon name="progress_activity" className="animate-spin" size={20} /> : <MIcon name="ios_share" size={20} />}
                                         </button>
                                     )}
                                     <h2 className="text-2xl font-normal text-on-surface mb-6">{editingItem ? '编辑' : '新建'}</h2>
@@ -722,8 +728,8 @@
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
-                            <div className="relative z-10 bg-white/80 p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
+                            <div className="absolute inset-0 bg-white/80"></div>
+                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
                                 <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Countdown</div>
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
                                 

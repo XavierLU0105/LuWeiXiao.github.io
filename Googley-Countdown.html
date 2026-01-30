@@ -27,22 +27,7 @@
                     },
                     screens: {
                         '3xl': '1800px',
-                    },
-                    animation: {
-                        'gradient-x': 'gradient-x 15s ease infinite',
-                    },
-                    keyframes: {
-                        'gradient-x': {
-                            '0%, 100%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            },
-                        },
-                    },
+                    }
                 } 
             }
         }
@@ -91,8 +76,8 @@
             --md-sys-color-secondary-container: #3e4755;
             --md-sys-color-on-secondary-container: #dbe4f9;
             --md-sys-color-surface: #1a1c1e;
-            --md-sys-color-surface-container: #1e2227; 
-            --md-sys-color-surface-container-high: #282c34;
+            --md-sys-color-surface-container: #26292f; /* Slightly lighter than pure black */
+            --md-sys-color-surface-container-high: #31353b;
             --md-sys-color-on-surface: #e2e2e6;
             --md-sys-color-on-surface-variant: #c3c7cf;
             --md-sys-color-outline: #8d9199;
@@ -522,30 +507,31 @@
                                 {sortedItems.map((item, index) => {
                                     const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1">
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
                                             {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
-                                            <div className="mb-6">
-                                                {item.category && (
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80">{item.category}</span>
-                                                    </div>
-                                                )}
-                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6">{item.title}</h3>
+                                            <div className="mb-4">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80 border border-outline/10">{item.category || '默认'}</span>
+                                                </div>
+                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
                                                 <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
                                                     <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between items-end">
-                                                <span className={`text-xs px-2.5 py-1 rounded-lg font-bold ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
-                                                    {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
-                                                </span>
+                                            
+                                            <div className="mt-auto pt-4 flex justify-between items-end border-t border-outline/5">
+                                                <div className="flex flex-col">
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                        {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
+                                                    </span>
+                                                    {subText && <span className="text-[10px] text-on-surface-variant opacity-60">{subText}</span>}
+                                                </div>
                                                 <div className="flex items-baseline text-primary">
-                                                    <span className="text-6xl font-medium tracking-tighter leading-none">{days}</span>
-                                                    <span className="text-sm ml-1 font-medium opacity-60">天</span>
+                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
+                                                    <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
                                                 </div>
                                             </div>
-                                            {subText && <div className="mt-4 pt-3 border-t border-outline/10 text-xs text-on-surface-variant flex items-center gap-1 opacity-70"><MIcon name="history" size={14}/> {subText}</div>}
                                         </div>
                                     )
                                 })}
@@ -728,8 +714,7 @@
                         </div>
                     )}
 
-                    {/* HIDDEN CAPTURE AREA - Moved outside main modals to prevent overlap */}
-                    {/* Fixed Font Family explicitly to sans-serif to ensure system font fallback works on mobile */}
+                    {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
                             <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
@@ -740,9 +725,16 @@
                                 <div className="text-2xl text-[#0061a4] font-bold mb-2">
                                     {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
-                                <div className="text-8xl font-bold text-slate-800 mb-4 leading-normal font-mono tracking-tighter flex items-end justify-center">
-                                    {shareItemInfo.days}
-                                    <span className="text-3xl text-slate-500 font-medium mb-4 ml-2">天</span>
+                                
+                                <div className="flex justify-center w-full">
+                                    <div className="relative inline-block">
+                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
+                                            {shareItemInfo.days}
+                                        </span>
+                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
+                                            天
+                                        </span>
+                                    </div>
                                 </div>
                                 
                                 <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">

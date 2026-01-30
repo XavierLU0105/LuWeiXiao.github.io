@@ -145,7 +145,7 @@
                 light: { primary: '#006e1c', onPrimary: '#ffffff', primaryContainer: '#94f990', onPrimaryContainer: '#002204', secondary: '#52634f', onSecondary: '#ffffff', secondaryContainer: '#d5e8cf', onSecondaryContainer: '#111f0c', tertiary: '#38656a', onTertiary: '#ffffff', tertiaryContainer: '#bcebf0', onTertiaryContainer: '#002023', background: '#fcfdf6', onBackground: '#1a1c1e', surface: '#fcfdf6', onSurface: '#1a1c1e', surfaceVariant: '#dee5d8', onSurfaceVariant: '#424940', outline: '#72796f', surfaceContainer: '#f0f5eb', surfaceContainerHigh: '#eaefe5' },
                 dark: { primary: '#78dc77', onPrimary: '#00390a', primaryContainer: '#005313', onPrimaryContainer: '#94f990', secondary: '#baccb3', onSecondary: '#253423', secondaryContainer: '#3b4b38', onSecondaryContainer: '#d5e8cf', tertiary: '#a0cfd4', onTertiary: '#00363b', tertiaryContainer: '#1f4d52', onTertiaryContainer: '#bcebf0', background: '#1a1c1e', onBackground: '#e2e2e6', surface: '#1a1c1e', onSurface: '#e2e2e6', surfaceVariant: '#424940', onSurfaceVariant: '#c2c8bd', outline: '#8c9388', surfaceContainer: '#1a211b', surfaceContainerHigh: '#252b26' }
             },
-            'orange': { // Coffee / Milk Tea
+            'orange': { 
                 light: { primary: '#8b5000', onPrimary: '#ffffff', primaryContainer: '#ffdcbe', onPrimaryContainer: '#2c1600', secondary: '#725a42', onSecondary: '#ffffff', secondaryContainer: '#fdddbd', onSecondaryContainer: '#2a1806', tertiary: '#58633a', onTertiary: '#ffffff', tertiaryContainer: '#dbe8b4', onTertiaryContainer: '#161f01', background: '#fff8f6', onBackground: '#1f1b16', surface: '#fff8f6', onSurface: '#1f1b16', surfaceVariant: '#f0e0cf', onSurfaceVariant: '#4f4539', outline: '#817567', surfaceContainer: '#fcece4', surfaceContainerHigh: '#f6e6de' },
                 dark: { primary: '#ffb870', onPrimary: '#4a2800', primaryContainer: '#6a3c00', onPrimaryContainer: '#ffdcbe', secondary: '#e0c1a3', onSecondary: '#402d18', secondaryContainer: '#58432c', onSecondaryContainer: '#fdddbd', tertiary: '#bfcca0', onTertiary: '#2b341a', tertiaryContainer: '#414b29', onTertiaryContainer: '#dbe8b4', background: '#1f1b16', onBackground: '#eae1d9', surface: '#1f1b16', onSurface: '#eae1d9', surfaceVariant: '#4f4539', onSurfaceVariant: '#d3c4b4', outline: '#9c8f80', surfaceContainer: '#2a241f', surfaceContainerHigh: '#352f29' }
             },
@@ -164,23 +164,44 @@
         };
 
         const applyTheme = (colorKey, isDark) => {
-            const t = THEMES[colorKey] || THEMES['orange']; // Default to Orange (Coffee)
+            const t = THEMES[colorKey] || THEMES['orange']; 
             const palette = isDark ? t.dark : t.light;
             const root = document.documentElement;
-            
             if (isDark) root.classList.add('dark-theme');
             else root.classList.remove('dark-theme');
-
-            // Map keys to CSS variables
             for (const [key, value] of Object.entries(palette)) {
-                // key: primaryContainer -> --md-sys-color-primary-container
                 const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
                 root.style.setProperty(`--md-sys-color-${kebabKey}`, value);
             }
-            
-            // Set PWA Theme Color
             const metaThemeColor = document.querySelector("meta[name=theme-color]");
             if(metaThemeColor) metaThemeColor.setAttribute("content", palette.background);
+        };
+
+        // Dynamic Background Class
+        const getThemeBackground = () => {
+            const isDark = document.documentElement.classList.contains('dark-theme');
+            // Using Tailwind classes that don't depend on complex JS logic for class generation is safer here
+            // But since we are using style tag for colors, we can rely on body background-color
+            // However, user wanted gradient. Let's map themes to specific gradient hexes that match the palette
+            const theme = localStorage.getItem('md_app_theme') || 'orange';
+            
+            if (isDark) {
+                switch (theme) {
+                    case 'orange': return 'bg-gradient-to-br from-[#1e1b16] to-[#332b24]'; 
+                    case 'green': return 'bg-gradient-to-br from-[#1a1c1e] to-[#142318]';
+                    case 'purple': return 'bg-gradient-to-br from-[#1a1c1e] to-[#20182b]';
+                    case 'red': return 'bg-gradient-to-br from-[#1a1c1e] to-[#2b1816]';
+                    default: return 'bg-gradient-to-br from-[#1a1c1e] to-[#121418]';
+                }
+            } else {
+                switch (theme) {
+                    case 'orange': return 'bg-gradient-to-br from-[#fff8f6] to-[#fcece4]'; 
+                    case 'green': return 'bg-gradient-to-br from-[#fdfcff] to-[#e6f4ea]';
+                    case 'purple': return 'bg-gradient-to-br from-[#fffbfe] to-[#f3eefc]';
+                    case 'red': return 'bg-gradient-to-br from-[#fffbfa] to-[#fae8e7]';
+                    default: return 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff]'; 
+                }
+            }
         };
 
         const nativeFetch = (url, options = {}) => {
@@ -201,7 +222,7 @@
             const [modalMode, setModalMode] = useState(null); 
             const [editingItem, setEditingItem] = useState(null);
             
-            const [appTheme, setAppTheme] = useState('orange'); // Default Coffee
+            const [appTheme, setAppTheme] = useState('orange'); 
             const [darkMode, setDarkMode] = useState('system'); 
             const [webdavConfig, setWebdavConfig] = useState({ url: '', username: '', password: '', filename: 'countdown_backup.json', autoSync: false });
             const [driveConfig, setDriveConfig] = useState({ clientId: '', autoSync: false });
@@ -262,6 +283,7 @@
                 });
             }, []);
 
+            // Auto Login Effect for Google Drive
             useEffect(() => {
                 if (driveConnection === 'connected') return;
                 if (!driveConfig.clientId) return;
@@ -289,28 +311,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Dynamic Background Class
-            const getThemeBackground = () => {
-                const isDark = darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (isDark) {
-                    switch (appTheme) {
-                        case 'orange': return 'bg-gradient-to-br from-[#1e1b16] to-[#332b24]'; // Dark Coffee
-                        case 'green': return 'bg-gradient-to-br from-[#1a1c1e] to-[#142318]';
-                        case 'purple': return 'bg-gradient-to-br from-[#1a1c1e] to-[#20182b]';
-                        case 'red': return 'bg-gradient-to-br from-[#1a1c1e] to-[#2b1816]';
-                        default: return 'bg-gradient-to-br from-[#1a1c1e] to-[#121418]';
-                    }
-                } else {
-                    switch (appTheme) {
-                        case 'orange': return 'bg-gradient-to-br from-[#fff8f6] to-[#fcece4]'; // Warm Beige (Coffee)
-                        case 'green': return 'bg-gradient-to-br from-[#fdfcff] to-[#e6f4ea]';
-                        case 'purple': return 'bg-gradient-to-br from-[#fffbfe] to-[#f3eefc]';
-                        case 'red': return 'bg-gradient-to-br from-[#fffbfa] to-[#fae8e7]';
-                        default: return 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff]'; // Default Blue
-                    }
-                }
-            };
-
+            // Auto Sync Logic (Debounced & Safe)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
@@ -420,6 +421,13 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
+            // Auto switch if current category becomes empty
+            useEffect(() => {
+                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
+                    setActiveCategory('All');
+                }
+            }, [availableCategories, activeCategory]);
+
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -429,7 +437,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive
+            // Google Drive Logic
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -454,7 +462,7 @@
                 if (!isTokenValid) {
                     if (isSilent) { 
                         console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('error'); 
+                        setSaveStatus('error');
                         if (action === 'connect') setDriveConnection('disconnected');
                         return; 
                     }
@@ -487,13 +495,7 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-                    
-                    if (action === 'connect') {
-                         setDriveConnection('connected');
-                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
-                         return;
-                    }
-
+                    if (action === 'connect') { setDriveConnection('connected'); if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'}); return; }
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -503,7 +505,6 @@
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
-
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -533,7 +534,7 @@
                     setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); }
+                } finally { setIsLoading(false); }
             };
 
             // WebDAV Logic
@@ -608,8 +609,6 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    
-                                    {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
                                         <button 
                                             onClick={() => {
@@ -618,8 +617,8 @@
                                             }}
                                             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${
                                                 driveConnection === 'disconnected' && driveConfig.clientId 
-                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' // Login Button Style
-                                                : 'bg-error-container text-error hover:bg-error-container/80' // Error Style
+                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md'
+                                                : 'bg-error-container text-error hover:bg-error-container/80'
                                             }`}
                                         >
                                             <MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} />
@@ -628,10 +627,9 @@
                                             </span>
                                         </button>
                                     )}
-                                    
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
-                                        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${
+                                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${
                                             driveConnection === 'connected' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800' : 
                                             driveConnection === 'connecting' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800' : 
                                             'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
@@ -678,7 +676,7 @@
                                 {sortedItems.map((item, index) => {
                                     const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
                                             {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
                                             <div className="mb-4">
                                                 {item.category && (
@@ -691,7 +689,7 @@
                                                     <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
-                                                {/* Card Remark Snippet - NEW */}
+                                                {/* Card Remark Snippet */}
                                                 {item.remarks && (
                                                     <p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
                                                         {item.remarks}
@@ -893,11 +891,7 @@
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 text-center text-[10px] text-on-surface-variant opacity-40">
-                                        Version 3.4.0 • Build 34
-                                    </div>
-
-                                    <button onClick={()=>setModalMode(null)} className="w-full mt-2 text-primary text-sm font-medium">关闭</button>
+                                    <button onClick={()=>setModalMode(null)} className="w-full mt-6 text-primary text-sm font-medium">关闭</button>
                                 </div>
                             )}
                         </div>
@@ -905,32 +899,49 @@
 
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
-                        <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/90"></div>
-                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
-                                <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
-                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
-                                
-                                <div className="text-2xl text-[#0061a4] font-bold mb-2">
-                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
-                                </div>
-                                
-                                <div className="flex justify-center w-full">
-                                    <div className="relative inline-block">
-                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
+                        <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-6 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
+                             {/* Soft Background Accent - Material Blobs */}
+                             <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-[#d3e3fd] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+                             <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 bg-[#c2e7ff] rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+                             
+                            {/* Card Container */}
+                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-between border border-[#e7e7e7]">
+                                {/* Top Section */}
+                                <div className="w-full flex flex-col items-center mt-8">
+                                    <h1 className="text-3xl font-bold text-[#1f1f1f] mb-8 text-center leading-snug break-words w-full px-2">
+                                        {formData.title || '倒数日'}
+                                    </h1>
+
+                                    {/* Status Pill */}
+                                    <div className="px-5 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-bold mb-8 shadow-sm">
+                                        {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
+                                    </div>
+
+                                    {/* Big Number */}
+                                    <div className="flex items-baseline justify-center">
+                                         <span className="text-[120px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                                             {shareItemInfo.days}
                                         </span>
-                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
+                                        <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-4">
                                             天
                                         </span>
                                     </div>
                                 </div>
-                                
-                                <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">
-                                    {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
+
+                                {/* Bottom Section */}
+                                <div className="w-full flex flex-col items-center mb-6">
+                                     {/* Date Pill - Subtle Text Only */}
+                                    <div className="border-t border-[#e0e2e0] w-full mb-4"></div>
+                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 mb-8 uppercase">
+                                        {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
+                                    </div>
+                                    
+                                    {/* Footer Branding - Subtle */}
+                                    <div className="text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
+                                        Googley Countdown
+                                    </div>
                                 </div>
                             </div>
-                            <div className="relative z-10 mt-10 text-xs text-slate-500 font-medium opacity-60">Generated by Googley Countdown</div>
                         </div>
                     </div>
                 </div>

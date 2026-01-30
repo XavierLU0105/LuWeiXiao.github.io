@@ -43,9 +43,6 @@
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Lunar Calendar Lib -->
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
-
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -189,8 +186,10 @@
             const [isLoading, setIsLoading] = useState(false);
             const [isAppMode, setIsAppMode] = useState(false);
             
-            // New Sync Status State: 'idle', 'pending', 'syncing', 'success', 'error'
+            // Sync Status State: 'idle', 'pending', 'syncing', 'success', 'error'
             const [saveStatus, setSaveStatus] = useState('idle');
+            // Drive Connection State: 'disconnected', 'connecting', 'connected'
+            const [driveConnection, setDriveConnection] = useState('disconnected');
             
             const [shareImgUrl, setShareImgUrl] = useState(null);
             const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
@@ -230,6 +229,31 @@
                     if (localStorage.getItem('md_dark_mode') === 'system') handleThemeChange(savedTheme, 'system');
                 });
             }, []);
+
+            // Auto Login Effect for Google Drive
+            useEffect(() => {
+                if (!driveConfig.clientId) return;
+                
+                const autoLoginDrive = async () => {
+                    // Wait for GIS script
+                    let tries = 0;
+                    while (!window.google && tries < 10) {
+                        await new Promise(r => setTimeout(r, 500));
+                        tries++;
+                    }
+                    if (!window.google) return;
+                    
+                    // Try silent login / check status
+                    setDriveConnection('connecting');
+                    // We trigger a 'connect' action which basically tries to list files silently
+                    handleGoogleDriveAction('connect', true);
+                };
+
+                // Trigger if we have a client ID (likely previously configured)
+                if (driveConfig.clientId) {
+                    autoLoginDrive();
+                }
+            }, [driveConfig.clientId]);
 
             useEffect(() => { localStorage.setItem('md_countdowns', JSON.stringify(items)); }, [items]);
             useEffect(() => { localStorage.setItem('md_webdav_config', JSON.stringify(webdavConfig)); }, [webdavConfig]);
@@ -351,13 +375,6 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
-            // Auto switch if current category becomes empty
-            useEffect(() => {
-                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
-                    setActiveCategory('All');
-                }
-            }, [availableCategories, activeCategory]);
-
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -417,19 +434,32 @@
                     const folderData = await folderSearch.json();
                     if (folderData.files && folderData.files.length > 0) folderId = folderData.files[0].id;
                     else {
+                        // Create folder logic... (omitted for brevity, same as before)
                         const createFolder = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) });
                         const createData = await createFolder.json();
-                        if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
+                        if (createData.id) folderId = createData.id;
                     }
+                    
+                    // If action is connect, just verify we got here
+                    if (action === 'connect') {
+                         setDriveConnection('connected');
+                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
+                         // Optionally store user info?
+                         return;
+                    }
+
+                    // ... existing upload/download logic ...
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
                     if (fileDataInFolder.files && fileDataInFolder.files.length > 0) fileId = fileDataInFolder.files[0].id;
                     else if (action === 'download') {
-                        const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                        const fileDataRoot = await fileSearchRoot.json();
-                        if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
+                         // ... fallback to root check ...
+                         const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                         const fileDataRoot = await fileSearchRoot.json();
+                         if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
+
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -442,18 +472,25 @@
                         else { metadata.parents = [folderId]; const formNew = new FormData(); formNew.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); formNew.append('file', new Blob([fileContent], { type: 'application/json' })); uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart'; method = 'POST'; const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: formNew }); if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed'); return; }
                         const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: form });
                         if (upRes.ok) { 
+                            setDriveConnection('connected');
                             if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'});
                             if (isSilent) { setSaveStatus('success'); setTimeout(() => setSaveStatus('idle'), 2000); }
                         } else throw new Error('Upload failed');
                     } else if (action === 'download') {
-                        if (!fileId) throw new Error('未找到备份文件');
-                        const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                        if (downRes.ok) { const data = await downRes.json(); if(Array.isArray(data)) setItems(data); setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); } else throw new Error('Download failed');
+                         // ... download logic ...
+                         if (!fileId) throw new Error('未找到备份文件');
+                         const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                         if (downRes.ok) { 
+                             const data = await downRes.json(); if(Array.isArray(data)) setItems(data); 
+                             setDriveConnection('connected');
+                             setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); 
+                        } else throw new Error('Download failed');
                     }
                 } catch (e) { 
+                    setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); } // isSyncing handled by saveStatus logic in silent mode
+                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); }
             };
 
             // WebDAV Logic
@@ -478,6 +515,7 @@
                 }
             };
 
+            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -729,7 +767,20 @@
                                         ) : (
                                             <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
                                                 <p className="text-[10px] text-primary mb-2 bg-primary/10 p-2 rounded">网页版直接可用。需在 Google Cloud Console 申请 Client ID。</p>
+                                                
                                                 <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="Client ID (apps.googleusercontent.com)" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} />
+                                                
+                                                {/* Connection Status Indicator */}
+                                                <div className="flex items-center justify-between py-2 border-b border-outline/5 mb-2">
+                                                    <span className="text-xs font-medium text-on-surface-variant">连接状态</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className={`w-2 h-2 rounded-full ${driveConnection === 'connected' ? 'bg-success' : (driveConnection === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-outline/50')}`}></div>
+                                                        <span className="text-[10px] text-on-surface-variant">
+                                                            {driveConnection === 'connected' ? '已连接' : (driveConnection === 'connecting' ? '连接中...' : '未连接')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex items-center justify-between py-1">
                                                     <span className="text-xs text-on-surface">自动同步</span>
                                                     <div onClick={()=>setDriveConfig({...driveConfig, autoSync: !driveConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${driveConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>

@@ -188,7 +188,7 @@
             
             // Sync Status State
             const [saveStatus, setSaveStatus] = useState('idle');
-            // Drive Connection State: 'disconnected', 'connecting', 'connected'
+            // Drive Connection State
             const [driveConnection, setDriveConnection] = useState('disconnected');
             
             const [shareImgUrl, setShareImgUrl] = useState(null);
@@ -242,7 +242,6 @@
 
             // Auto Login Effect for Google Drive
             useEffect(() => {
-                // If we already restored a valid token from LS, don't auto-login again
                 if (driveConnection === 'connected') return;
                 
                 if (!driveConfig.clientId) return;
@@ -280,7 +279,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced)
+            // Auto Sync Logic (Debounced & Strict Logic)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
@@ -393,7 +392,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive
+            // Google Drive Logic (Strict Error Handling)
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -407,7 +406,7 @@
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         const tokenObj = { token: resp.access_token, expiresAt };
                         setGAccessToken(tokenObj);
-                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj)); // Cache token
+                        localStorage.setItem('md_g_token', JSON.stringify(tokenObj)); 
                         setDriveConnection('connected');
                     }});
                     setTokenClient(client);
@@ -427,9 +426,10 @@
 
                 if (!isTokenValid) {
                     if (isSilent) { 
-                        console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('idle');
-                        if (action === 'connect') setDriveConnection('disconnected'); // Only reset if explicit connect check failed
+                        // CRITICAL FIX: If silent sync fails auth, SHOW ERROR, don't just idle
+                        console.log("Auto-sync failed: Token expired/missing."); 
+                        setSaveStatus('error'); 
+                        if (action === 'connect') setDriveConnection('disconnected'); 
                         return; 
                     }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
@@ -462,6 +462,9 @@
                     const FILENAME = 'countdown_backup.json';
                     let folderId = null;
                     const folderSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                    
+                    if (!folderSearch.ok) throw new Error("Auth/Network Error"); // Catch token invalidation here
+
                     const folderData = await folderSearch.json();
                     if (folderData.files && folderData.files.length > 0) folderId = folderData.files[0].id;
                     else {
@@ -470,14 +473,12 @@
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
                     
-                    // If action is connect, just verify we got here
                     if (action === 'connect') {
                          setDriveConnection('connected');
                          if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
                          return;
                     }
 
-                    // ... existing upload/download logic ...
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -542,6 +543,7 @@
                 }
             };
 
+            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -592,7 +594,17 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
+                                    
+                                    {/* Updated Error State: Show Unlogged/Error status explicitly */}
+                                    {saveStatus === 'error' && (
+                                        <div className="flex items-center gap-1 text-error cursor-pointer bg-error/10 px-2 py-1 rounded-full hover:bg-error/20 transition-colors" onClick={() => {
+                                            if(driveConfig.clientId && driveConnection === 'disconnected') handleGoogleDriveAction('connect');
+                                            else setModalMode('settings');
+                                        }}>
+                                            <MIcon name="error" className="text-sm" size={16} />
+                                            <span className="text-xs font-bold">{driveConnection === 'disconnected' ? '未登录' : '同步失败'}</span>
+                                        </div>
+                                    )}
                                     
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (

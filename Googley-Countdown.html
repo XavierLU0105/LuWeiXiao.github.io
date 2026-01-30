@@ -197,7 +197,7 @@
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // Form Data - Added endDate
+            // Form Data
             const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
 
             useEffect(() => {
@@ -244,7 +244,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Improved)
+            // Auto Sync Logic (Debounced)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 const timer = setTimeout(() => {
@@ -254,22 +254,18 @@
                 return () => clearTimeout(timer);
             }, [items]);
 
-            // --- Calculation (Fixed Logic with End Date) ---
+            // --- Calculation ---
             const calculateDays = (item) => {
-                // If End Date is set, calculate fixed duration
                 if (item.endDate) {
                     const start = new Date(item.date);
                     const end = new Date(item.endDate);
-                    // Use start of day for both
                     start.setHours(0,0,0,0);
                     end.setHours(0,0,0,0);
                     const diffTime = Math.abs(end - start);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    // For duration, it's always "Total" days, past tense usually.
                     return { days: diffDays, date: end, subText: '', isPast: true, isDuration: true };
                 }
 
-                // Normal Countdown Logic
                 const now = new Date(); 
                 now.setHours(0,0,0,0);
                 
@@ -312,7 +308,6 @@
             };
 
             const getDisplayDateText = (item, calculatedDate) => {
-                // If duration mode, show range
                 if (item.endDate) {
                     return `${item.date.replace(/-/g, '/')} - ${item.endDate.replace(/-/g, '/')}`;
                 }
@@ -383,7 +378,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive Logic (Enhanced for Silent Sync)
+            // Google Drive Logic (Smart Refresh)
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -392,10 +387,9 @@
                         scope: 'https://www.googleapis.com/auth/drive.file',
                         callback: (resp) => {
                             if (resp.error) {
-                                console.error(resp);
+                                if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error});
                                 return;
                             }
-                            // Store token and expiration (approx 3500s buffer)
                             const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                             setGAccessToken({ token: resp.access_token, expiresAt });
                         }
@@ -412,40 +406,45 @@
                 if (!client && !isSilent) return; 
 
                 // --- Token Management Strategy ---
-                let accessToken = gAccessToken?.token;
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
 
-                if (!isTokenValid) {
-                    if (isSilent) {
-                        // Silent mode: If token invalid, DO NOT prompt user. Just pause sync.
-                        console.log("Auto-sync skipped: Token expired or missing.");
-                        return; 
-                    }
-                    // Manual mode: Prompt user
-                    setIsLoading(true);
-                    setSyncStatus({type: 'info', msg: '正在连接 Google...'});
-                    
-                    // We need to wait for the callback to set the token. 
-                    // To keep it simple in this flow, we override the callback temporarily for this manual action
-                    client.callback = async (resp) => {
-                        if (resp.error) {
-                            setSyncStatus({type: 'error', msg: '授权失败'});
+                client.callback = async (resp) => {
+                    if (resp.error) {
+                        if (!isSilent) {
+                            setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error});
                             setIsLoading(false);
-                            return;
+                        } else {
+                            console.log("Silent refresh failed:", resp.error);
+                            setIsSyncing(false);
                         }
-                        const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                        setGAccessToken({ token: resp.access_token, expiresAt });
-                        await performDriveOp(resp.access_token, action, isSilent);
-                    };
-                    client.requestAccessToken();
-                    return;
-                }
+                        return;
+                    }
+                    
+                    const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
+                    setGAccessToken({ token: resp.access_token, expiresAt });
+                    await performDriveOp(resp.access_token, action, isSilent);
+                };
 
-                // If token is valid, proceed immediately
-                if (!isSilent) setIsLoading(true);
-                else setIsSyncing(true);
-                
-                await performDriveOp(accessToken, action, isSilent);
+                if (isTokenValid) {
+                     if (!isSilent) setIsLoading(true);
+                     else setIsSyncing(true);
+                     await performDriveOp(gAccessToken.token, action, isSilent);
+                } else {
+                    if (isSilent) {
+                        // Try silent refresh
+                        setIsSyncing(true);
+                        try {
+                            client.requestAccessToken({prompt: 'none'});
+                        } catch (e) {
+                            setIsSyncing(false);
+                        }
+                    } else {
+                        // Manual
+                        setIsLoading(true);
+                        setSyncStatus({type: 'info', msg: '正在连接 Google...'});
+                        client.requestAccessToken();
+                    }
+                }
             };
 
             const performDriveOp = async (accessToken, action, isSilent) => {

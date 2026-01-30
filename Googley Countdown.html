@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Googley Countdown</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fdfcff">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3652/3652191.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href='data:application/json;base64,eyJuYW1lIjoiR29vZ2xleSBDb3VudGRvd24iLCJzaG9ydF9uYW1lIjoiQ291bnRkb3duIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzM2NTIvMzY1MjE5MS5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dLCJzdGFydF91cmwiOiIuaW5kZXguaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZGZjZmYiLCJ0aGVtZV9jb2xvciI6IiMwMDYxYTQifQ=='>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: { 
+                extend: {
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
+                    },
+                    screens: {
+                        '3xl': '1800px',
+                    }
+                } 
+            }
+        }
+    </script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Identity -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Html2Canvas -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <style>
+        :root {
+            --md-sys-color-primary: #0061a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d1e4ff;
+            --md-sys-color-on-primary-container: #001d36;
+            --md-sys-color-secondary-container: #d7e3f7;
+            --md-sys-color-on-secondary-container: #101c2b;
+            --md-sys-color-surface: #fdfcff;
+            --md-sys-color-surface-container: #f0f4f9;
+            --md-sys-color-surface-container-high: #e9eff6;
+            --md-sys-color-on-surface: #1a1c1e;
+            --md-sys-color-on-surface-variant: #43474e;
+            --md-sys-color-outline: #73777f;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-success: #146c2e;
+        }
+
+        .dark-theme {
+            --md-sys-color-primary: #9ecaff;
+            --md-sys-color-on-primary: #003258;
+            --md-sys-color-primary-container: #00497d;
+            --md-sys-color-on-primary-container: #d1e4ff;
+            --md-sys-color-secondary-container: #3e4755;
+            --md-sys-color-on-secondary-container: #dbe4f9;
+            --md-sys-color-surface: #1a1c1e;
+            --md-sys-color-surface-container: #1e2227; 
+            --md-sys-color-surface-container-high: #282c34;
+            --md-sys-color-on-surface: #e2e2e6;
+            --md-sys-color-on-surface-variant: #c3c7cf;
+            --md-sys-color-outline: #8d9199;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-success: #6dd58c;
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans SC', "Microsoft YaHei", sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* Utility Classes */
+        .bg-surface { background-color: var(--md-sys-color-surface); }
+        .bg-surface-container { background-color: var(--md-sys-color-surface-container); }
+        .bg-surface-container-high { background-color: var(--md-sys-color-surface-container-high); }
+        .bg-primary { background-color: var(--md-sys-color-primary); }
+        .bg-primary-container { background-color: var(--md-sys-color-primary-container); }
+        .bg-secondary-container { background-color: var(--md-sys-color-secondary-container); }
+        
+        .text-on-surface { color: var(--md-sys-color-on-surface); }
+        .text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
+        .text-primary { color: var(--md-sys-color-primary); }
+        .text-on-primary { color: var(--md-sys-color-on-primary); }
+        .text-on-primary-container { color: var(--md-sys-color-on-primary-container); }
+        .text-on-secondary-container { color: var(--md-sys-color-on-secondary-container); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background-color: var(--md-sys-color-outline); border-radius: 4px; opacity: 0.2; }
+        
+        .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        const MIcon = ({ name, className = "", filled = false, size = 24 }) => (
+            <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
+        );
+
+        // Safe Local Date Generator
+        const getLocalDateString = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        const applyTheme = (colorKey, isDark) => {
+            const themePalettes = {
+                'blue': { light: '#0061a4', dark: '#9ecaff' },
+                'green': { light: '#006e1c', dark: '#80d996' },
+                'purple': { light: '#6b4ea2', dark: '#d0bcff' },
+                'orange': { light: '#8b5000', dark: '#ffb870' },
+                'red': { light: '#b3261e', dark: '#ffb4ab' },
+                'monet': { light: '#475d92', dark: '#b0c6ff' }
+            };
+            const root = document.documentElement;
+            if (isDark) root.classList.add('dark-theme');
+            else root.classList.remove('dark-theme');
+            const p = themePalettes[colorKey] || themePalettes['blue'];
+            root.style.setProperty('--md-sys-color-primary', isDark ? p.dark : p.light);
+            const metaThemeColor = document.querySelector("meta[name=theme-color]");
+            if(metaThemeColor) metaThemeColor.setAttribute("content", isDark ? "#1a1c1e" : "#fdfcff");
+        };
+
+        // Native Fetch Adapter for HBuilderX/5+ Apps
+        const nativeFetch = (url, options = {}) => {
+            return new Promise((resolve, reject) => {
+                if (window.plus && window.plus.net) {
+                    const xhr = new plus.net.XMLHttpRequest();
+                    xhr.open(options.method || 'GET', url);
+                    if (options.headers) for (const key in options.headers) xhr.setRequestHeader(key, options.headers[key]);
+                    xhr.onload = () => resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, json: () => Promise.resolve(JSON.parse(xhr.responseText)) });
+                    xhr.onerror = (e) => reject(new Error("Native Network Error"));
+                    xhr.send(options.body || null);
+                } else fetch(url, options).then(resolve).catch(reject);
+            });
+        };
+
+        const App = () => {
+            const [items, setItems] = useState([]);
+            const [modalMode, setModalMode] = useState(null); 
+            const [editingItem, setEditingItem] = useState(null);
+            
+            // Configs
+            const [appTheme, setAppTheme] = useState('blue');
+            const [darkMode, setDarkMode] = useState('system'); 
+            const [webdavConfig, setWebdavConfig] = useState({ url: '', username: '', password: '', filename: 'countdown_backup.json', autoSync: false });
+            const [driveConfig, setDriveConfig] = useState({ clientId: '', autoSync: false });
+            
+            // Runtime
+            const [activeCategory, setActiveCategory] = useState('All'); 
+            const [syncStatus, setSyncStatus] = useState({ type: '', msg: '' });
+            const [isLoading, setIsLoading] = useState(false);
+            const [isAppMode, setIsAppMode] = useState(false);
+            const [isSyncing, setIsSyncing] = useState(false);
+            const [shareImgUrl, setShareImgUrl] = useState(null);
+            const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
+            const [tokenClient, setTokenClient] = useState(null);
+
+            const isFirstMount = useRef(true);
+            const shareRef = useRef(null);
+            const fileInputRef = useRef(null);
+
+            // Form Data
+            const [formData, setFormData] = useState({ title: '', date: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
+
+            useEffect(() => {
+                const savedItems = localStorage.getItem('md_countdowns');
+                if (savedItems) setItems(JSON.parse(savedItems));
+                
+                const savedConfig = localStorage.getItem('md_webdav_config');
+                if (savedConfig) setWebdavConfig(JSON.parse(savedConfig));
+                
+                const savedDrive = localStorage.getItem('md_drive_config');
+                if (savedDrive) {
+                    const parsed = JSON.parse(savedDrive);
+                    setDriveConfig(parsed);
+                    if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive');
+                }
+
+                const savedTheme = localStorage.getItem('md_app_theme') || 'blue';
+                const savedDark = localStorage.getItem('md_dark_mode') || 'system';
+                setAppTheme(savedTheme);
+                setDarkMode(savedDark);
+                
+                handleThemeChange(savedTheme, savedDark);
+
+                if (window.plus) setIsAppMode(true);
+                document.addEventListener('plusready', () => setIsAppMode(true));
+                
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (localStorage.getItem('md_dark_mode') === 'system') handleThemeChange(savedTheme, 'system');
+                });
+            }, []);
+
+            useEffect(() => { localStorage.setItem('md_countdowns', JSON.stringify(items)); }, [items]);
+            useEffect(() => { localStorage.setItem('md_webdav_config', JSON.stringify(webdavConfig)); }, [webdavConfig]);
+            useEffect(() => { localStorage.setItem('md_drive_config', JSON.stringify(driveConfig)); }, [driveConfig]);
+
+            const handleThemeChange = (color, mode) => {
+                setAppTheme(color);
+                setDarkMode(mode);
+                localStorage.setItem('md_app_theme', color);
+                localStorage.setItem('md_dark_mode', mode);
+                let isDark = false;
+                if (mode === 'system') isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                else isDark = (mode === 'dark');
+                applyTheme(color, isDark);
+            };
+
+            // Auto Sync Logic (Debounced)
+            useEffect(() => {
+                if (isFirstMount.current) { isFirstMount.current = false; return; }
+                const timer = setTimeout(() => {
+                    if (driveConfig.autoSync && driveConfig.clientId) handleGoogleDriveAction('upload', true);
+                    else if (webdavConfig.autoSync && webdavConfig.url) handleWebDAV(true, true);
+                }, 2000); 
+                return () => clearTimeout(timer);
+            }, [items]);
+
+            // --- Calculation (Safe Local Time Logic) ---
+            const calculateDays = (item) => {
+                // Current time at 00:00:00 local
+                const now = new Date(); 
+                now.setHours(0,0,0,0);
+                
+                if (!item.date) return { days: 0, date: now, subText: '', isPast: false };
+
+                // Parse YYYY-MM-DD manually to avoid UTC conversion issues
+                const [y, m, d] = item.date.split('-').map(Number);
+                const targetBase = new Date(y, m - 1, d); // Month is 0-indexed
+                
+                let target = new Date(targetBase);
+                let subText = null;
+                let isPast = false;
+
+                if (item.repeatType && item.repeatType !== 'none') {
+                    let next = new Date(targetBase);
+                    let prev = new Date(targetBase);
+                    if (item.repeatType === 'week') {
+                        const diffDays = Math.floor((now - targetBase) / 86400000);
+                        const weeksPassed = Math.floor(diffDays / 7);
+                        next.setDate(targetBase.getDate() + (weeksPassed * 7));
+                        if (next < now) next.setDate(next.getDate() + 7);
+                        prev = new Date(next); prev.setDate(next.getDate() - 7);
+                    } else if (item.repeatType === 'month') {
+                        let monthDiff = (now.getFullYear() - targetBase.getFullYear()) * 12 + (now.getMonth() - targetBase.getMonth());
+                        next.setMonth(targetBase.getMonth() + monthDiff);
+                        if (next < now) next.setMonth(next.getMonth() + 1);
+                        prev = new Date(next); prev.setMonth(next.getMonth() - 1);
+                    } else if (item.repeatType === 'year') {
+                        next.setFullYear(now.getFullYear());
+                        if (next < now) next.setFullYear(now.getFullYear() + 1);
+                        prev = new Date(next); prev.setFullYear(next.getFullYear() - 1);
+                    }
+                    target = next;
+                    subText = `上次已过 ${Math.floor((now - prev) / 86400000)} 天`;
+                } else if (target < now) {
+                    isPast = true;
+                }
+                
+                const rawDays = Math.ceil((target - now) / 86400000);
+                return { days: Math.abs(rawDays), date: target, subText, isPast };
+            };
+
+            const getDisplayDateText = (item, calculatedDate) => {
+                const d = calculatedDate;
+                if(item.repeatType==='year') return `每年 ${d.getMonth()+1}月${d.getDate()}日`;
+                if(item.repeatType==='month') return `每月 ${d.getDate()}日`;
+                if(item.repeatType==='week') return `每周${['日','一','二','三','四','五','六'][d.getDay()]}`;
+                return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+            };
+
+            const handleShare = async () => {
+                if (!shareRef.current) return;
+                try {
+                    await document.fonts.ready;
+                    const canvas = await html2canvas(shareRef.current, { 
+                        backgroundColor: null, 
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    });
+                    setShareImgUrl(canvas.toDataURL("image/png"));
+                    setModalMode('share_preview');
+                } catch (e) { alert("生成图片失败: " + e.message); }
+            };
+
+            const handleSave = (e) => {
+                e.preventDefault();
+                const cat = formData.category.trim();
+                const newItem = { ...formData, category: cat, id: editingItem ? editingItem.id : Date.now().toString() };
+                setItems(editingItem ? items.map(i => i.id === newItem.id ? newItem : i) : [...items, newItem]);
+                setModalMode(null);
+            };
+
+            const handleDelete = () => { if (confirm('确定删除?')) { setItems(items.filter(i => i.id !== editingItem.id)); setModalMode(null); } };
+            
+            const openAddEdit = (item = null) => {
+                setEditingItem(item);
+                if (item) setFormData(item);
+                else setFormData({ 
+                    title: '', 
+                    date: getLocalDateString(),
+                    repeatType: 'none', 
+                    isPinned: false, 
+                    category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '',
+                    statusText: '' 
+                });
+                setModalMode('add');
+            };
+
+            const availableCategories = useMemo(() => {
+                const cats = new Set();
+                items.forEach(i => {
+                    if (i.category && i.category.trim() !== '') cats.add(i.category);
+                });
+                return ['All', ...Array.from(cats)];
+            }, [items]);
+
+            const sortedItems = useMemo(() => {
+                let filtered = items;
+                if (activeCategory !== 'All') {
+                    filtered = items.filter(i => i.category === activeCategory);
+                }
+                return filtered.sort((a, b) => {
+                    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+                    return Math.abs(calculateDays(a).days) - Math.abs(calculateDays(b).days);
+                });
+            }, [items, activeCategory]);
+
+            // Google Drive Logic
+            const initTokenClient = () => {
+                if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
+                if (window.google) {
+                    const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: '' });
+                    setTokenClient(client);
+                    return client;
+                }
+                return null;
+            };
+
+            const handleGoogleDriveAction = async (action, isSilent = false) => {
+                let client = tokenClient;
+                if (!client) client = initTokenClient();
+                if (!client) return;
+                if (!isSilent) { setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'}); } else { setIsSyncing(true); }
+                client.callback = async (resp) => {
+                    if (resp.error) { if(!isSilent) setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); setIsSyncing(false); return; }
+                    await performDriveOp(resp.access_token, action, isSilent);
+                };
+                if (isSilent) { try { client.requestAccessToken({prompt: 'none'}); } catch(e) { setIsSyncing(false); } } else { client.requestAccessToken(); }
+            };
+
+            const performDriveOp = async (accessToken, action, isSilent) => {
+                try {
+                    const FILENAME = 'countdown_backup.json';
+                    const searchUrl = `https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`;
+                    const searchRes = await fetch(searchUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
+                    const searchData = await searchRes.json();
+                    const fileId = searchData.files && searchData.files.length > 0 ? searchData.files[0].id : null;
+                    if (action === 'upload') {
+                        const fileContent = JSON.stringify(items);
+                        const metadata = { name: FILENAME, mimeType: 'application/json' };
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                        form.append('file', new Blob([fileContent], { type: 'application/json' }));
+                        let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                        let method = 'POST';
+                        if (fileId) { uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`; method = 'PATCH'; }
+                        const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: form });
+                        if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed');
+                    } else if (action === 'download') {
+                        if (!fileId) throw new Error('未找到备份文件');
+                        const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                        if (downRes.ok) { const data = await downRes.json(); if(Array.isArray(data)) setItems(data); setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); } else throw new Error('Download failed');
+                    }
+                } catch (e) { if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); } finally { setIsLoading(false); setIsSyncing(false); }
+            };
+
+            // WebDAV Logic
+            const handleWebDAV = async (isUpload, isSilent) => {
+                if(!webdavConfig.url) return !isSilent && setSyncStatus({type:'error',msg:'URL为空'});
+                if(isSilent) setIsSyncing(true); else setIsLoading(true);
+                try {
+                    let u = webdavConfig.url.endsWith('/') ? webdavConfig.url : webdavConfig.url + '/'; u += webdavConfig.filename;
+                    const options = { method: isUpload ? 'PUT' : 'GET', headers: {'Authorization': 'Basic ' + btoa(unescape(encodeURIComponent(webdavConfig.username + ':' + webdavConfig.password)))} };
+                    if(isUpload) { options.headers['Content-Type']='application/json'; options.body=JSON.stringify(items); } else u += `?t=${Date.now()}`;
+                    const res = await nativeFetch(u, options);
+                    if(res.ok) { if(!isUpload) { const data = await res.json(); if(Array.isArray(data)) setItems(data); } if(!isSilent) setSyncStatus({type:'success',msg:'成功'}); } else throw new Error(res.status);
+                } catch(e) { if(!isSilent) setSyncStatus({type:'error',msg:'失败'}); } finally { if(isSilent) setTimeout(()=>setIsSyncing(false),500); else setIsLoading(false); }
+            };
+
+            // Local Backup
+            const handleExportLocal = () => {
+                const backupData = {
+                    version: 1,
+                    date: new Date().toISOString(),
+                    items: items,
+                    settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig }
+                };
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "googley_backup_" + getLocalDateString() + ".json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                setSyncStatus({type: 'success', msg: '已导出到本地'});
+            };
+
+            const handleImportLocal = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (json.items && Array.isArray(json.items)) {
+                            if (confirm(`发现 ${json.items.length} 条数据，是否覆盖当前数据？`)) {
+                                setItems(json.items);
+                                if (json.settings) {
+                                    if (json.settings.theme) handleThemeChange(json.settings.theme, json.settings.darkMode || 'system');
+                                    if (json.settings.webdav) setWebdavConfig(json.settings.webdav);
+                                    if (json.settings.drive) setDriveConfig(json.settings.drive);
+                                }
+                                setSyncStatus({type: 'success', msg: '导入成功'});
+                                setTimeout(() => setModalMode(null), 1000);
+                            }
+                        } else throw new Error("Format error");
+                    } catch (error) { setSyncStatus({type: 'error', msg: '文件格式错误'}); }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            };
+
+            const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
+
+            return (
+                <div className="min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300">
+                    <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/80 flex flex-col gap-4 shadow-sm transition-colors">
+                        <div className="flex justify-between items-center">
+                            <span className="text-2xl font-bold text-on-surface">Googley Countdown</span>
+                            <div className="flex gap-2">
+                                {isSyncing && <MIcon name="cloud_sync" className="text-primary animate-spin" size={24} />}
+                                <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                            {availableCategories.map(cat => (
+                                <button key={cat} onClick={()=>setActiveCategory(cat)} 
+                                    className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory===cat ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-high/80'}`}>
+                                    {cat === 'All' ? '全部' : cat}
+                                </button>
+                            ))}
+                        </div>
+                    </header>
+
+                    <main className="w-full px-6 mt-4 flex-1">
+                        {sortedItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-32 animate-enter opacity-50">
+                                <MIcon name="event_busy" size={64} className="text-on-surface-variant mb-4" />
+                                <p className="text-sm text-on-surface-variant">暂无倒数日</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                                {sortedItems.map((item, index) => {
+                                    const { days, date, subText, isPast } = calculateDays(item);
+                                    return (
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-transform animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-md">
+                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
+                                            <div className="mb-6">
+                                                {item.category && (
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80">{item.category}</span>
+                                                    </div>
+                                                )}
+                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6">{item.title}</h3>
+                                                <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
+                                                    <MIcon name={item.repeatType!=='none'?'update':'event'} size={16} />
+                                                    <span>{getDisplayDateText(item, date)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-end">
+                                                <span className={`text-xs px-2.5 py-1 rounded-lg font-bold ${isPast ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                    {item.statusText || (isPast ? '已过去' : '还有')}
+                                                </span>
+                                                <div className="flex items-baseline text-primary">
+                                                    <span className="text-6xl font-medium tracking-tighter leading-none">{days}</span>
+                                                    <span className="text-sm ml-1 font-medium opacity-60">天</span>
+                                                </div>
+                                            </div>
+                                            {subText && <div className="mt-4 pt-3 border-t border-outline/10 text-xs text-on-surface-variant flex items-center gap-1 opacity-70"><MIcon name="history" size={14}/> {subText}</div>}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
+                    </main>
+
+                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl">
+                        <MIcon name="add" size={28} /> 新建
+                    </button>
+
+                    {/* --- Modals --- */}
+                    {modalMode && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setModalMode(null)}></div>
+                            
+                            {/* ADD / EDIT */}
+                            {modalMode === 'add' && (
+                                <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
+                                    {editingItem && (
+                                        <button onClick={handleShare} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors">
+                                            <MIcon name="ios_share" size={20} />
+                                        </button>
+                                    )}
+                                    <h2 className="text-2xl font-normal text-on-surface mb-6">{editingItem ? '编辑' : '新建'}</h2>
+                                    <form onSubmit={handleSave} className="space-y-4">
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
+                                            <label className="text-xs text-primary font-medium">名称</label>
+                                            <input className="w-full bg-transparent outline-none text-on-surface text-lg py-1" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} autoFocus required placeholder="例如: 结婚纪念日" />
+                                        </div>
+                                        
+                                        <div className="flex gap-3">
+                                            <div className="flex-1 bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
+                                                <label className="text-xs text-primary font-medium">日期 (本地时间)</label>
+                                                <input type="date" className="w-full bg-transparent outline-none text-on-surface py-1 h-8" value={formData.date} onChange={e=>setFormData({...formData, date: e.target.value})} required />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20 relative">
+                                            <label className="text-xs text-primary font-medium">分类 (可选)</label>
+                                            <input list="cat-suggestions" className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="例如: 追星" />
+                                            <datalist id="cat-suggestions">
+                                                {availableCategories.filter(c=>c!=='All').map(c => <option key={c} value={c} />)}
+                                            </datalist>
+                                        </div>
+
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
+                                            <label className="text-xs text-primary font-medium">状态标签 (可选)</label>
+                                            <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder="例如: 已用, 还有, 坚持了..." />
+                                        </div>
+
+                                        <div className="flex items-center gap-3 py-2">
+                                            <div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-colors ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}>
+                                                <MIcon name="keep" size={18} className={formData.isPinned ? "text-on-secondary-container" : "text-outline"} />
+                                                <span className="text-xs font-bold">置顶</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['none:无', 'week:周', 'month:月', 'year:年'].map(t => {
+                                                const [val, label] = t.split(':');
+                                                return <div key={val} onClick={()=>setFormData({...formData, repeatType: val})} 
+                                                    className={`py-2 text-center rounded-lg text-xs cursor-pointer border transition-all ${formData.repeatType===val ? 'bg-primary text-on-primary border-primary font-bold' : 'border-outline/20 text-on-surface hover:bg-surface-container-high'}`}>{label}</div>
+                                            })}
+                                        </div>
+
+                                        <div className="flex justify-end gap-3 pt-4 border-t border-outline/10">
+                                            {editingItem && <button type="button" onClick={handleDelete} className="mr-auto text-error text-sm font-medium px-2">删除</button>}
+                                            <button type="button" onClick={()=>setModalMode(null)} className="text-primary text-sm font-medium px-4">取消</button>
+                                            <button type="submit" className="bg-primary text-on-primary px-8 py-2.5 rounded-full text-sm font-medium shadow-md">保存</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+
+                            {/* SHARE PREVIEW */}
+                            {modalMode === 'share_preview' && (
+                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-enter z-50 flex flex-col items-center">
+                                    <h3 className="text-lg font-medium text-on-surface mb-4">保存分享图片</h3>
+                                    {shareImgUrl && <img src={shareImgUrl} className="w-full rounded-xl shadow-md mb-6 border border-outline/10" />}
+                                    <div className="flex gap-3 w-full">
+                                        <button onClick={()=>setModalMode('add')} className="flex-1 py-2.5 text-primary font-medium text-sm">返回</button>
+                                        <a href={shareImgUrl} download={`countdown_${Date.now()}.png`} className="flex-1 py-2.5 bg-primary text-on-primary rounded-full text-center text-sm font-medium shadow-md">保存图片</a>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* SETTINGS */}
+                            {modalMode === 'settings' && (
+                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]">
+                                    <h2 className="text-xl font-medium mb-6">设置</h2>
+                                    
+                                    <div className="mb-6">
+                                        <p className="text-xs font-bold text-primary mb-3">外观</p>
+                                        <div className="flex gap-2 justify-center mb-4">
+                                            {['blue','green','purple','orange','red','monet'].map(c => ( <div key={c} onClick={()=>handleThemeChange(c, darkMode)} className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-transform ${appTheme===c ? 'border-on-surface scale-110' : 'border-transparent'}`} style={{background: c==='monet'?'#475d92':c}}></div> ))}
+                                        </div>
+                                        <div className="bg-surface-container-high p-1 rounded-xl flex">
+                                            {['light:☀️', 'system:🌗', 'dark:🌙'].map(m => {
+                                                const [val, icon] = m.split(':');
+                                                return <button key={val} onClick={()=>handleThemeChange(appTheme, val)} className={`flex-1 py-1.5 rounded-lg text-sm transition-all ${darkMode===val ? 'bg-surface shadow-sm text-on-surface' : 'text-on-surface-variant'}`}>{icon}</button>
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Sync Settings */}
+                                    <div>
+                                        <p className="text-xs font-bold text-primary mb-3">云同步 (WebDAV / Drive)</p>
+                                        <div className="flex bg-surface-container-high p-1 rounded-xl mb-4">
+                                            <button onClick={()=>setActiveSyncTab('webdav')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='webdav' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>WebDAV</button>
+                                            <button onClick={()=>setActiveSyncTab('drive')} className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${activeSyncTab==='drive' ? 'bg-surface shadow-sm text-primary' : 'text-on-surface-variant'}`}>Google Drive</button>
+                                        </div>
+
+                                        {activeSyncTab === 'webdav' ? (
+                                            <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
+                                                {!isAppMode && <p className="text-[10px] text-error mb-2 bg-error/10 p-2 rounded">网页版受跨域限制，WebDAV 可能无法连接。建议打包成 APP 使用。</p>}
+                                                <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="WebDAV URL" value={webdavConfig.url} onChange={e=>setWebdavConfig({...webdavConfig, url: e.target.value})} />
+                                                <div className="flex gap-2">
+                                                    <input className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="用户" value={webdavConfig.username} onChange={e=>setWebdavConfig({...webdavConfig, username: e.target.value})} />
+                                                    <input type="password" className="flex-1 min-w-0 bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="密码" value={webdavConfig.password} onChange={e=>setWebdavConfig({...webdavConfig, password: e.target.value})} />
+                                                </div>
+                                                <div className="flex items-center justify-between py-1">
+                                                    <span className="text-xs text-on-surface">自动同步</span>
+                                                    <div onClick={()=>setWebdavConfig({...webdavConfig, autoSync: !webdavConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${webdavConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>
+                                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${webdavConfig.autoSync ? 'translate-x-3' : ''}`}></div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={()=>handleWebDAV(true)} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">备份</button>
+                                                    <button onClick={()=>handleWebDAV(false)} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">恢复</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-surface-container-high rounded-xl p-4 space-y-3 animate-enter">
+                                                <p className="text-[10px] text-primary mb-2 bg-primary/10 p-2 rounded">网页版直接可用。需在 Google Cloud Console 申请 Client ID。</p>
+                                                <input className="w-full bg-surface p-3 rounded-lg text-xs outline-none text-on-surface placeholder-on-surface-variant/50" placeholder="Client ID (apps.googleusercontent.com)" value={driveConfig.clientId} onChange={e=>setDriveConfig({...driveConfig, clientId: e.target.value})} />
+                                                <div className="flex items-center justify-between py-1">
+                                                    <span className="text-xs text-on-surface">自动同步</span>
+                                                    <div onClick={()=>setDriveConfig({...driveConfig, autoSync: !driveConfig.autoSync})} className={`w-8 h-5 rounded-full p-0.5 transition-colors ${driveConfig.autoSync ? 'bg-primary' : 'bg-surface border border-outline'}`}>
+                                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${driveConfig.autoSync ? 'translate-x-3' : ''}`}></div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={()=>handleGoogleDriveAction('upload')} disabled={isLoading} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container">登录并备份</button>
+                                                    <button onClick={()=>handleGoogleDriveAction('download')} disabled={isLoading} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface">登录并恢复</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <p className={`text-[10px] text-center mt-2 ${syncStatus.type==='error'?'text-error':'text-success'}`}>{syncStatus.msg}</p>
+                                    </div>
+
+                                    {/* Local Backup Section */}
+                                    <div>
+                                        <p className="text-xs font-bold text-primary mb-3">本地备份与恢复</p>
+                                        <div className="bg-surface-container-high rounded-xl p-4 flex gap-2">
+                                            <button onClick={handleExportLocal} className="flex-1 bg-secondary-container py-2 rounded-lg text-xs font-bold text-on-secondary-container flex items-center justify-center gap-1">
+                                                <MIcon name="download" size={16}/> 导出
+                                            </button>
+                                            <button onClick={()=>fileInputRef.current.click()} className="flex-1 bg-surface py-2 rounded-lg text-xs font-bold text-on-surface flex items-center justify-center gap-1">
+                                                <MIcon name="upload" size={16}/> 导入
+                                            </button>
+                                            <input type="file" ref={fileInputRef} onChange={handleImportLocal} accept=".json" className="hidden" />
+                                        </div>
+                                    </div>
+
+                                    <button onClick={()=>setModalMode(null)} className="w-full mt-6 text-primary text-sm font-medium">关闭</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* HIDDEN CAPTURE AREA - Moved outside main modals to prevent overlap */}
+                    {/* Fixed Font Family explicitly to sans-serif to ensure system font fallback works on mobile */}
+                    <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
+                        <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
+                            <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
+                            <div className="relative z-10 bg-white/80 p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
+                                <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Countdown</div>
+                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
+                                
+                                <div className="text-2xl text-[#0061a4] font-bold mb-2">
+                                    {formData.statusText || (shareItemInfo.isPast ? '已过去' : '还有')}
+                                </div>
+                                
+                                <div className="flex justify-center w-full">
+                                    <div className="relative inline-block">
+                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
+                                            {shareItemInfo.days}
+                                        </span>
+                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
+                                            天
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">
+                                    {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
+                                </div>
+                            </div>
+                            <div className="relative z-10 mt-10 text-xs text-slate-500 font-medium opacity-60">Generated by Googley Countdown</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

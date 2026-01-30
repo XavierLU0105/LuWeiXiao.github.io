@@ -25,39 +25,7 @@
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
                         sans: ['"Noto Sans SC"', 'Roboto', '"Microsoft YaHei"', '"PingFang SC"', 'sans-serif'],
                     },
-                    screens: { '3xl': '1800px' },
-                    colors: {
-                        // Mapping Tailwind colors to CSS Variables
-                        primary: 'var(--md-sys-color-primary)',
-                        'on-primary': 'var(--md-sys-color-on-primary)',
-                        'primary-container': 'var(--md-sys-color-primary-container)',
-                        'on-primary-container': 'var(--md-sys-color-on-primary-container)',
-                        secondary: 'var(--md-sys-color-secondary)',
-                        'on-secondary': 'var(--md-sys-color-on-secondary)',
-                        'secondary-container': 'var(--md-sys-color-secondary-container)',
-                        'on-secondary-container': 'var(--md-sys-color-on-secondary-container)',
-                        tertiary: 'var(--md-sys-color-tertiary)',
-                        'on-tertiary': 'var(--md-sys-color-on-tertiary)',
-                        'tertiary-container': 'var(--md-sys-color-tertiary-container)',
-                        'on-tertiary-container': 'var(--md-sys-color-on-tertiary-container)',
-                        error: 'var(--md-sys-color-error)',
-                        'on-error': 'var(--md-sys-color-on-error)',
-                        'error-container': 'var(--md-sys-color-error-container)',
-                        'on-error-container': 'var(--md-sys-color-on-error-container)',
-                        background: 'var(--md-sys-color-background)',
-                        'on-background': 'var(--md-sys-color-on-background)',
-                        surface: 'var(--md-sys-color-surface)',
-                        'on-surface': 'var(--md-sys-color-on-surface)',
-                        'surface-variant': 'var(--md-sys-color-surface-variant)',
-                        'on-surface-variant': 'var(--md-sys-color-on-surface-variant)',
-                        outline: 'var(--md-sys-color-outline)',
-                        'outline-variant': 'var(--md-sys-color-outline-variant)',
-                        'surface-container-lowest': 'var(--md-sys-color-surface-container-lowest)',
-                        'surface-container-low': 'var(--md-sys-color-surface-container-low)',
-                        'surface-container': 'var(--md-sys-color-surface-container)',
-                        'surface-container-high': 'var(--md-sys-color-surface-container-high)',
-                        'surface-container-highest': 'var(--md-sys-color-surface-container-highest)',
-                    }
+                    screens: { '3xl': '1800px' }
                 } 
             }
         }
@@ -82,75 +50,43 @@
 
     <style>
         :root {
-            /* Default Baseline (Blue) - Will be overwritten by JS */
             --md-sys-color-primary: #0061a4;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #d1e4ff;
             --md-sys-color-on-primary-container: #001d36;
-            --md-sys-color-secondary: #535f70;
-            --md-sys-color-on-secondary: #ffffff;
             --md-sys-color-secondary-container: #d7e3f7;
             --md-sys-color-on-secondary-container: #101c2b;
-            --md-sys-color-tertiary: #6b5778;
-            --md-sys-color-on-tertiary: #ffffff;
-            --md-sys-color-tertiary-container: #f2daff;
-            --md-sys-color-on-tertiary-container: #251431;
-            --md-sys-color-error: #ba1a1a;
-            --md-sys-color-on-error: #ffffff;
-            --md-sys-color-error-container: #ffdad6;
-            --md-sys-color-on-error-container: #410002;
-            --md-sys-color-background: #fdfcff;
-            --md-sys-color-on-background: #1a1c1e;
             --md-sys-color-surface: #fdfcff;
+            --md-sys-color-surface-container: #f0f4f9;
+            --md-sys-color-surface-container-high: #e9eff6;
             --md-sys-color-on-surface: #1a1c1e;
-            --md-sys-color-surface-variant: #dfe2eb;
             --md-sys-color-on-surface-variant: #43474e;
             --md-sys-color-outline: #73777f;
-            --md-sys-color-outline-variant: #c3c7cf;
-            --md-sys-color-surface-container-lowest: #ffffff;
-            --md-sys-color-surface-container-low: #f7f9ff;
-            --md-sys-color-surface-container: #f1f4fa;
-            --md-sys-color-surface-container-high: #ebeef5;
-            --md-sys-color-surface-container-highest: #e5e8ef;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-success: #146c2e;
         }
 
-        /* Dark Mode defaults */
         .dark-theme {
             --md-sys-color-primary: #9ecaff;
             --md-sys-color-on-primary: #003258;
             --md-sys-color-primary-container: #00497d;
             --md-sys-color-on-primary-container: #d1e4ff;
-            --md-sys-color-secondary: #bbc7db;
-            --md-sys-color-on-secondary: #253140;
-            --md-sys-color-secondary-container: #3b4858;
-            --md-sys-color-on-secondary-container: #d7e3f7;
-            --md-sys-color-tertiary: #d7bee4;
-            --md-sys-color-on-tertiary: #3b2948;
-            --md-sys-color-tertiary-container: #523f5f;
-            --md-sys-color-on-tertiary-container: #f2daff;
-            --md-sys-color-error: #ffb4ab;
-            --md-sys-color-on-error: #690005;
-            --md-sys-color-error-container: #93000a;
-            --md-sys-color-on-error-container: #ffdad6;
-            --md-sys-color-background: #1a1c1e;
-            --md-sys-color-on-background: #e2e2e6;
+            --md-sys-color-secondary-container: #3e4755;
+            --md-sys-color-on-secondary-container: #dbe4f9;
             --md-sys-color-surface: #1a1c1e;
+            --md-sys-color-surface-container: #1e2227; 
+            --md-sys-color-surface-container-high: #282c34;
             --md-sys-color-on-surface: #e2e2e6;
-            --md-sys-color-surface-variant: #43474e;
             --md-sys-color-on-surface-variant: #c3c7cf;
             --md-sys-color-outline: #8d9199;
-            --md-sys-color-outline-variant: #43474e;
-            --md-sys-color-surface-container-lowest: #0c0e11;
-            --md-sys-color-surface-container-low: #1a1c1e;
-            --md-sys-color-surface-container: #1e2022;
-            --md-sys-color-surface-container-high: #282a2d;
-            --md-sys-color-surface-container-highest: #333538;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-success: #6dd58c;
         }
 
         body {
             font-family: 'Roboto', 'Noto Sans SC', "Microsoft YaHei", sans-serif;
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-background);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
             transition: background-color 0.4s ease, color 0.4s ease;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -158,6 +94,25 @@
         }
 
         .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .icon-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* Utility Classes */
+        .bg-surface { background-color: var(--md-sys-color-surface); }
+        .bg-surface-container { background-color: var(--md-sys-color-surface-container); }
+        .bg-surface-container-high { background-color: var(--md-sys-color-surface-container-high); }
+        .bg-primary { background-color: var(--md-sys-color-primary); }
+        .bg-primary-container { background-color: var(--md-sys-color-primary-container); }
+        .bg-secondary-container { background-color: var(--md-sys-color-secondary-container); }
+        
+        .text-on-surface { color: var(--md-sys-color-on-surface); }
+        .text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
+        .text-primary { color: var(--md-sys-color-primary); }
+        .text-on-primary { color: var(--md-sys-color-on-primary); }
+        .text-on-primary-container { color: var(--md-sys-color-on-primary-container); }
+        .text-on-secondary-container { color: var(--md-sys-color-on-secondary-container); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background-color: var(--md-sys-color-outline); border-radius: 4px; opacity: 0.2; }
         
         .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
         @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -168,10 +123,19 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
-        const MIcon = ({ name, className = "", filled = false, size = 24 }) => (<span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>);
-        const getLocalDateString = () => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; };
 
-        // --- Material Theme Builder Palettes ---
+        const MIcon = ({ name, className = "", filled = false, size = 24 }) => (
+            <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
+        );
+
+        const getLocalDateString = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         const THEMES = {
             'blue': {
                 light: { primary: '#0061a4', onPrimary: '#ffffff', primaryContainer: '#d1e4ff', onPrimaryContainer: '#001d36', secondary: '#535f70', onSecondary: '#ffffff', secondaryContainer: '#d7e3f7', onSecondaryContainer: '#101c2b', tertiary: '#6b5778', onTertiary: '#ffffff', tertiaryContainer: '#f2daff', onTertiaryContainer: '#251431', background: '#fdfcff', onBackground: '#1a1c1e', surface: '#fdfcff', onSurface: '#1a1c1e', surfaceVariant: '#dfe2eb', onSurfaceVariant: '#43474e', outline: '#73777f', surfaceContainer: '#f0f4f9', surfaceContainerHigh: '#ebeef5' },
@@ -325,6 +289,28 @@
                 applyTheme(color, isDark);
             };
 
+            // Dynamic Background Class
+            const getThemeBackground = () => {
+                const isDark = darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) {
+                    switch (appTheme) {
+                        case 'orange': return 'bg-gradient-to-br from-[#1e1b16] to-[#332b24]'; // Dark Coffee
+                        case 'green': return 'bg-gradient-to-br from-[#1a1c1e] to-[#142318]';
+                        case 'purple': return 'bg-gradient-to-br from-[#1a1c1e] to-[#20182b]';
+                        case 'red': return 'bg-gradient-to-br from-[#1a1c1e] to-[#2b1816]';
+                        default: return 'bg-gradient-to-br from-[#1a1c1e] to-[#121418]';
+                    }
+                } else {
+                    switch (appTheme) {
+                        case 'orange': return 'bg-gradient-to-br from-[#fff8f6] to-[#fcece4]'; // Warm Beige (Coffee)
+                        case 'green': return 'bg-gradient-to-br from-[#fdfcff] to-[#e6f4ea]';
+                        case 'purple': return 'bg-gradient-to-br from-[#fffbfe] to-[#f3eefc]';
+                        case 'red': return 'bg-gradient-to-br from-[#fffbfa] to-[#fae8e7]';
+                        default: return 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff]'; // Default Blue
+                    }
+                }
+            };
+
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
@@ -434,11 +420,6 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
-            // Auto switch if current category becomes empty
-            useEffect(() => {
-                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) setActiveCategory('All');
-            }, [availableCategories, activeCategory]);
-
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -448,7 +429,7 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive Logic
+            // Google Drive
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
@@ -506,7 +487,13 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-                    if (action === 'connect') { setDriveConnection('connected'); if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'}); return; }
+                    
+                    if (action === 'connect') {
+                         setDriveConnection('connected');
+                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
+                         return;
+                    }
+
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -516,6 +503,7 @@
                          const fileDataRoot = await fileSearchRoot.json();
                          if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
+
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -545,7 +533,7 @@
                     setDriveConnection('disconnected');
                     if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
                     if (isSilent) setSaveStatus('error');
-                } finally { setIsLoading(false); }
+                } finally { setIsLoading(false); if (!isSilent) setIsSyncing(false); }
             };
 
             // WebDAV Logic
@@ -610,7 +598,7 @@
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
-                <div className="min-h-screen pb-24 select-none flex flex-col bg-background transition-colors duration-300">
+                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${getThemeBackground()}`}>
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
@@ -620,6 +608,8 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
+                                    
+                                    {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
                                         <button 
                                             onClick={() => {
@@ -628,8 +618,8 @@
                                             }}
                                             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 ${
                                                 driveConnection === 'disconnected' && driveConfig.clientId 
-                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md'
-                                                : 'bg-error-container text-error hover:bg-error-container/80'
+                                                ? 'bg-primary text-on-primary shadow-sm hover:shadow-md' // Login Button Style
+                                                : 'bg-error-container text-error hover:bg-error-container/80' // Error Style
                                             }`}
                                         >
                                             <MIcon name={driveConnection === 'disconnected' && driveConfig.clientId ? "login" : "error"} size={16} />
@@ -638,20 +628,21 @@
                                             </span>
                                         </button>
                                     )}
+                                    
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (
-                                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-medium transition-colors cursor-pointer ${
-                                            driveConnection === 'connected' ? 'bg-success-container text-success border-transparent' : 
-                                            driveConnection === 'connecting' ? 'bg-primary-container text-primary border-transparent' : 
-                                            'bg-surface-container text-outline border-outline'
+                                        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold transition-colors cursor-pointer ${
+                                            driveConnection === 'connected' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800' : 
+                                            driveConnection === 'connecting' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800' : 
+                                            'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                                         }`} onClick={() => {
                                             if(driveConnection === 'disconnected') handleGoogleDriveAction('connect');
                                             else setModalMode('settings');
                                         }}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${
-                                                driveConnection === 'connected' ? 'bg-success animate-pulse' : 
-                                                driveConnection === 'connecting' ? 'bg-primary animate-ping' : 
-                                                'bg-outline'
+                                                driveConnection === 'connected' ? 'bg-green-600 animate-pulse' : 
+                                                driveConnection === 'connecting' ? 'bg-yellow-500 animate-ping' : 
+                                                'bg-slate-400'
                                             }`}></div>
                                             <span className="hidden sm:inline">{driveConnection === 'connected' ? 'Drive 已连接' : driveConnection === 'connecting' ? '连接中...' : 'Drive 未连接'}</span>
                                             <span className="sm:hidden">{driveConnection === 'connected' ? '已连接' : driveConnection === 'connecting' ? '...' : '未连接'}</span>
@@ -687,37 +678,37 @@
                                 {sortedItems.map((item, index) => {
                                     const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[24px] p-5 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
-                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-5 right-5 text-primary" />}
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 min-h-[180px]">
+                                            {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
                                             <div className="mb-4">
                                                 {item.category && (
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant opacity-80 border border-outline/10">{item.category}</span>
                                                     </div>
                                                 )}
-                                                <h3 className="text-lg font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
-                                                <div className="flex items-center gap-1 text-xs text-on-surface-variant opacity-80">
-                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={14} />
+                                                <h3 className="text-xl font-bold text-on-surface mb-1 truncate pr-6 leading-tight">{item.title}</h3>
+                                                <div className="flex items-center gap-1 text-sm text-on-surface-variant opacity-80">
+                                                    <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
-                                                {/* Card Remark Snippet */}
+                                                {/* Card Remark Snippet - NEW */}
                                                 {item.remarks && (
-                                                    <p className="text-[10px] text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
+                                                    <p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
                                                         {item.remarks}
                                                     </p>
                                                 )}
                                             </div>
                                             
-                                            <div className="mt-auto flex justify-between items-end border-t border-outline/5 pt-3">
+                                            <div className="mt-auto flex justify-between items-end">
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold mb-0.5 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                    <span className={`text-sm px-3 py-1 rounded-lg font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
                                                         {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
                                                     </span>
-                                                    {subText && <span className="text-[10px] text-on-surface-variant opacity-60">{subText}</span>}
+                                                    {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
                                                 </div>
                                                 <div className="flex items-baseline text-primary">
-                                                    <span className="text-4xl font-medium tracking-tighter leading-none">{days}</span>
-                                                    <span className="text-[10px] ml-1 font-medium opacity-60 mb-1">天</span>
+                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
+                                                    <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -902,7 +893,11 @@
                                         </div>
                                     </div>
 
-                                    <button onClick={()=>setModalMode(null)} className="w-full mt-6 text-primary text-sm font-medium">关闭</button>
+                                    <div className="mt-8 text-center text-[10px] text-on-surface-variant opacity-40">
+                                        Version 3.4.0 • Build 34
+                                    </div>
+
+                                    <button onClick={()=>setModalMode(null)} className="w-full mt-2 text-primary text-sm font-medium">关闭</button>
                                 </div>
                             )}
                         </div>
@@ -910,48 +905,32 @@
 
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
-                        <div ref={shareRef} className="w-full h-full bg-[#f0f4f9] p-6 flex flex-col items-center justify-center relative text-[#1f1f1f] overflow-hidden">
-                             {/* Soft Background Accent */}
-                             <div className="absolute top-0 left-0 w-full h-3 bg-primary"></div>
-                             
-                            {/* Card Container */}
-                            <div className="relative z-10 bg-white p-8 rounded-[32px] shadow-sm w-full h-[85%] flex flex-col items-center justify-between border border-[#e7e7e7]">
-                                {/* Top Section */}
-                                <div className="w-full flex flex-col items-center mt-8">
-                                    <h1 className="text-3xl font-bold text-[#1f1f1f] mb-8 text-center leading-snug break-words w-full px-2">
-                                        {formData.title || '倒数日'}
-                                    </h1>
-
-                                    {/* Status Pill - Use Primary Container */}
-                                    <div className="px-5 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-bold mb-8 shadow-sm">
-                                        {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
-                                    </div>
-
-                                    {/* Big Number */}
-                                    <div className="flex items-baseline justify-center">
-                                         <span className="text-[120px] font-bold text-primary leading-none tracking-tighter" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                        <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
+                            <div className="absolute inset-0 bg-white/90"></div>
+                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
+                                <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
+                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
+                                
+                                <div className="text-2xl text-[#0061a4] font-bold mb-2">
+                                    {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
+                                </div>
+                                
+                                <div className="flex justify-center w-full">
+                                    <div className="relative inline-block">
+                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
                                             {shareItemInfo.days}
                                         </span>
-                                        <span className="text-2xl text-[#444746] font-medium ml-2 -translate-y-4">
+                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
                                             天
                                         </span>
                                     </div>
                                 </div>
-
-                                {/* Bottom Section */}
-                                <div className="w-full flex flex-col items-center mb-6">
-                                     {/* Date Pill - Subtle */}
-                                    <div className="border-t border-[#e0e2e0] w-full mb-4"></div>
-                                    <div className="text-[#444746] text-sm font-bold tracking-wide opacity-80 mb-8 uppercase">
-                                        {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
-                                    </div>
-                                    
-                                    {/* Footer Branding - Subtle */}
-                                    <div className="text-[10px] text-[#8e918f] font-bold uppercase tracking-[0.2em] flex items-center gap-2 opacity-50">
-                                        Googley Countdown
-                                    </div>
+                                
+                                <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">
+                                    {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
                                 </div>
                             </div>
+                            <div className="relative z-10 mt-10 text-xs text-slate-500 font-medium opacity-60">Generated by Googley Countdown</div>
                         </div>
                     </div>
                 </div>

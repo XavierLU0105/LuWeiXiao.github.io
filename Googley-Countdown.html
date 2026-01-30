@@ -258,6 +258,7 @@
                     if (!window.google) return;
                     
                     setDriveConnection('connecting');
+                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
 
@@ -281,21 +282,28 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic
+            // Auto Sync Logic (Debounced & Safe)
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
+                // Only show pending if actually configured to sync
                 if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
                      setSaveStatus('pending');
+                } else {
+                     return; // Don't start timer if not syncing
                 }
 
                 const timer = setTimeout(() => {
-                    if (driveConfig.autoSync && driveConfig.clientId) handleGoogleDriveAction('upload', true);
-                    else if (webdavConfig.autoSync && webdavConfig.url) handleWebDAV(true, true);
-                    else setSaveStatus('idle');
+                    try {
+                        if (driveConfig.autoSync && driveConfig.clientId) handleGoogleDriveAction('upload', true);
+                        else if (webdavConfig.autoSync && webdavConfig.url) handleWebDAV(true, true);
+                        else setSaveStatus('idle');
+                    } catch(e) {
+                        setSaveStatus('error');
+                    }
                 }, 2000); 
                 return () => clearTimeout(timer);
-            }, [items]);
+            }, [items, driveConfig, webdavConfig]); // Added configs to dependency
 
             const calculateDays = (item) => {
                 if (item.endDate) {
@@ -399,7 +407,12 @@
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
                     const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => {
-                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); setSaveStatus('error'); return; }
+                        if (resp.error) { 
+                            if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); 
+                            setSaveStatus('error');
+                            setDriveConnection('disconnected');
+                            return; 
+                        }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
                         localStorage.setItem('md_g_token', JSON.stringify({ token: resp.access_token, expiresAt })); 
@@ -414,12 +427,24 @@
             const handleGoogleDriveAction = async (action, isSilent = false) => {
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
-                if (!client && !isSilent) return; 
+                if (!client) {
+                    // Critical Fix: If we can't create client (e.g. adblocker/network), we must reset state
+                    if (isSilent) {
+                        setSaveStatus('error');
+                        setDriveConnection('disconnected'); // Assume disconnected if lib fails
+                    }
+                    return; 
+                }
+                
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
+                
+                if (isSilent) setSaveStatus('syncing');
+
                 if (!isTokenValid) {
                     if (isSilent) { 
+                        // Critical Fix: Show error state instead of idle if not logged in
                         console.log("Auto-sync skipped: Token expired."); 
-                        setSaveStatus('idle');
+                        setSaveStatus('error');
                         if (action === 'connect') setDriveConnection('disconnected');
                         return; 
                     }
@@ -441,6 +466,7 @@
                     client.requestAccessToken();
                     return;
                 }
+                
                 if (!isSilent) setIsLoading(true); else if (action !== 'connect') setIsSyncing(true);
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
@@ -579,7 +605,17 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
+                                    
+                                    {/* Updated Error State: Show Unlogged/Error status explicitly */}
+                                    {saveStatus === 'error' && (
+                                        <div className="flex items-center gap-1 text-error cursor-pointer bg-error/10 px-2 py-1 rounded-full hover:bg-error/20 transition-colors" onClick={() => {
+                                            if(driveConfig.clientId && driveConnection === 'disconnected') handleGoogleDriveAction('connect');
+                                            else setModalMode('settings');
+                                        }}>
+                                            <MIcon name="error" className="text-sm" size={16} />
+                                            <span className="text-xs font-bold">{driveConnection === 'disconnected' ? '未登录' : '同步失败'}</span>
+                                        </div>
+                                    )}
                                     
                                     {/* Default to Drive Connection Status when idle and Drive configured */}
                                     {saveStatus === 'idle' && driveConfig.clientId && (

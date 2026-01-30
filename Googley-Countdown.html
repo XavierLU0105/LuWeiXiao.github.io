@@ -27,20 +27,6 @@
                     },
                     screens: {
                         '3xl': '1800px',
-                    },
-                    animation: {
-                        'gradient-flow': 'gradient-flow 15s ease infinite',
-                        'breathe': 'breathe 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        'gradient-flow': {
-                            '0%, 100%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' },
-                        },
-                        'breathe': {
-                            '0%, 100%': { 'box-shadow': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' },
-                            '50%': { 'box-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' },
-                        }
                     }
                 } 
             }
@@ -56,6 +42,9 @@
 
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Lunar Calendar Lib -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
 
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -130,19 +119,8 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background-color: var(--md-sys-color-outline); border-radius: 4px; opacity: 0.2; }
         
-        /* Spring Animations */
-        @keyframes slide-up-fade {
-            0% { opacity: 0; transform: translateY(20px) scale(0.96); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
-        @keyframes scale-in-center {
-            0% { opacity: 0; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .animate-enter { animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-modal { animation: scale-in-center 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-enter { animation: fade-up 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards; }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -154,37 +132,6 @@
         const MIcon = ({ name, className = "", filled = false, size = 24 }) => (
             <span className={`material-symbols-rounded ${filled ? 'icon-filled' : ''} ${className}`} style={{ fontSize: `${size}px` }}>{name}</span>
         );
-
-        // Animated Number Component
-        const CountUp = ({ end, duration = 800 }) => {
-            const [count, setCount] = useState(0);
-            
-            useEffect(() => {
-                let startTime;
-                let animationFrame;
-                const startValue = 0; // Always start from 0 for fresh feel
-                
-                const step = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const progress = Math.min((timestamp - startTime) / duration, 1);
-                    // Ease Out Quart
-                    const ease = 1 - Math.pow(1 - progress, 4);
-                    
-                    setCount(Math.floor(startValue + (end - startValue) * ease));
-                    
-                    if (progress < 1) {
-                        animationFrame = requestAnimationFrame(step);
-                    } else {
-                        setCount(end);
-                    }
-                };
-                
-                animationFrame = requestAnimationFrame(step);
-                return () => cancelAnimationFrame(animationFrame);
-            }, [end]);
-            
-            return <>{count}</>;
-        };
 
         const getLocalDateString = () => {
             const now = new Date();
@@ -256,7 +203,7 @@
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
+            const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '', remarks: '' });
 
             useEffect(() => {
                 const savedItems = localStorage.getItem('md_countdowns');
@@ -270,6 +217,16 @@
                     const parsed = JSON.parse(savedDrive);
                     setDriveConfig(parsed);
                     if (parsed.clientId && parsed.clientId.length > 5) setActiveSyncTab('drive');
+                }
+
+                // Check LocalStorage for cached Google Token
+                const cachedToken = localStorage.getItem('md_g_token');
+                if (cachedToken) {
+                    const parsedToken = JSON.parse(cachedToken);
+                    if (parsedToken.expiresAt > Date.now()) {
+                        setGAccessToken(parsedToken);
+                        setDriveConnection('connected');
+                    }
                 }
 
                 const savedTheme = localStorage.getItem('md_app_theme') || 'blue';
@@ -324,7 +281,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced)
+            // Auto Sync Logic
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
@@ -418,7 +375,7 @@
             const openAddEdit = (item = null) => {
                 setEditingItem(item);
                 if (item) setFormData(item);
-                else setFormData({ title: '', date: getLocalDateString(), endDate: '', repeatType: 'none', isPinned: false, category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '', statusText: '' });
+                else setFormData({ title: '', date: getLocalDateString(), endDate: '', repeatType: 'none', isPinned: false, category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '', statusText: '', remarks: '' });
                 setModalMode('add');
             };
 
@@ -427,13 +384,6 @@
                 items.forEach(i => { if (i.category && i.category.trim() !== '') cats.add(i.category); });
                 return ['All', ...Array.from(cats)];
             }, [items]);
-
-            // Auto switch if current category becomes empty
-            useEffect(() => {
-                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
-                    setActiveCategory('All');
-                }
-            }, [availableCategories, activeCategory]);
 
             const sortedItems = useMemo(() => {
                 let filtered = items;
@@ -452,6 +402,8 @@
                         if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); setSaveStatus('error'); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
+                        localStorage.setItem('md_g_token', JSON.stringify({ token: resp.access_token, expiresAt })); 
+                        setDriveConnection('connected');
                     }});
                     setTokenClient(client);
                     return client;
@@ -463,11 +415,7 @@
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
                 if (!client && !isSilent) return; 
-                
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
-                
-                if (isSilent) setSaveStatus('syncing');
-
                 if (!isTokenValid) {
                     if (isSilent) { 
                         console.log("Auto-sync skipped: Token expired."); 
@@ -486,13 +434,14 @@
                         }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
+                        localStorage.setItem('md_g_token', JSON.stringify({ token: resp.access_token, expiresAt }));
+                        setDriveConnection('connected');
                         await performDriveOp(resp.access_token, action, isSilent);
                     };
                     client.requestAccessToken();
                     return;
                 }
-                
-                if (!isSilent) setIsLoading(true);
+                if (!isSilent) setIsLoading(true); else if (action !== 'connect') setIsSyncing(true);
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -620,7 +569,7 @@
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
-                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''} ${appTheme !== 'blue' ? 'bg-surface' : ''}`}>
+                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''}`}>
                     <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
                             <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
@@ -691,6 +640,12 @@
                                                     <MIcon name={isDuration ? 'date_range' : (item.repeatType!=='none'?'update':'event')} size={16} />
                                                     <span>{getDisplayDateText(item, date)}</span>
                                                 </div>
+                                                {/* Card Remark Snippet - NEW */}
+                                                {item.remarks && (
+                                                    <p className="text-xs text-on-surface-variant opacity-60 mt-2 line-clamp-2 leading-relaxed">
+                                                        {item.remarks}
+                                                    </p>
+                                                )}
                                             </div>
                                             
                                             <div className="mt-auto flex justify-between items-end">
@@ -701,7 +656,7 @@
                                                     {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
                                                 </div>
                                                 <div className="flex items-baseline text-primary">
-                                                    <span className="text-5xl font-medium tracking-tighter leading-none"><CountUp end={days} /></span>
+                                                    <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>
                                                     <span className="text-xs ml-1 font-medium opacity-60 mb-1">天</span>
                                                 </div>
                                             </div>
@@ -712,7 +667,7 @@
                         )}
                     </main>
 
-                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl animate-breathe">
+                    <button onClick={() => openAddEdit()} className="fixed bottom-10 right-8 h-16 px-6 rounded-[24px] bg-primary-container text-on-primary-container shadow-xl flex items-center gap-2 active:scale-90 transition-transform z-30 font-bold border border-primary/10 hover:shadow-2xl">
                         <MIcon name="add" size={28} /> 新建
                     </button>
 
@@ -723,7 +678,7 @@
                             
                             {/* ADD / EDIT */}
                             {modalMode === 'add' && (
-                                <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-modal z-50 relative">
+                                <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
                                     {editingItem && (
                                         <button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">
                                             {isLoading ? <MIcon name="progress_activity" className="animate-spin" size={20} /> : <MIcon name="ios_share" size={20} />}
@@ -764,6 +719,12 @@
                                             <input className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30" value={formData.statusText} onChange={e=>setFormData({...formData, statusText: e.target.value})} placeholder={formData.endDate ? "例如: 共计, 持续了..." : "例如: 已用, 还有..."} />
                                         </div>
 
+                                        {/* Remarks Input - NEW */}
+                                        <div className="bg-surface-container-high rounded-t-xl px-4 py-2 border-b border-outline/20">
+                                            <label className="text-xs text-primary font-medium">备注 (可选)</label>
+                                            <textarea className="w-full bg-transparent outline-none text-on-surface py-1 placeholder-on-surface-variant/30 resize-none h-16 text-sm" value={formData.remarks} onChange={e=>setFormData({...formData, remarks: e.target.value})} placeholder="例如: 账号、密码、纪念日故事..." />
+                                        </div>
+
                                         <div className="flex items-center gap-3 py-2">
                                             <div onClick={()=>setFormData({...formData, isPinned: !formData.isPinned})} className={`flex-1 flex items-center justify-center gap-2 cursor-pointer p-3 rounded-xl border transition-colors ${formData.isPinned ? 'bg-secondary-container border-secondary-container' : 'bg-surface border-outline/20'}`}>
                                                 <MIcon name="keep" size={18} className={formData.isPinned ? "text-on-secondary-container" : "text-outline"} />
@@ -793,7 +754,7 @@
 
                             {/* SHARE PREVIEW */}
                             {modalMode === 'share_preview' && (
-                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-modal z-50 flex flex-col items-center">
+                                <div className="bg-surface-container w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-enter z-50 flex flex-col items-center">
                                     <h3 className="text-lg font-medium text-on-surface mb-4">保存分享图片</h3>
                                     {shareImgUrl && <img src={shareImgUrl} className="w-full rounded-xl shadow-md mb-6 border border-outline/10" />}
                                     <div className="flex gap-3 w-full">
@@ -805,7 +766,7 @@
 
                             {/* SETTINGS */}
                             {modalMode === 'settings' && (
-                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-modal z-50 overflow-y-auto max-h-[85vh]">
+                                <div className="bg-surface-container w-full max-w-[340px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 overflow-y-auto max-h-[85vh]">
                                     <h2 className="text-xl font-medium mb-6">设置</h2>
                                     
                                     <div className="mb-6">
@@ -890,7 +851,7 @@
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/90"></div>
+                            <div className="absolute inset-0 bg-white/80"></div>
                             <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
                                 <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>

@@ -27,7 +27,22 @@
                     },
                     screens: {
                         '3xl': '1800px',
-                    }
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 15s ease infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                    },
                 } 
             }
         }
@@ -188,8 +203,6 @@
             const [isSyncing, setIsSyncing] = useState(false);
             const [shareImgUrl, setShareImgUrl] = useState(null);
             const [activeSyncTab, setActiveSyncTab] = useState('webdav'); 
-            
-            // Google Auth State
             const [tokenClient, setTokenClient] = useState(null);
             const [gAccessToken, setGAccessToken] = useState(null);
 
@@ -197,7 +210,6 @@
             const shareRef = useRef(null);
             const fileInputRef = useRef(null);
 
-            // Form Data
             const [formData, setFormData] = useState({ title: '', date: '', endDate: '', repeatType: 'none', isPinned: false, category: '', statusText: '' });
 
             useEffect(() => {
@@ -218,7 +230,6 @@
                 const savedDark = localStorage.getItem('md_dark_mode') || 'system';
                 setAppTheme(savedTheme);
                 setDarkMode(savedDark);
-                
                 handleThemeChange(savedTheme, savedDark);
 
                 if (window.plus) setIsAppMode(true);
@@ -244,7 +255,6 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 const timer = setTimeout(() => {
@@ -254,7 +264,6 @@
                 return () => clearTimeout(timer);
             }, [items]);
 
-            // --- Calculation ---
             const calculateDays = (item) => {
                 if (item.endDate) {
                     const start = new Date(item.date);
@@ -265,19 +274,13 @@
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     return { days: diffDays, date: end, subText: '', isPast: true, isDuration: true };
                 }
-
-                const now = new Date(); 
-                now.setHours(0,0,0,0);
-                
+                const now = new Date(); now.setHours(0,0,0,0);
                 if (!item.date) return { days: 0, date: now, subText: '', isPast: false };
-
                 const [y, m, d] = item.date.split('-').map(Number);
                 const targetBase = new Date(y, m - 1, d);
-                
                 let target = new Date(targetBase);
                 let subText = null;
                 let isPast = false;
-
                 if (item.repeatType && item.repeatType !== 'none') {
                     let next = new Date(targetBase);
                     let prev = new Date(targetBase);
@@ -299,19 +302,13 @@
                     }
                     target = next;
                     subText = `上次已过 ${Math.floor((now - prev) / 86400000)} 天`;
-                } else if (target < now) {
-                    isPast = true;
-                }
-                
+                } else if (target < now) { isPast = true; }
                 const rawDays = Math.ceil((target - now) / 86400000);
                 return { days: Math.abs(rawDays), date: target, subText, isPast };
             };
 
             const getDisplayDateText = (item, calculatedDate) => {
-                if (item.endDate) {
-                    return `${item.date.replace(/-/g, '/')} - ${item.endDate.replace(/-/g, '/')}`;
-                }
-
+                if (item.endDate) return `${item.date.replace(/-/g, '/')} - ${item.endDate.replace(/-/g, '/')}`;
                 const d = calculatedDate;
                 if(item.repeatType==='year') return `每年 ${d.getMonth()+1}月${d.getDate()}日`;
                 if(item.repeatType==='month') return `每月 ${d.getDate()}日`;
@@ -321,16 +318,10 @@
 
             const handleShare = async () => {
                 if (!shareRef.current) return;
-                setIsLoading(true); // Show loading feedback
-                // Delay to allow UI to update
+                setIsLoading(true);
                 setTimeout(async () => {
                     try {
-                        const canvas = await html2canvas(shareRef.current, { 
-                            backgroundColor: null, 
-                            scale: 2,
-                            useCORS: true,
-                            logging: false
-                        });
+                        const canvas = await html2canvas(shareRef.current, { backgroundColor: null, scale: 2, useCORS: true, logging: false });
                         setShareImgUrl(canvas.toDataURL("image/png"));
                         setModalMode('share_preview');
                     } catch (e) { alert("生成图片失败: " + e.message); }
@@ -351,31 +342,19 @@
             const openAddEdit = (item = null) => {
                 setEditingItem(item);
                 if (item) setFormData(item);
-                else setFormData({ 
-                    title: '', 
-                    date: getLocalDateString(),
-                    endDate: '', 
-                    repeatType: 'none', 
-                    isPinned: false, 
-                    category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '',
-                    statusText: '' 
-                });
+                else setFormData({ title: '', date: getLocalDateString(), endDate: '', repeatType: 'none', isPinned: false, category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '', statusText: '' });
                 setModalMode('add');
             };
 
             const availableCategories = useMemo(() => {
                 const cats = new Set();
-                items.forEach(i => {
-                    if (i.category && i.category.trim() !== '') cats.add(i.category);
-                });
+                items.forEach(i => { if (i.category && i.category.trim() !== '') cats.add(i.category); });
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
             const sortedItems = useMemo(() => {
                 let filtered = items;
-                if (activeCategory !== 'All') {
-                    filtered = items.filter(i => i.category === activeCategory);
-                }
+                if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
                 return filtered.sort((a, b) => {
                     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
                     return Math.abs(calculateDays(a).days) - Math.abs(calculateDays(b).days);
@@ -386,7 +365,11 @@
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
-                    const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: '' });
+                    const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: (resp) => {
+                        if (resp.error) { if (syncStatus.type !== 'error') setSyncStatus({type: 'error', msg: '授权失败: ' + resp.error}); return; }
+                        const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
+                        setGAccessToken({ token: resp.access_token, expiresAt });
+                    }});
                     setTokenClient(client);
                     return client;
                 }
@@ -418,7 +401,6 @@
                 try {
                     const FOLDER_NAME = 'Googley Countdown Data';
                     const FILENAME = 'countdown_backup.json';
-                    
                     let folderId = null;
                     const folderSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const folderData = await folderSearch.json();
@@ -428,7 +410,6 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
-
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
@@ -438,7 +419,6 @@
                         const fileDataRoot = await fileSearchRoot.json();
                         if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
-
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -472,14 +452,8 @@
                 } catch(e) { if(!isSilent) setSyncStatus({type:'error',msg:'失败'}); } finally { if(isSilent) setTimeout(()=>setIsSyncing(false),500); else setIsLoading(false); }
             };
 
-            // Local Backup
             const handleExportLocal = () => {
-                const backupData = {
-                    version: 1,
-                    date: new Date().toISOString(),
-                    items: items,
-                    settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig }
-                };
+                const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
                 const downloadAnchorNode = document.createElement('a');
                 downloadAnchorNode.setAttribute("href", dataStr);
@@ -518,10 +492,10 @@
             const shareItemInfo = editingItem ? calculateDays(formData) : { days: 0, isPast: false };
 
             return (
-                <div className="min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300">
-                    <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/80 flex flex-col gap-4 shadow-sm transition-colors">
+                <div className={`min-h-screen pb-24 select-none flex flex-col bg-surface transition-colors duration-300 ${appTheme === 'blue' ? 'bg-gradient-to-br from-[#fdfcff] to-[#e0e7ff] dark:from-[#1a1c1e] dark:to-[#121418]' : ''}`}>
+                    <header className="sticky top-0 z-20 px-6 pt-6 pb-2 backdrop-blur-xl bg-surface/70 flex flex-col gap-4 shadow-sm transition-colors border-b border-outline/5">
                         <div className="flex justify-between items-center">
-                            <span className="text-2xl font-bold text-on-surface">Googley Countdown</span>
+                            <span className="text-2xl font-bold text-on-surface tracking-tight">Googley Countdown</span>
                             <div className="flex gap-2">
                                 {isSyncing && <MIcon name="cloud_sync" className="text-primary animate-spin" size={24} />}
                                 <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
@@ -530,7 +504,7 @@
                         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
                             {availableCategories.map(cat => (
                                 <button key={cat} onClick={()=>setActiveCategory(cat)} 
-                                    className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory===cat ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-high/80'}`}>
+                                    className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${activeCategory===cat ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-high/80'}`}>
                                     {cat === 'All' ? '全部' : cat}
                                 </button>
                             ))}
@@ -548,7 +522,7 @@
                                 {sortedItems.map((item, index) => {
                                     const { days, date, subText, isPast, isDuration } = calculateDays(item);
                                     return (
-                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-transform animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-md">
+                                        <div key={item.id} onClick={() => openAddEdit(item)} style={{animationDelay: index*50+'ms'}} className="bg-surface-container/80 backdrop-blur-md rounded-[28px] p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 animate-enter opacity-0 border border-transparent hover:border-outline/10 group cursor-pointer h-full flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1">
                                             {item.isPinned && <MIcon name="keep" filled size={20} className="absolute top-6 right-6 text-primary" />}
                                             <div className="mb-6">
                                                 {item.category && (
@@ -754,27 +728,21 @@
                         </div>
                     )}
 
-                    {/* HIDDEN CAPTURE AREA */}
+                    {/* HIDDEN CAPTURE AREA - Moved outside main modals to prevent overlap */}
+                    {/* Fixed Font Family explicitly to sans-serif to ensure system font fallback works on mobile */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/90"></div>
-                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
+                            <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
+                            <div className="relative z-10 bg-white/80 p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
                                 <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Countdown</div>
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
                                 
                                 <div className="text-2xl text-[#0061a4] font-bold mb-2">
                                     {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
-                                
-                                <div className="flex justify-center w-full">
-                                    <div className="relative inline-block">
-                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
-                                            {shareItemInfo.days}
-                                        </span>
-                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
-                                            天
-                                        </span>
-                                    </div>
+                                <div className="text-8xl font-bold text-slate-800 mb-4 leading-normal font-mono tracking-tighter flex items-end justify-center">
+                                    {shareItemInfo.days}
+                                    <span className="text-3xl text-slate-500 font-medium mb-4 ml-2">天</span>
                                 </div>
                                 
                                 <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">

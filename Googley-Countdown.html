@@ -43,9 +43,6 @@
     <!-- Google Identity -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Lunar Calendar Lib -->
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
-
     <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -258,6 +255,7 @@
                     if (!window.google) return;
                     
                     setDriveConnection('connecting');
+                    // Try silent check
                     handleGoogleDriveAction('connect', true);
                 };
 
@@ -286,9 +284,14 @@
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 
                 // Only show pending if actually configured to sync
-                if ((driveConfig.autoSync && driveConfig.clientId) || (webdavConfig.autoSync && webdavConfig.url)) {
+                let canSync = false;
+                if (driveConfig.autoSync && driveConfig.clientId) canSync = true;
+                if (webdavConfig.autoSync && webdavConfig.url) canSync = true;
+
+                if (canSync) {
                      setSaveStatus('pending');
                 } else {
+                     setSaveStatus('idle'); // Clear pending if auto sync is disabled
                      return; 
                 }
 
@@ -300,7 +303,7 @@
                     } catch(e) {
                         setSaveStatus('error');
                     }
-                }, 2000); 
+                }, 1500); // Shorter delay 1.5s
                 return () => clearTimeout(timer);
             }, [items, driveConfig, webdavConfig]);
 
@@ -408,6 +411,13 @@
                 return ['All', ...Array.from(cats)];
             }, [items]);
 
+            // Auto switch if current category becomes empty
+            useEffect(() => {
+                if (activeCategory !== 'All' && !availableCategories.includes(activeCategory)) {
+                    setActiveCategory('All');
+                }
+            }, [availableCategories, activeCategory]);
+
             const sortedItems = useMemo(() => {
                 let filtered = items;
                 if (activeCategory !== 'All') filtered = items.filter(i => i.category === activeCategory);
@@ -440,18 +450,25 @@
                 if (!client && !isSilent) return; 
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
                 if (!isTokenValid) {
-                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); return; }
+                    if (isSilent) { 
+                        console.log("Auto-sync skipped: Token expired."); 
+                        setSaveStatus('error'); // SHOW ERROR IF EXPIRED
+                        if (action === 'connect') setDriveConnection('disconnected');
+                        return; 
+                    }
                     setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
                     client.callback = async (resp) => {
                         if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
+                        localStorage.setItem('md_g_token', JSON.stringify({ token: resp.access_token, expiresAt }));
+                        setDriveConnection('connected');
                         await performDriveOp(resp.access_token, action, isSilent);
                     };
                     client.requestAccessToken();
                     return;
                 }
-                if (!isSilent) setIsLoading(true); else setIsSyncing(true);
+                if (!isSilent) setIsLoading(true); else if (action !== 'connect') setSaveStatus('syncing');
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -468,15 +485,23 @@
                         const createData = await createFolder.json();
                         if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
+                    
+                    if (action === 'connect') {
+                         setDriveConnection('connected');
+                         if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 已连接'});
+                         return;
+                    }
+
                     let fileId = null;
                     const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
                     if (fileDataInFolder.files && fileDataInFolder.files.length > 0) fileId = fileDataInFolder.files[0].id;
                     else if (action === 'download') {
-                        const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                        const fileDataRoot = await fileSearchRoot.json();
-                        if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
+                         const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                         const fileDataRoot = await fileSearchRoot.json();
+                         if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
+
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
@@ -488,13 +513,25 @@
                         if (fileId && fileDataInFolder.files && fileDataInFolder.files.length > 0) { uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`; method = 'PATCH'; }
                         else { metadata.parents = [folderId]; const formNew = new FormData(); formNew.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); formNew.append('file', new Blob([fileContent], { type: 'application/json' })); uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart'; method = 'POST'; const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: formNew }); if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed'); return; }
                         const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: form });
-                        if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed');
+                        if (upRes.ok) { 
+                            setDriveConnection('connected');
+                            if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'});
+                            if (isSilent) { setSaveStatus('success'); setTimeout(() => setSaveStatus('idle'), 2000); }
+                        } else throw new Error('Upload failed');
                     } else if (action === 'download') {
-                        if (!fileId) throw new Error('未找到备份文件');
-                        const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                        if (downRes.ok) { const data = await downRes.json(); if(Array.isArray(data)) setItems(data); setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); } else throw new Error('Download failed');
+                         if (!fileId) throw new Error('未找到备份文件');
+                         const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                         if (downRes.ok) { 
+                             const data = await downRes.json(); if(Array.isArray(data)) setItems(data); 
+                             setDriveConnection('connected');
+                             setSyncStatus({type: 'success', msg: 'Google Drive 恢复成功'}); 
+                        } else throw new Error('Download failed');
                     }
-                } catch (e) { if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); } finally { setIsLoading(false); setIsSyncing(false); }
+                } catch (e) { 
+                    setDriveConnection('disconnected');
+                    if(!isSilent) setSyncStatus({type: 'error', msg: `操作失败: ${e.message || '网络错误'}`}); 
+                    if (isSilent) setSaveStatus('error');
+                } finally { setIsLoading(false); }
             };
 
             // WebDAV Logic
@@ -569,7 +606,6 @@
                                     {saveStatus === 'pending' && <span className="text-xs font-bold text-on-surface-variant/50">准备同步...</span>}
                                     {saveStatus === 'syncing' && <div className="flex items-center gap-1 text-primary"><MIcon name="sync" className="animate-spin text-sm" size={16} /><span className="text-xs font-bold">正在保存...</span></div>}
                                     {saveStatus === 'success' && <div className="flex items-center gap-1 text-success"><MIcon name="check_circle" className="text-sm" size={16} /><span className="text-xs font-bold">已保存</span></div>}
-                                    {saveStatus === 'error' && <div className="flex items-center gap-1 text-error"><MIcon name="error" className="text-sm" size={16} /><span className="text-xs font-bold">同步失败</span></div>}
                                     
                                     {/* Updated Error State: Show Login Button if disconnected */}
                                     {saveStatus === 'error' && (
@@ -864,29 +900,28 @@
                     {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/90"></div>
+                            <div className="absolute inset-0 bg-white/80"></div>
                             <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
-                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2 mt-8">{formData.title || '倒数日'}</h1>
+                                <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Googley Countdown</div>
+                                <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
                                 
-                                <div className="text-xl text-[#0061a4] font-bold mb-4 bg-blue-50 px-4 py-1.5 rounded-full">
+                                <div className="text-2xl text-[#0061a4] font-bold mb-2">
                                     {formData.statusText || (shareItemInfo.isDuration ? '共计' : (shareItemInfo.isPast ? '已过去' : '还有'))}
                                 </div>
                                 
-                                <div className="flex justify-center w-full mb-8">
+                                <div className="flex justify-center w-full">
                                     <div className="relative inline-block">
-                                        <span className="text-9xl font-bold text-slate-800 leading-none tracking-tighter">
+                                        <span className="text-8xl font-bold text-slate-800 leading-none tracking-tight">
                                             {shareItemInfo.days}
                                         </span>
-                                        <span className="text-2xl text-slate-400 font-medium absolute -right-8 bottom-4">
+                                        <span className="text-3xl text-slate-500 font-medium absolute left-full bottom-2 ml-2 whitespace-nowrap">
                                             天
                                         </span>
                                     </div>
                                 </div>
                                 
-                                <div className="mt-8 border-t border-slate-100 w-full pt-6">
-                                    <span className="text-sm text-slate-500 font-medium tracking-wide opacity-80">
-                                        {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
-                                    </span>
+                                <div className="mt-8 text-sm text-slate-600 font-medium tracking-wide opacity-80">
+                                    {editingItem ? getDisplayDateText(formData, calculateDays(formData).date) : ''}
                                 </div>
                             </div>
                             <div className="relative z-10 mt-10 text-xs text-slate-500 font-medium opacity-60">Generated by Googley Countdown</div>

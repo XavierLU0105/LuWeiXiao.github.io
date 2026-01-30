@@ -447,6 +447,7 @@
                 } catch(e) { if(!isSilent) setSyncStatus({type:'error',msg:'失败'}); } finally { if(isSilent) setTimeout(()=>setIsSyncing(false),500); else setIsLoading(false); }
             };
 
+            // Local Backup
             const handleExportLocal = () => {
                 const backupData = { version: 1, date: new Date().toISOString(), items: items, settings: { theme: appTheme, darkMode: darkMode, webdav: webdavConfig, drive: driveConfig } };
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
@@ -536,10 +537,10 @@
                                             
                                             <div className="mt-auto flex justify-between items-end">
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
+                                                    <span className={`text-sm px-3 py-1 rounded-lg font-bold mb-1 w-fit ${isPast || isDuration ? 'bg-surface-container-high text-on-surface-variant' : 'bg-primary-container text-on-primary-container'}`}>
                                                         {item.statusText || (isDuration ? '共计' : (isPast ? '已过去' : '还有'))}
                                                     </span>
-                                                    {subText && <span className="text-[10px] text-on-surface-variant opacity-60">{subText}</span>}
+                                                    {subText && <span className="text-xs text-on-surface-variant opacity-60 ml-0.5">{subText}</span>}
                                                 </div>
                                                 <div className="flex items-baseline text-primary">
                                                     <span className="text-5xl font-medium tracking-tighter leading-none">{days}</span>

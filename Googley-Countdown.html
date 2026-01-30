@@ -191,7 +191,7 @@
             
             // Google Auth State
             const [tokenClient, setTokenClient] = useState(null);
-            const [gAccessToken, setGAccessToken] = useState(null); // Access Token object { token, expiresAt }
+            const [gAccessToken, setGAccessToken] = useState(null);
 
             const isFirstMount = useRef(true);
             const shareRef = useRef(null);
@@ -244,7 +244,7 @@
                 applyTheme(color, isDark);
             };
 
-            // Auto Sync Logic (Debounced)
+            // Auto Sync Logic
             useEffect(() => {
                 if (isFirstMount.current) { isFirstMount.current = false; return; }
                 const timer = setTimeout(() => {
@@ -321,17 +321,21 @@
 
             const handleShare = async () => {
                 if (!shareRef.current) return;
-                try {
-                    await document.fonts.ready;
-                    const canvas = await html2canvas(shareRef.current, { 
-                        backgroundColor: null, 
-                        scale: 2,
-                        useCORS: true,
-                        logging: false
-                    });
-                    setShareImgUrl(canvas.toDataURL("image/png"));
-                    setModalMode('share_preview');
-                } catch (e) { alert("生成图片失败: " + e.message); }
+                setIsLoading(true); // Show loading feedback
+                // Delay to allow UI to update
+                setTimeout(async () => {
+                    try {
+                        const canvas = await html2canvas(shareRef.current, { 
+                            backgroundColor: null, 
+                            scale: 2,
+                            useCORS: true,
+                            logging: false
+                        });
+                        setShareImgUrl(canvas.toDataURL("image/png"));
+                        setModalMode('share_preview');
+                    } catch (e) { alert("生成图片失败: " + e.message); }
+                    finally { setIsLoading(false); }
+                }, 100);
             };
 
             const handleSave = (e) => {
@@ -350,7 +354,7 @@
                 else setFormData({ 
                     title: '', 
                     date: getLocalDateString(),
-                    endDate: '', // Reset end date
+                    endDate: '', 
                     repeatType: 'none', 
                     isPinned: false, 
                     category: (activeCategory !== 'All' && activeCategory !== '全部') ? activeCategory : '',
@@ -378,22 +382,11 @@
                 });
             }, [items, activeCategory]);
 
-            // Google Drive Logic (Enhanced for Folder Support)
+            // Google Drive
             const initTokenClient = () => {
                 if (!driveConfig.clientId) { setSyncStatus({type: 'error', msg: '请先配置 Client ID'}); return null; }
                 if (window.google) {
-                    const client = google.accounts.oauth2.initTokenClient({
-                        client_id: driveConfig.clientId,
-                        scope: 'https://www.googleapis.com/auth/drive.file',
-                        callback: (resp) => {
-                            if (resp.error) {
-                                console.error(resp);
-                                return;
-                            }
-                            const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
-                            setGAccessToken({ token: resp.access_token, expiresAt });
-                        }
-                    });
+                    const client = google.accounts.oauth2.initTokenClient({ client_id: driveConfig.clientId, scope: 'https://www.googleapis.com/auth/drive.file', callback: '' });
                     setTokenClient(client);
                     return client;
                 }
@@ -404,24 +397,12 @@
                 let client = tokenClient;
                 if (!client) client = initTokenClient();
                 if (!client && !isSilent) return; 
-
-                // --- Token Management Strategy ---
                 const isTokenValid = gAccessToken && Date.now() < gAccessToken.expiresAt;
-
                 if (!isTokenValid) {
-                    if (isSilent) {
-                        console.log("Auto-sync skipped: Token expired or missing.");
-                        return; 
-                    }
-                    setIsLoading(true);
-                    setSyncStatus({type: 'info', msg: '正在连接 Google...'});
-                    
+                    if (isSilent) { console.log("Auto-sync skipped: Token expired."); return; }
+                    setIsLoading(true); setSyncStatus({type: 'info', msg: '正在连接 Google...'});
                     client.callback = async (resp) => {
-                        if (resp.error) {
-                            setSyncStatus({type: 'error', msg: '授权失败'});
-                            setIsLoading(false);
-                            return;
-                        }
+                        if (resp.error) { setSyncStatus({type: 'error', msg: '授权失败'}); setIsLoading(false); return; }
                         const expiresAt = Date.now() + (resp.expires_in * 1000) - 60000;
                         setGAccessToken({ token: resp.access_token, expiresAt });
                         await performDriveOp(resp.access_token, action, isSilent);
@@ -429,10 +410,7 @@
                     client.requestAccessToken();
                     return;
                 }
-
-                if (!isSilent) setIsLoading(true);
-                else setIsSyncing(true);
-                
+                if (!isSilent) setIsLoading(true); else setIsSyncing(true);
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -441,95 +419,38 @@
                     const FOLDER_NAME = 'Googley Countdown Data';
                     const FILENAME = 'countdown_backup.json';
                     
-                    // 1. Check if folder exists
                     let folderId = null;
-                    const folderSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`, { 
-                        headers: { Authorization: `Bearer ${accessToken}` } 
-                    });
+                    const folderSearch = await fetch(`https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder' and name='${FOLDER_NAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const folderData = await folderSearch.json();
-                    
-                    if (folderData.files && folderData.files.length > 0) {
-                        folderId = folderData.files[0].id;
-                    } else {
-                        // Create Folder
-                        const createFolder = await fetch('https://www.googleapis.com/drive/v3/files', {
-                            method: 'POST',
-                            headers: { 
-                                Authorization: `Bearer ${accessToken}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                name: FOLDER_NAME,
-                                mimeType: 'application/vnd.google-apps.folder'
-                            })
-                        });
+                    if (folderData.files && folderData.files.length > 0) folderId = folderData.files[0].id;
+                    else {
+                        const createFolder = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }) });
                         const createData = await createFolder.json();
-                        if (createData.id) folderId = createData.id;
-                        else throw new Error("Could not create folder");
+                        if (createData.id) folderId = createData.id; else throw new Error("Could not create folder");
                     }
 
-                    // 2. Search for file (Look in folder first, then root as fallback for restore)
-                    // Note: for Upload, we force into folder. For Download, we check folder first.
                     let fileId = null;
-
-                    // Search inside the folder
-                    const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { 
-                        headers: { Authorization: `Bearer ${accessToken}` } 
-                    });
+                    const fileSearchInFolder = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and '${folderId}' in parents and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                     const fileDataInFolder = await fileSearchInFolder.json();
-                    
-                    if (fileDataInFolder.files && fileDataInFolder.files.length > 0) {
-                        fileId = fileDataInFolder.files[0].id;
-                    } else if (action === 'download') {
-                        // Fallback: Check root if not in folder (Backward compatibility)
-                        const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { 
-                            headers: { Authorization: `Bearer ${accessToken}` } 
-                        });
+                    if (fileDataInFolder.files && fileDataInFolder.files.length > 0) fileId = fileDataInFolder.files[0].id;
+                    else if (action === 'download') {
+                        const fileSearchRoot = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${FILENAME}' and trashed=false`, { headers: { Authorization: `Bearer ${accessToken}` } });
                         const fileDataRoot = await fileSearchRoot.json();
-                         if (fileDataRoot.files && fileDataRoot.files.length > 0) {
-                            fileId = fileDataRoot.files[0].id;
-                        }
+                        if (fileDataRoot.files && fileDataRoot.files.length > 0) fileId = fileDataRoot.files[0].id;
                     }
 
                     if (action === 'upload') {
                         const fileContent = JSON.stringify(items);
                         const metadata = { name: FILENAME, mimeType: 'application/json' };
-                        // If file doesn't exist (in folder), create it with parent.
-                        // If it exists (in folder), update it. 
-                        // If it exists in root, we IGNORE it and create a NEW one in folder to enforce organization.
-                        
                         const form = new FormData();
                         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
                         form.append('file', new Blob([fileContent], { type: 'application/json' }));
-                        
-                        // BUT wait, if we found a fileId in the folder, we update it.
-                        // If we didn't find it in folder (even if it exists in root), we create NEW in folder.
-                        
-                        let uploadUrl, method;
-                        if (fileId && fileDataInFolder.files && fileDataInFolder.files.length > 0) {
-                             // Update existing file inside folder
-                             uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
-                             method = 'PATCH';
-                        } else {
-                             // Create new file inside folder (Add parent in metadata)
-                             metadata.parents = [folderId];
-                             // Re-append metadata with parents
-                             const formNew = new FormData();
-                             formNew.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                             formNew.append('file', new Blob([fileContent], { type: 'application/json' }));
-                             
-                             uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-                             method = 'POST';
-                             
-                             // Use the new form
-                             const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: formNew });
-                             if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed');
-                             return;
-                        }
-
+                        let uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                        let method = 'POST';
+                        if (fileId && fileDataInFolder.files && fileDataInFolder.files.length > 0) { uploadUrl = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`; method = 'PATCH'; }
+                        else { metadata.parents = [folderId]; const formNew = new FormData(); formNew.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); formNew.append('file', new Blob([fileContent], { type: 'application/json' })); uploadUrl = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart'; method = 'POST'; const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: formNew }); if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed'); return; }
                         const upRes = await fetch(uploadUrl, { method: method, headers: { Authorization: `Bearer ${accessToken}` }, body: form });
                         if (upRes.ok) { if(!isSilent) setSyncStatus({type: 'success', msg: 'Google Drive 备份成功'}); } else throw new Error('Upload failed');
-
                     } else if (action === 'download') {
                         if (!fileId) throw new Error('未找到备份文件');
                         const downRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -671,7 +592,7 @@
                             {modalMode === 'add' && (
                                 <div className="bg-surface-container w-full max-w-[380px] rounded-[32px] p-6 shadow-2xl animate-enter z-50 relative">
                                     {editingItem && (
-                                        <button onClick={handleShare} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors">
+                                        <button onClick={handleShare} disabled={isLoading} className="absolute top-6 right-6 p-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary-container transition-colors disabled:opacity-50">
                                             <MIcon name="ios_share" size={20} />
                                         </button>
                                     )}
@@ -833,12 +754,11 @@
                         </div>
                     )}
 
-                    {/* HIDDEN CAPTURE AREA - Moved outside main modals to prevent overlap */}
-                    {/* Fixed Font Family explicitly to sans-serif to ensure system font fallback works on mobile */}
+                    {/* HIDDEN CAPTURE AREA */}
                     <div className="fixed top-0 left-[-9999px] z-[-1]" style={{width: '375px', height: '600px', fontFamily: 'sans-serif'}}>
                         <div ref={shareRef} className="w-full h-full bg-gradient-to-br from-[#e0eafc] to-[#cfdef3] p-8 flex flex-col items-center justify-center relative text-slate-800">
-                            <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl"></div>
-                            <div className="relative z-10 bg-white/80 p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
+                            <div className="absolute inset-0 bg-white/90"></div>
+                            <div className="relative z-10 bg-white p-8 rounded-[40px] shadow-2xl w-full text-center border border-white/50 flex flex-col items-center">
                                 <div className="text-sm text-slate-500 mb-4 font-medium tracking-widest uppercase">Countdown</div>
                                 <h1 className="text-3xl font-bold text-slate-800 mb-8 line-clamp-2 leading-relaxed px-2 p-2">{formData.title || '倒数日'}</h1>
                                 

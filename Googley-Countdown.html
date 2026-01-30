@@ -369,6 +369,22 @@
                 }, 100);
             };
 
+            const handleRefresh = () => {
+                if (isLoading) return;
+                // If neither cloud is configured, reload page
+                if (!driveConfig.clientId && !webdavConfig.url) {
+                    location.reload();
+                    return;
+                }
+                
+                // Try download based on priority
+                if (driveConfig.clientId) {
+                    handleGoogleDriveAction('download');
+                } else if (webdavConfig.url) {
+                    handleWebDAV(false);
+                }
+            };
+
             const handleSave = (e) => {
                 e.preventDefault();
                 const cat = formData.category.trim();
@@ -453,7 +469,7 @@
                     return;
                 }
                 
-                if (!isSilent) setIsLoading(true); else if (action !== 'connect') setIsSyncing(true);
+                if (!isSilent) setIsLoading(true);
                 await performDriveOp(gAccessToken.token, action, isSilent);
             };
 
@@ -632,6 +648,9 @@
                                         </div>
                                     )}
                                 </div>
+                                <button onClick={handleRefresh} className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors ${isLoading ? 'animate-spin' : ''}`}>
+                                    <MIcon name="refresh" />
+                                </button>
                                 <button onClick={() => setModalMode('settings')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high text-on-surface-variant transition-colors"><MIcon name="settings" /></button>
                             </div>
                         </div>
